@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # TODO: 根据技术栈补充构建步骤
+      # - name: Setup
+      # - name: Install dependencies
+      # - name: Lint
+      # - name: Test
+      # - name: Build
