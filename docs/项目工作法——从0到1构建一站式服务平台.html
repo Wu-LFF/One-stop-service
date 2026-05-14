@@ -20,6 +20,7 @@ html { scroll-behavior: smooth; }
   --t2: #9CA3AF;
   --s: #34A853;
   --w: #FBBC04;
+  --r: #EF4444;
   --grad: linear-gradient(135deg, #1E6DF2, #7C3AED);
   --grad2: linear-gradient(135deg, #1E6DF2, #06B6D4);
   --grad3: linear-gradient(135deg, #7C3AED, #EC4899);
@@ -52,7 +53,6 @@ body { font-family: var(--font); background: #0F172A; color: var(--t); overflow:
 #slides { display: flex; height: 100vh; transition: transform .7s cubic-bezier(.65,0,.35,1); will-change: transform; }
 .slide { flex: 0 0 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 80px; position: relative; overflow: hidden; }
 
-/* ─── Slide Background Decorations ─── */
 .slide::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; border-radius: 50%; opacity: .03; pointer-events: none; }
 .slide::after { content: ''; position: absolute; bottom: -30%; left: -10%; width: 400px; height: 400px; border-radius: 50%; opacity: .02; pointer-events: none; }
 
@@ -61,30 +61,27 @@ body { font-family: var(--font); background: #0F172A; color: var(--t); overflow:
 .bg-teal::before { background: #06B6D4; }
 .bg-amber::before { background: #F59E0B; }
 
-/* ─── Slide Content ─── */
-.slide-content { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; width: 100%; }
+.slide-content { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; width: 100%; }
 
-h1 { font-size: clamp(40px, 5vw, 64px); font-weight: 900; line-height: 1.2; letter-spacing: -1px; }
-h2 { font-size: clamp(28px, 3.5vw, 42px); font-weight: 700; margin-bottom: 12px; letter-spacing: -.5px; }
-h3 { font-size: clamp(18px, 2vw, 24px); font-weight: 600; margin-bottom: 8px; }
-.subtitle { font-size: clamp(14px, 1.2vw, 18px); color: var(--t2); font-weight: 300; margin-bottom: 32px; line-height: 1.6; }
+h1 { font-size: clamp(36px, 5vw, 60px); font-weight: 900; line-height: 1.2; letter-spacing: -1px; }
+h2 { font-size: clamp(26px, 3.2vw, 40px); font-weight: 700; margin-bottom: 8px; letter-spacing: -.5px; }
+h3 { font-size: clamp(17px, 1.8vw, 22px); font-weight: 600; margin-bottom: 6px; }
+.subtitle { font-size: clamp(14px, 1.1vw, 17px); color: var(--t2); font-weight: 300; margin-bottom: 28px; line-height: 1.6; }
 
 .gradient-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-.badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-bottom: 16px; }
+.badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-bottom: 12px; }
 .badge-blue { background: rgba(30,109,242,.15); color: #60A5FA; }
 .badge-purple { background: rgba(124,58,237,.15); color: #A78BFA; }
 .badge-green { background: rgba(52,168,83,.15); color: #34D399; }
 .badge-amber { background: rgba(251,191,36,.15); color: #FBBF24; }
+.badge-red { background: rgba(239,68,68,.15); color: #F87171; }
 
 /* ─── Animations ─── */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
-@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-@keyframes pulse { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
 @keyframes slideLeft { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes spread { from { width: 0; } to { width: 100%; } }
 
 .slide.active .anim-fade { animation: fadeUp .7s ease both; }
 .slide.active .anim-fade-1 { animation: fadeUp .7s ease .1s both; }
@@ -99,99 +96,130 @@ h3 { font-size: clamp(18px, 2vw, 24px); font-weight: 600; margin-bottom: 8px; }
 
 /* ─── Intro Slide ─── */
 .slide-intro { background: #0F172A; text-align: center; }
-.slide-intro .accent-line { width: 60px; height: 3px; background: var(--grad); margin: 0 auto 24px; border-radius: 2px; }
-.slide-intro .meta { font-size: 14px; color: var(--t2); margin-top: 40px; letter-spacing: 2px; }
-.slide-intro .version { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; background: rgba(255,255,255,.05); border-radius: 20px; font-size: 12px; color: var(--t2); margin-top: 20px; border: 1px solid rgba(255,255,255,.06); }
+.slide-intro .accent-line { width: 60px; height: 3px; background: var(--grad); margin: 0 auto 20px; border-radius: 2px; }
+.slide-intro .meta { font-size: 14px; color: var(--t2); margin-top: 32px; letter-spacing: 2px; }
+.slide-intro .version { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; background: rgba(255,255,255,.05); border-radius: 20px; font-size: 12px; color: var(--t2); margin-top: 16px; border: 1px solid rgba(255,255,255,.06); }
 
 /* ─── Grid / Card Layouts ─── */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 16px; }
-.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-top: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-top: 12px; }
+.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-top: 12px; }
 
-.card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 24px; transition: all .3s ease; }
+.card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 22px; transition: all .3s ease; }
 .card:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); transform: translateY(-2px); }
-.card .num { font-size: 32px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
-.card .icon { font-size: 28px; margin-bottom: 12px; }
-.card h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.card .num { font-size: 32px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 6px; }
+.card .icon { font-size: 26px; margin-bottom: 10px; display: block; }
+.card h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
 .card p { font-size: 13px; color: var(--t2); line-height: 1.6; }
-.card .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; margin-bottom: 10px; }
+.card .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; margin-bottom: 8px; }
+
+/* ─── Audience Cards ─── */
+.audience-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+.audience-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 22px; display: flex; gap: 16px; align-items: flex-start; transition: all .3s ease; }
+.audience-card:hover { background: rgba(255,255,255,.06); border-color: var(--p); transform: translateY(-2px); }
+.audience-card .a-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.audience-card .a-content h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.audience-card .a-content p { font-size: 13px; color: var(--t2); line-height: 1.5; }
+
+/* ─── Pain Point Cards ─── */
+.pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+.pain-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 20px; border-left: 3px solid var(--r); }
+.pain-card .p-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.pain-card .p-title .p-emoji { font-size: 18px; }
+.pain-card p { font-size: 13px; color: var(--t2); line-height: 1.5; }
 
 /* ─── Principle Cards ─── */
-.principle-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 28px; text-align: center; transition: all .4s ease; }
+.principle-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; justify-content: center; }
+.principle-card { flex: 1; min-width: 160px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 22px 18px; text-align: center; transition: all .4s ease; }
 .principle-card:hover { transform: translateY(-4px); border-color: var(--p); box-shadow: 0 20px 40px rgba(30,109,242,.1); }
-.principle-card .p-icon { font-size: 36px; margin-bottom: 12px; }
-.principle-card h4 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-.principle-card p { font-size: 13px; color: var(--t2); line-height: 1.5; }
+.principle-card .p-icon { font-size: 30px; margin-bottom: 10px; display: block; }
+.principle-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.principle-card p { font-size: 12px; color: var(--t2); line-height: 1.5; }
 
 /* ─── Flow Steps ─── */
-.flow-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 16px 0; }
-.flow-step { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 10px 18px; transition: all .3s ease; }
-.flow-step:hover { background: rgba(30,109,242,.1); border-color: var(--p); }
-.flow-step .s-num { width: 26px; height: 26px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-.flow-step .s-text { font-size: 14px; font-weight: 500; white-space: nowrap; }
-.flow-arrow { color: var(--t2); font-size: 18px; opacity: .5; }
+.flow-vertical { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.flow-row-item { display: flex; align-items: center; gap: 14px; padding: 10px 18px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; transition: all .3s ease; }
+.flow-row-item:hover { background: rgba(30,109,242,.08); border-color: var(--p); }
+.flow-row-item .f-num { width: 28px; height: 28px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: #fff; }
+.flow-row-item .f-text { font-size: 14px; font-weight: 500; min-width: 80px; }
+.flow-row-item .f-desc { font-size: 12px; color: var(--t2); line-height: 1.4; }
+.flow-row-item .f-tag { font-size: 11px; padding: 2px 10px; border-radius: 10px; margin-left: auto; flex-shrink: 0; }
 
 /* ─── List Styles ─── */
-.list-group { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-.list-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px; background: rgba(255,255,255,.03); border-radius: 12px; border: 1px solid rgba(255,255,255,.05); transition: all .3s ease; }
-.list-item:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); }
-.list-item .l-bullet { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.list-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.list-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,.03); border-radius: 10px; border: 1px solid rgba(255,255,255,.05); transition: all .3s ease; }
+.list-item:hover { background: rgba(255,255,255,.06); }
+.list-item .l-bullet { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
 .list-item .l-content { flex: 1; }
-.list-item .l-label { font-size: 15px; font-weight: 600; }
-.list-item .l-desc { font-size: 13px; color: var(--t2); margin-top: 2px; line-height: 1.5; }
+.list-item .l-label { font-size: 14px; font-weight: 600; }
+.list-item .l-desc { font-size: 12px; color: var(--t2); margin-top: 1px; line-height: 1.5; }
 .list-item .l-tag { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: 11px; margin-right: 6px; }
 
 /* ─── Comparison ─── */
-.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
-.comp-box { border-radius: 16px; padding: 24px; }
+.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px; }
+.comp-box { border-radius: 14px; padding: 22px; }
 .comp-box.bad { background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.15); }
 .comp-box.good { background: rgba(52,168,83,.06); border: 1px solid rgba(52,168,83,.15); }
-.comp-box h4 { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-.comp-box h4 .icon-good { color: var(--s); }
-.comp-box h4 .icon-bad { color: #EF4444; }
+.comp-box h4 { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .comp-box ul { list-style: none; }
-.comp-box li { padding: 6px 0; font-size: 14px; color: var(--t2); display: flex; align-items: center; gap: 8px; line-height: 1.5; }
+.comp-box li { padding: 5px 0; font-size: 13px; color: var(--t2); display: flex; align-items: center; gap: 8px; line-height: 1.5; }
 .comp-box li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
 .comp-box.bad li::before { background: #EF4444; }
 .comp-box.good li::before { background: var(--s); }
 
-/* ─── Timeline ─── */
-.timeline { position: relative; margin-top: 20px; }
-.timeline::before { content: ''; position: absolute; left: 14px; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.08); }
-.tl-item { display: flex; gap: 20px; padding: 10px 0; position: relative; }
-.tl-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--d2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 1; font-size: 10px; color: var(--t2); border: 2px solid #0F172A; }
-.tl-dot.done { background: var(--grad); color: #fff; }
-.tl-content { flex: 1; padding-top: 4px; }
-.tl-content .tl-hash { font-size: 11px; color: var(--p); font-family: monospace; }
-.tl-content .tl-text { font-size: 14px; font-weight: 500; }
-.tl-content .tl-desc { font-size: 12px; color: var(--t2); margin-top: 2px; }
+/* ─── V-timeline (vertical) ─── */
+.v-timeline { position: relative; padding-left: 28px; margin-top: 8px; }
+.v-timeline::before { content: ''; position: absolute; left: 9px; top: 4px; bottom: 4px; width: 2px; background: rgba(255,255,255,.08); }
+.vt-item { position: relative; padding: 8px 0 8px 16px; }
+.vt-item::before { content: ''; position: absolute; left: -24px; top: 13px; width: 12px; height: 12px; border-radius: 50%; background: var(--d2); border: 2px solid #0F172A; }
+.vt-item.done::before { background: var(--p); }
+.vt-item .vt-title { font-size: 14px; font-weight: 600; }
+.vt-item .vt-desc { font-size: 12px; color: var(--t2); }
 
-/* ─── Final Quote ─── */
-.quote-block { text-align: center; max-width: 700px; margin: 0 auto; }
-.quote-mark { font-size: 60px; line-height: .6; color: var(--p); opacity: .3; font-family: serif; }
-.quote-text { font-size: clamp(20px, 2.5vw, 28px); font-weight: 500; line-height: 1.6; margin: 16px 0 24px; }
+/* ─── Results Wall ─── */
+.results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+.result-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 16px; text-align: center; transition: all .3s ease; }
+.result-card:hover { background: rgba(30,109,242,.08); border-color: var(--p); transform: translateY(-2px); }
+.result-card .r-icon { font-size: 28px; margin-bottom: 6px; }
+.result-card .r-count { font-size: 28px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.result-card .r-label { font-size: 12px; color: var(--t2); margin-top: 2px; }
 
-/* ─── Tech Badge Grid ─── */
-.tech-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-.tech-tag { padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); transition: all .3s ease; }
+/* ─── Get Started ─── */
+.step-card { display: flex; gap: 18px; padding: 18px 22px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; margin-bottom: 10px; align-items: flex-start; }
+.step-card .s-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.step-card .s-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.step-card .s-content p { font-size: 13px; color: var(--t2); line-height: 1.5; }
+
+/* ─── Quote ─── */
+.quote-block { text-align: center; max-width: 720px; margin: 0 auto; }
+.quote-mark { font-size: 56px; line-height: .6; color: var(--p); opacity: .25; font-family: serif; }
+.quote-text { font-size: clamp(18px, 2.2vw, 26px); font-weight: 500; line-height: 1.6; margin: 12px 0 20px; }
+.quote-source { font-size: 14px; color: var(--t2); }
+
+/* ─── Tech Tag ─── */
+.tech-tag { display: inline-block; padding: 6px 16px; border-radius: 10px; font-size: 12px; font-weight: 500; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); transition: all .3s ease; margin: 3px; }
 .tech-tag:hover { background: rgba(30,109,242,.1); border-color: var(--p); transform: translateY(-2px); }
+
+/* ─── Divider ─── */
+.divider { width: 100%; height: 1px; background: rgba(255,255,255,.06); margin: 12px 0; }
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
-  .slide { padding: 40px 24px; }
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .slide { padding: 32px 20px; }
+  .grid-2, .grid-3, .grid-4, .audience-grid, .pain-grid, .results-grid { grid-template-columns: 1fr; }
   .comp-grid { grid-template-columns: 1fr; }
-  .flow-row { flex-direction: column; }
-  .flow-arrow { transform: rotate(90deg); }
+  .principle-row { flex-direction: column; }
   .arrow { display: none; }
-  #counter { bottom: 16px; right: 16px; }
+  #counter { bottom: 12px; right: 12px; font-size: 11px; }
+  #nav { bottom: 12px; }
+  .slide-content { max-width: 100%; }
 }
 </style>
 </head>
 <body>
 
 <div id="progress" style="width:0%"></div>
-<div id="counter"><span id="curSlide">1</span> / <span id="totalSlides">16</span></div>
+<div id="counter"><span id="curSlide">1</span> / <span id="totalSlides">14</span></div>
 
 <div id="nav"></div>
 <button class="arrow arrow-left" id="prevBtn">◀</button>
@@ -205,462 +233,537 @@ h3 { font-size: clamp(18px, 2vw, 24px); font-weight: 600; margin-bottom: 8px; }
     <div class="anim-scale"><span class="badge badge-blue" style="font-size:11px;letter-spacing:1px">制造与物流园区 · 一站式服务平台</span></div>
     <div class="anim-fade"><div class="accent-line"></div></div>
     <h1 class="anim-fade-1 gradient-text">从0到1</h1>
-    <h1 class="anim-fade-2" style="font-weight:300;font-size:clamp(24px,3vw,38px);color:var(--t);margin-top:8px">构建一站式服务平台</h1>
-    <p class="anim-fade-3" style="font-size:18px;color:var(--t2);margin-top:24px;font-weight:300">项目工作法 · 完整方法论沉淀</p>
-    <div class="anim-fade-4 meta">特步 · XTEP</div>
-    <div class="anim-fade-5 version">📄 v1.0 · 2026.05.14</div>
+    <h1 class="anim-fade-2" style="font-weight:300;font-size:clamp(22px,2.8vw,36px);color:var(--t);margin-top:6px">构建一站式服务平台</h1>
+    <p class="anim-fade-3" style="font-size:16px;color:var(--t2);margin-top:20px;font-weight:300">项目工作法 —— 让AI成为你的超级协作者</p>
+    <div style="max-width:600px;margin:20px auto 0;font-size:13px;color:var(--t2);line-height:1.6;background:rgba(255,255,255,.03);padding:14px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.05)" class="anim-fade-4">
+      📌 一套经过实战检验的方法论：从需求到交付，把AI的能力系统化地用在项目开发中
+    </div>
+    <div class="anim-fade-5 meta">特步 · XTEP ｜ v1.0</div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 2: CORE PRINCIPLES ══════ -->
+<!-- ══════ SLIDE 2: AUDIENCE ══════ -->
+<div class="slide" data-title="适合谁看">
+  <div class="slide-content">
+    <div class="anim-fade"><span class="badge badge-blue">读者指南</span></div>
+    <h2 class="anim-fade-1">这份方法论适合谁？</h2>
+    <p class="subtitle anim-fade-2">无论你在项目中扮演什么角色，都能从中找到可用的方法</p>
+    <div class="audience-grid anim-fade-3">
+      <div class="audience-card">
+        <div class="a-icon" style="background:rgba(30,109,242,.12)">📋</div>
+        <div class="a-content">
+          <h4>项目经理</h4>
+          <p>学会用"文档驱动+原型验证"来管理需求变更，减少返工，让团队始终朝着一个方向前进。</p>
+        </div>
+      </div>
+      <div class="audience-card">
+        <div class="a-icon" style="background:rgba(124,58,237,.12)">🎨</div>
+        <div class="a-content">
+          <h4>产品经理</h4>
+          <p>掌握"HTML可交互原型"方法，无需专业工具即可快速产出原型，还能做自动化检查。</p>
+        </div>
+      </div>
+      <div class="audience-card">
+        <div class="a-icon" style="background:rgba(52,168,83,.12)">⚙️</div>
+        <div class="a-content">
+          <h4>开发工程师</h4>
+          <p>了解如何将重复工作"固化"为AI可执行的技能，减少低效沟通，让AI真正理解项目上下文。</p>
+        </div>
+      </div>
+      <div class="audience-card">
+        <div class="a-icon" style="background:rgba(251,191,36,.12)">📈</div>
+        <div class="a-content">
+          <h4>团队负责人</h4>
+          <p>获得一套可落地的项目标准化流程，从项目初始化到交付每个环节都有产出物和检查机制。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SLIDE 3: PAIN POINTS ══════ -->
+<div class="slide" data-title="痛点">
+  <div class="slide-content">
+    <div class="anim-fade"><span class="badge badge-red">为什么需要这套方法论</span></div>
+    <h2 class="anim-fade-1">传统做法，哪里不够？</h2>
+    <p class="subtitle anim-fade-2">这些问题你是否也遇到过？</p>
+    <div class="pain-grid anim-fade-3">
+      <div class="pain-card" style="border-left-color:#EF4444">
+        <div class="p-title"><span class="p-emoji">💬</span> 需求"说着说着就变了"</div>
+        <p>口头沟通的需求没有统一记录，开发到一半才发现理解不一致。文档和代码各写各的，没人知道哪个是准的。</p>
+      </div>
+      <div class="pain-card" style="border-left-color:#F59E0B">
+        <div class="p-title"><span class="p-emoji">🎨</span> 原型做好了，没法自动检查</div>
+        <p>用 Axure/Figma 画的原型是图片，没法做自动化校验。有没有页面断链、跳转对不对，全靠肉眼过。</p>
+      </div>
+      <div class="pain-card" style="border-left-color:#8B5CF6">
+        <div class="p-title"><span class="p-emoji">🔄</span> 重复工作每次都重来</div>
+        <p>项目结构搭建、文档分类、原型验证……这些工作每个项目都要做一遍，没人沉淀成可复用的工具。</p>
+      </div>
+      <div class="pain-card" style="border-left-color:#06B6D4">
+        <div class="p-title"><span class="p-emoji">🧠</span> AI 聊完就忘</div>
+        <p>和AI协作时，会话一压缩或一关，之前的约定和上下文全丢了。每次都要重新交代一遍背景。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SLIDE 4: PRINCIPLES ══════ -->
 <div class="slide" data-title="核心原则">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">核心理念</span></div>
+    <div class="anim-fade"><span class="badge badge-blue">方法论基石</span></div>
     <h2 class="anim-fade-1">五个核心原则</h2>
-    <p class="subtitle anim-fade-2">贯穿项目全流程的方法论基石</p>
-    <div class="grid-3" style="grid-template-columns:repeat(5,1fr);gap:12px">
-      <div class="principle-card anim-fade-3"><div class="p-icon">📋</div><h4>文档驱动</h4><p>先写文档，再写代码，文档是一切行动的起点</p></div>
-      <div class="principle-card anim-fade-4"><div class="p-icon">🎨</div><h4>原型验证</h4><p>写代码前先用可交互原型验证方案，降低返工</p></div>
-      <div class="principle-card anim-fade-5"><div class="p-icon">⚙️</div><h4>技能固化</h4><p>重复劳动编码为可复用的 Skill，一次做对</p></div>
-      <div class="principle-card anim-fade-6"><div class="p-icon">📈</div><h4>渐进交付</h4><p>分模块分阶段推进，试点→推广→全覆盖</p></div>
-      <div class="principle-card anim-fade-7"><div class="p-icon">🔖</div><h4>版本对应</h4><p>每步变更对应一个 Git 提交，演进可追溯</p></div>
+    <p class="subtitle anim-fade-2">这五个原则贯穿项目始终，是后面所有方法的基石</p>
+    <div class="principle-row anim-fade-3">
+      <div class="principle-card">
+        <span class="p-icon">📋</span>
+        <h4>文档驱动</h4>
+        <p>先写文档，再写代码。文档不是"写完就扔"的产物，而是开发过程中持续依赖的"唯一事实来源"。</p>
+      </div>
+      <div class="principle-card">
+        <span class="p-icon">🎨</span>
+        <h4>原型验证</h4>
+        <p>写代码之前先用可交互HTML原型跑通流程。发现问题在原型阶段改，比改代码成本低10倍。</p>
+      </div>
+      <div class="principle-card">
+        <span class="p-icon">⚙️</span>
+        <h4>技能固化</h4>
+        <p>重复性工作（搭建项目、归类文档、检查原型）写成AI Skill。下次再做，一键执行，不出错。</p>
+      </div>
+      <div class="principle-card">
+        <span class="p-icon">📈</span>
+        <h4>渐进交付</h4>
+        <p>不追求一步到位。分模块、分阶段推进：先试点一个模块，验证可行再推广，逐步覆盖全部功能。</p>
+      </div>
+      <div class="principle-card">
+        <span class="p-icon">🔖</span>
+        <h4>版本对应</h4>
+        <p>文档、原型、代码全部纳入Git管理。每次变更提交一个记录，整个项目的历史一目了然。</p>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 3: FULL WORKFLOW ══════ -->
-<div class="slide" data-title="全流程图">
+<!-- ══════ SLIDE 5: WORKFLOW ══════ -->
+<div class="slide" data-title="全流程">
   <div class="slide-content">
     <div class="anim-fade"><span class="badge badge-purple">工作流程</span></div>
-    <h2 class="anim-fade-1">项目全流程</h2>
-    <p class="subtitle anim-fade-2">每一步的产出是下一步的输入，环环相扣</p>
-    <div class="anim-fade-3" style="margin-top:24px">
-      <div class="flow-row">
-        <div class="flow-step"><span class="s-num">1</span><span class="s-text">需求文档</span></div><span class="flow-arrow">→</span>
-        <div class="flow-step"><span class="s-num">2</span><span class="s-text">架构设计</span></div><span class="flow-arrow">→</span>
-        <div class="flow-step"><span class="s-num">3</span><span class="s-text">文档归类</span></div><span class="flow-arrow">→</span>
-        <div class="flow-step"><span class="s-num">4</span><span class="s-text">原型设计</span></div>
+    <h2 class="anim-fade-1">八步工作流</h2>
+    <p class="subtitle anim-fade-2">每一步都产出明确的交付物，每一步都是下一步的输入</p>
+    <div class="flow-vertical anim-fade-3">
+      <div class="flow-row-item">
+        <span class="f-num">1</span>
+        <span class="f-text">需求文档</span>
+        <span class="f-desc">把业务想法写成结构化文档，明确功能范围和优先级</span>
+        <span class="f-tag" style="background:rgba(30,109,242,.12);color:#60A5FA">📄 requirements.md</span>
       </div>
-      <div class="flow-row" style="margin-top:8px">
-        <div class="flow-step"><span class="s-num">5</span><span class="s-text">原型验证</span></div><span class="flow-arrow">→</span>
-        <div class="flow-step"><span class="s-num">6</span><span class="s-text">Skills 固化</span></div><span class="flow-arrow">→</span>
-        <div class="flow-step"><span class="s-num">7</span><span class="s-text">代码开发</span></div><span class="flow-arrow">→</span>
-        <div class="flow-step"><span class="s-num">8</span><span class="s-text">Git 提交</span></div>
+      <div class="flow-row-item">
+        <span class="f-num">2</span>
+        <span class="f-text">架构设计</span>
+        <span class="f-desc">确定技术选型、模块划分和系统分层</span>
+        <span class="f-tag" style="background:rgba(124,58,237,.12);color:#A78BFA">🏗️ architecture.md</span>
       </div>
-    </div>
-    <div class="anim-fade-4" style="margin-top:28px;text-align:center;font-size:14px;color:var(--t2);padding:16px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06)">
-      💡 <strong style="color:var(--t)">核心闭环：</strong>需求 → 设计 → 归类 → 原型 → 验证 → 固化 → 开发 → 提交
+      <div class="flow-row-item">
+        <span class="f-num">3</span>
+        <span class="f-text">文档归类</span>
+        <span class="f-desc">按业务模块建立清晰的目录结构</span>
+        <span class="f-tag" style="background:rgba(52,168,83,.12);color:#34D399">📂 docs/ 结构化</span>
+      </div>
+      <div class="flow-row-item">
+        <span class="f-num">4</span>
+        <span class="f-text">原型设计</span>
+        <span class="f-desc">制作三端（手机/PC/门户）可交互HTML原型</span>
+        <span class="f-tag" style="background:rgba(251,191,36,.12);color:#FBBF24">🎨 原型.html</span>
+      </div>
+      <div class="flow-row-item">
+        <span class="f-num">5</span>
+        <span class="f-text">原型验证</span>
+        <span class="f-desc">自动化检查所有页面跳转和交互，零断链</span>
+        <span class="f-tag" style="background:rgba(239,68,68,.12);color:#F87171">🔍 validate-prototype</span>
+      </div>
+      <div class="flow-row-item">
+        <span class="f-num">6</span>
+        <span class="f-text">技能固化</span>
+        <span class="f-desc">把可重复的流程编码为 AI Skill</span>
+        <span class="f-tag" style="background:rgba(30,109,242,.12);color:#60A5FA">⚙️ .claude/skills/</span>
+      </div>
+      <div class="flow-row-item">
+        <span class="f-num">7</span>
+        <span class="f-text">代码开发</span>
+        <span class="f-desc">在有文档、有原型、有验证机制的基础上写代码</span>
+        <span class="f-tag" style="background:rgba(52,168,83,.12);color:#34D399">💻 实现</span>
+      </div>
+      <div class="flow-row-item">
+        <span class="f-num">8</span>
+        <span class="f-text">Git 提交</span>
+        <span class="f-desc">每次变更对应一个提交，演进历史可追溯</span>
+        <span class="f-tag" style="background:rgba(124,58,237,.12);color:#A78BFA">🔖 git commit</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 4: PROJECT INIT ══════ -->
-<div class="slide" data-title="项目初始化">
+<!-- ══════ SLIDE 6: DOCUMENT-DRIVEN ══════ -->
+<div class="slide" data-title="文档驱动">
   <div class="slide-content">
     <div class="anim-fade"><span class="badge badge-blue">第1步</span></div>
-    <h2 class="anim-fade-1">项目初始化</h2>
-    <p class="subtitle anim-fade-2">搭建标准化项目骨架，确保结构一致</p>
-    <div class="grid-2 anim-fade-3">
+    <h2 class="anim-fade-1">文档驱动 —— 先写文档，再写代码</h2>
+    <p class="subtitle anim-fade-2">文档不是"写完了就归档"的产物，而是整个项目开发过程中持续依赖的"可执行需求"</p>
+    <div class="grid-2 anim-fade-3" style="gap:16px">
       <div>
-        <div class="card" style="padding:20px"><div class="icon">📁</div><h4>标准化目录</h4><p>CLAUDE.md / README.md / .gitignore / .github/ / .vscode/ / docs/ / src/ / tests/ / .claude/</p></div>
-        <div class="card" style="padding:20px;margin-top:12px"><div class="icon">📜</div><h4>CLAUDE.md — 项目"宪法"</h4><p>定义项目概览、开发规范、工作流，约束 AI 行为</p></div>
-      </div>
-      <div>
-        <div class="comp-grid" style="grid-template-columns:1fr;gap:12px;margin-top:0">
-          <div class="comp-box bad"><h4><span class="icon-bad">✗</span> 混乱的做法</h4><ul><li>每个项目从零搭目录，风格各异</li><li>团队和 AI 不知道规范</li><li>不同项目配置五花八门</li></ul></div>
-          <div class="comp-box good"><h4><span class="icon-good">✓</span> 好的做法</h4><ul><li>标准化模板一键生成</li><li>CLAUDE.md 就是"宪法"</li><li>.vscode/ + .github/ 统一配置</li></ul></div>
+        <div class="card" style="padding:18px;margin-bottom:10px">
+          <div class="tag" style="background:rgba(30,109,242,.12);color:#60A5FA">📄 requirements.md</div>
+          <h4>需求总纲</h4>
+          <p>项目背景、痛点、目标、功能模块清单（含优先级 P0/P1/P2）、系统集成关系、非功能需求。</p>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SLIDE 5: REQUIREMENTS & ARCH ══════ -->
-<div class="slide" data-title="需求与架构">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-purple">第2步</span></div>
-    <h2 class="anim-fade-1">需求梳理 &amp; 架构设计</h2>
-    <p class="subtitle anim-fade-2">将业务想法转化为结构化文档，一切后续工作的唯一依据</p>
-    <div class="grid-2 anim-fade-3">
-      <div>
-        <div class="card" style="padding:20px;height:100%">
-          <div class="tag" style="background:rgba(30,109,242,.12);color:#60A5FA">requirements.md</div>
-          <h4>📋 需求总纲</h4>
-          <ul style="list-style:none;margin-top:10px;font-size:13px;color:var(--t2);line-height:2">
-            <li>• 项目简介 &amp; 背景痛点</li>
-            <li>• 可衡量的项目目标</li>
-            <li>• 分阶段目标（试点→推广→全覆盖）</li>
-            <li>• 功能模块清单 + 优先级</li>
-            <li>• 系统集成关系</li>
-            <li>• 非功能需求（性能/安全/兼容性）</li>
-          </ul>
+        <div class="card" style="padding:18px;margin-bottom:10px">
+          <div class="tag" style="background:rgba(124,58,237,.12);color:#A78BFA">🏗️ architecture.md</div>
+          <h4>架构设计</h4>
+          <p>技术选型、分层架构图、模块划分、接口协议、主数据管理。确保团队对系统结构有一致的理解。</p>
         </div>
-      </div>
-      <div>
-        <div class="card" style="padding:20px;height:100%">
-          <div class="tag" style="background:rgba(124,58,237,.12);color:#A78BFA">architecture.md</div>
-          <h4>🏗️ 架构设计</h4>
-          <ul style="list-style:none;margin-top:10px;font-size:13px;color:var(--t2);line-height:2">
-            <li>• 技术选型（前端/后端/数据库）</li>
-            <li>• 分层架构图（接入→应用→流程→集成）</li>
-            <li>• 模块划分与交互关系</li>
-            <li>• 设计原则</li>
-            <li>• 主数据管理</li>
-            <li>• 决策记录 (ADR)</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SLIDE 6: DOCS ORGANIZATION ══════ -->
-<div class="slide" data-title="文档归类">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-green">第3步</span></div>
-    <h2 class="anim-fade-1">文档归类管理</h2>
-    <p class="subtitle anim-fade-2">按模块建立清晰的文档体系，避免混乱</p>
-    <div class="grid-2 anim-fade-3" style="gap:24px">
-      <div>
-        <div class="card" style="padding:20px;font-family:monospace;font-size:13px;line-height:2">
-          <div style="color:var(--t2);font-weight:400">docs/</div>
-          <div style="color:var(--t)">├── requirements.md <span style="color:var(--t2);font-size:11px">// 需求总纲</span></div>
-          <div style="color:var(--t)">├── architecture.md <span style="color:var(--t2);font-size:11px">// 架构设计</span></div>
-          <div style="color:var(--t2)">├── 01-蓝图方案/</div>
-          <div style="color:var(--p)">├── 02-业务需求/</div>
-          <div style="color:var(--p);padding-left:20px">├── HR人事模块/</div>
-          <div style="color:var(--p);padding-left:20px">├── 行政模块/</div>
-          <div style="color:var(--p);padding-left:20px">├── 生产模块/</div>
-          <div style="color:var(--p);padding-left:20px">└── 通用模块/</div>
-          <div style="color:var(--s)">├── 03-原型方案/</div>
-          <div style="color:var(--w)">└── 04-PRD/</div>
-        </div>
-      </div>
-      <div>
-        <div class="list-group" style="margin-top:0">
-          <div class="list-item"><div class="l-bullet" style="background:#3B82F6"></div><div class="l-content"><div class="l-label">按模块不按类型</div><div class="l-desc">业务需求按「模块」分类（HR/行政/生产），而非文件类型</div></div></div>
-          <div class="list-item"><div class="l-bullet" style="background:#10B981"></div><div class="l-content"><div class="l-label">README 导航</div><div class="l-desc">每个模块目录放 README.md 作为入口</div></div></div>
-          <div class="list-item"><div class="l-bullet" style="background:#F59E0B"></div><div class="l-content"><div class="l-label">归类即整理</div><div class="l-desc">新文件立刻归类，不堆积到 docs/ 根目录</div></div></div>
-          <div class="list-item"><div class="l-bullet" style="background:#8B5CF6"></div><div class="l-content"><div class="l-label">可自动化</div><div class="l-desc">用 organize-docs skill 自动扫描归类</div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SLIDE 7: PROTOTYPE DESIGN ══════ -->
-<div class="slide" data-title="原型设计">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-amber">第4步</span></div>
-    <h2 class="anim-fade-1">原型设计</h2>
-    <p class="subtitle anim-fade-2">三端合一的 HTML 可交互原型</p>
-    <div class="grid-2 anim-fade-3" style="gap:24px">
-      <div>
-        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;">
-          <h4 style="margin-bottom:12px">📱 手机端 (m-page)</h4>
-          <div style="font-size:13px;color:var(--t2);line-height:1.8">
-            底部 Tab 导航 · 页面 ID: <code style="color:var(--p);background:rgba(30,109,242,.1);padding:2px 6px;border-radius:4px">mp-{模块名}</code>
-          </div>
-          <div style="margin-top:12px;font-size:13px;color:var(--t2);line-height:1.8">
-            导航函数: <code style="color:var(--s);background:rgba(52,168,83,.1);padding:2px 6px;border-radius:4px">mNav('page-id')</code>
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;margin-top:12px;">
-          <h4 style="margin-bottom:12px">💻 PC 端 (pc-page)</h4>
-          <div style="font-size:13px;color:var(--t2);line-height:1.8">
-            左侧导航 · data-pc 属性绑定 · 页面 ID: <code style="color:var(--p);background:rgba(30,109,242,.1);padding:2px 6px;border-radius:4px">pc-{模块名}</code>
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;margin-top:12px;">
-          <h4 style="margin-bottom:12px">🔐 管理门户 (portal-page)</h4>
-          <div style="font-size:13px;color:var(--t2);line-height:1.8">
-            左侧导航 · data-portal 属性绑定 · 页面 ID: <code style="color:var(--p);background:rgba(30,109,242,.1);padding:2px 6px;border-radius:4px">portal-{模块名}</code>
-          </div>
+        <div class="card" style="padding:18px">
+          <div class="tag" style="background:rgba(52,168,83,.12);color:#34D399">📜 CLAUDE.md</div>
+          <h4>项目规范（AI"宪法"）</h4>
+          <p>定义代码规范、工作流、目录结构、约束条件。让AI在协助开发时始终遵循统一规则。</p>
         </div>
       </div>
       <div>
         <div class="comp-grid" style="grid-template-columns:1fr;gap:12px;margin-top:0">
-          <div class="comp-box bad"><h4><span class="icon-bad">✗</span> Axure / Figma</h4><ul><li>需专门软件安装</li><li>无法做自动化校验</li><li>不能 Git diff</li><li>分享需额外部署</li></ul></div>
-          <div class="comp-box good"><h4><span class="icon-good">✓</span> HTML 原型</h4><ul><li>浏览器直接运行</li><li>可自动化断链检查</li><li>可 Git 提交做 diff</li><li>分享链接即可查看</li></ul></div>
+          <div class="comp-box bad">
+            <h4><span class="icon-bad">✗</span> 没有文档驱动的问题</h4>
+            <ul>
+              <li>需求在微信/邮件里，找起来非常困难</li>
+              <li>开发做着做着发现方向偏了</li>
+              <li>新成员加入要口述一遍所有背景</li>
+              <li>同一个功能不同人的理解不一样</li>
+            </ul>
+          </div>
+          <div class="comp-box good">
+            <h4><span class="icon-good">✓</span> 文档驱动的好处</h4>
+            <ul>
+              <li>团队所有人对需求的理解一致</li>
+              <li>每次变更都在文档上先改，再讨论</li>
+              <li>新成员自己看文档就能上手</li>
+              <li>需求、架构、代码三者版本对应</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 8: PROTOTYPE VALIDATION ══════ -->
-<div class="slide" data-title="原型验证">
+<!-- ══════ SLIDE 7: PROTOTYPE ══════ -->
+<div class="slide" data-title="原型先行">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-amber">第5步</span></div>
-    <h2 class="anim-fade-1">原型验证</h2>
-    <p class="subtitle anim-fade-2">自动化质量门禁，Axure/Figma 做不到的事</p>
-    <div class="grid-2 anim-fade-3" style="gap:24px">
+    <div class="anim-fade"><span class="badge badge-amber">第2步</span></div>
+    <h2 class="anim-fade-1">原型先行 —— 写代码前先验证方案</h2>
+    <p class="subtitle anim-fade-2">用 HTML 制作可交互原型，三端合一（手机端 + PC 端 + 管理门户），浏览器直接运行</p>
+    <div class="grid-2 anim-fade-3" style="gap:16px">
       <div>
-        <div style="counter-reset:step">
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:10px 16px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--p)">
-            <span style="font-size:14px;font-weight:700;color:var(--p);min-width:24px">1</span>
-            <div><div style="font-weight:600;font-size:14px">读取 HTML 原型文件</div><div style="font-size:12px;color:var(--t2)">定位 .html 并读取完整内容</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <div style="flex:1;background:rgba(30,109,242,.08);border:1px solid rgba(30,109,242,.15);border-radius:10px;padding:14px;text-align:center;min-width:100px">
+            <div style="font-size:22px;margin-bottom:4px">📱</div>
+            <div style="font-size:13px;font-weight:600">手机端</div>
+            <div style="font-size:11px;color:var(--t2)">m-page · mNav()</div>
           </div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:10px 16px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--p)">
-            <span style="font-size:14px;font-weight:700;color:var(--p);min-width:24px">2</span>
-            <div><div style="font-weight:600;font-size:14px">提取页面定义</div><div style="font-size:12px;color:var(--t2)">m-page / pc-page / portal-page</div></div>
+          <div style="flex:1;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);border-radius:10px;padding:14px;text-align:center;min-width:100px">
+            <div style="font-size:22px;margin-bottom:4px">💻</div>
+            <div style="font-size:13px;font-weight:600">PC 端</div>
+            <div style="font-size:11px;color:var(--t2)">pc-page · data-pc</div>
           </div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:10px 16px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--s)">
-            <span style="font-size:14px;font-weight:700;color:var(--s);min-width:24px">3</span>
-            <div><div style="font-weight:600;font-size:14px">提取导航引用</div><div style="font-size:12px;color:var(--t2)">mNav调用 / data-pc / data-portal / onclick函数</div></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:10px 16px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--s)">
-            <span style="font-size:14px;font-weight:700;color:var(--s);min-width:24px">4</span>
-            <div><div style="font-weight:600;font-size:14px">逐项校验</div><div style="font-size:12px;color:var(--t2)">目标存在? 函数定义? ID重复?</div></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:14px;padding:10px 16px;background:rgba(255,255,255,.03);border-radius:10px;border-left:3px solid var(--w)">
-            <span style="font-size:14px;font-weight:700;color:var(--w);min-width:24px">5</span>
-            <div><div style="font-weight:600;font-size:14px">输出验证报告</div><div style="font-size:12px;color:var(--t2)">通过/失败，断链清单</div></div>
+          <div style="flex:1;background:rgba(52,168,83,.08);border:1px solid rgba(52,168,83,.15);border-radius:10px;padding:14px;text-align:center;min-width:100px">
+            <div style="font-size:22px;margin-bottom:4px">🔐</div>
+            <div style="font-size:13px;font-weight:600">管理门户</div>
+            <div style="font-size:11px;color:var(--t2)">portal-page · data-portal</div>
           </div>
         </div>
+        <div class="card" style="padding:16px">
+          <h4 style="margin-bottom:4px">🔄 原型做完了，还能自动检查</h4>
+          <p style="font-size:13px">validate-prototype 会自动扫描整个原型文件，检查所有页面跳转是否有对应的目标页面、所有被调用的函数是否正确定义、是否有重复的页面 ID。结果立即可见。</p>
+        </div>
       </div>
-      <div style="display:flex;flex-direction:column;justify-content:center">
-        <div class="card" style="padding:24px;text-align:center">
-          <div style="font-size:48px;margin-bottom:12px">✅</div>
-          <h4 style="font-size:18px">人事通.html 验证结果</h4>
-          <p style="margin-top:8px;font-size:14px">22 个移动页面 · 16 个 PC 页面 · 9 个门户页面</p>
-          <p style="color:var(--s);font-size:15px;font-weight:600;margin-top:6px">全部通过，零断链，零重复</p>
+      <div>
+        <div class="comp-grid" style="grid-template-columns:1fr;gap:12px;margin-top:0">
+          <div class="comp-box bad">
+            <h4><span class="icon-bad">✗</span> 传统工具（Axure / Figma）</h4>
+            <ul>
+              <li>需要安装专门软件</li>
+              <li>原型是"图片"，无法做自动化检查</li>
+              <li>不能放进 Git 做版本对比</li>
+              <li>分享需要部署或导出</li>
+              <li>断链只能人工逐个点</li>
+            </ul>
+          </div>
+          <div class="comp-box good">
+            <h4><span class="icon-good">✓</span> HTML 原型</h4>
+            <ul>
+              <li>浏览器直接打开即可运行</li>
+              <li>可做自动化断链、函数、ID检查</li>
+              <li>Git 管理可 diff 可追溯</li>
+              <li>分享一个文件或链接即可</li>
+              <li>20个页面断链检查只需几秒</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 9: SKILLS ══════ -->
-<div class="slide" data-title="Skills固化">
+<!-- ══════ SLIDE 8: SKILLS ══════ -->
+<div class="slide" data-title="技能固化">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-purple">第6步</span></div>
-    <h2 class="anim-fade-1">Skills 技能固化</h2>
-    <p class="subtitle anim-fade-2">将重复性工作流程编码为可复用的 Skill</p>
-    <div class="grid-4 anim-fade-3">
-      <div class="card" style="padding:20px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🚀</div><h4>init-project</h4><p>项目脚手架一键生成</p></div>
-      <div class="card" style="padding:20px;text-align:center"><div style="font-size:32px;margin-bottom:8px">📂</div><h4>organize-docs</h4><p>文档自动扫描归类</p></div>
-      <div class="card" style="padding:20px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🎨</div><h4>prototype-designer</h4><p>原型方案 + PRD 生成</p></div>
-      <div class="card" style="padding:20px;text-align:center"><div style="font-size:32px;margin-bottom:8px">🔍</div><h4>validate-prototype</h4><p>HTML 原型断链自动检查</p></div>
+    <div class="anim-fade"><span class="badge badge-purple">第3步</span></div>
+    <h2 class="anim-fade-1">技能固化 —— 把重复工作变成"一键执行"</h2>
+    <p class="subtitle anim-fade-2">Skill 是把一个完整的工作流程（步骤+规范+产出物）编码为 AI 可以严格遵循的指令集</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px" class="anim-fade-3">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
+          <span style="font-size:24px;flex-shrink:0">🚀</span>
+          <div><h4 style="font-size:14px">init-project</h4><p style="font-size:12px">一键生成标准化项目骨架：目录结构、CLAUDE.md、配置文件</p></div>
+        </div>
+        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
+          <span style="font-size:24px;flex-shrink:0">📂</span>
+          <div><h4 style="font-size:14px">organize-docs</h4><p style="font-size:12px">自动扫描 docs/ 目录，把新文件按模块归类到正确位置</p></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
+          <span style="font-size:24px;flex-shrink:0">🎨</span>
+          <div><h4 style="font-size:14px">prototype-designer</h4><p style="font-size:12px">从需求文档自动生成原型方案和 PRD，按步骤确认</p></div>
+        </div>
+        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
+          <span style="font-size:24px;flex-shrink:0">🔍</span>
+          <div><h4 style="font-size:14px">validate-prototype</h4><p style="font-size:12px">检查 HTML 原型的所有导航跳转、函数定义、ID 重复</p></div>
+        </div>
+      </div>
     </div>
-    <div class="anim-fade-4 list-group" style="margin-top:16px">
-      <div class="list-item"><div class="l-bullet" style="background:#8B5CF6"></div><div class="l-content"><div class="l-label">先做流程，后有 Skill</div><div class="l-desc">做过一次才知道流程对不对，做一次、沉淀一次</div></div></div>
-      <div class="list-item"><div class="l-bullet" style="background:#8B5CF6"></div><div class="l-content"><div class="l-label">步骤严格，产出可预期</div><div class="l-desc">用『不要跳过』约束 AI 行为，定义标准输出模板</div></div></div>
+    <div class="anim-fade-4" style="margin-top:12px;padding:14px 20px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.06)">
+      <div style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="color:var(--t);font-weight:600">💡 Skill 的核心价值：</span>
+        <span>先做一次确认流程是对的 → 做第二次时把它写成 Skill → 以后每次都一键执行</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 10: MEMORY SYSTEM ══════ -->
+<!-- ══════ SLIDE 9: MEMORY ══════ -->
 <div class="slide" data-title="记忆系统">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">第7步</span></div>
-    <h2 class="anim-fade-1">记忆系统</h2>
-    <p class="subtitle anim-fade-2">AI 会话压缩后，关键上下文不会丢失</p>
-    <div class="grid-2 anim-fade-3" style="gap:20px">
+    <div class="anim-fade"><span class="badge badge-blue">第4步</span></div>
+    <h2 class="anim-fade-1">记忆系统 —— 让 AI 拥有长期记忆</h2>
+    <p class="subtitle anim-fade-2">AI 会话压缩后，关键上下文不会丢失。这是"AI 越用越懂你"的核心</p>
+    <div class="grid-2 anim-fade-3" style="gap:16px">
       <div>
-        <div class="card" style="padding:20px;display:flex;align-items:flex-start;gap:16px">
-          <div style="font-size:24px">👤</div>
-          <div><h4>user 用户信息</h4><p>角色、知识水平、偏好。了解用户才能更好地协作</p></div>
+        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:22px;flex-shrink:0">👤</div>
+          <div><h4 style="font-size:14px">user 用户信息</h4><p style="font-size:12px">你的角色、技术背景、偏好。比如：你是后端转前端，不懂 React hooks —— AI 就不会用高级 React 概念解释问题</p></div>
         </div>
-        <div class="card" style="padding:20px;display:flex;align-items:flex-start;gap:16px;margin-top:10px">
-          <div style="font-size:24px">💡</div>
-          <div><h4>feedback 反馈</h4><p>用户的纠正和确认，记录"为什么"以便未来判断</p></div>
+        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:22px;flex-shrink:0">💡</div>
+          <div><h4 style="font-size:14px">feedback 反馈</h4><p style="font-size:12px">你纠正过 AI 什么、肯定了 AI 什么。比如："不要每次问我权限了" → 自动生成权限配置</p></div>
         </div>
-        <div class="card" style="padding:20px;display:flex;align-items:flex-start;gap:16px;margin-top:10px">
-          <div style="font-size:24px">📌</div>
-          <div><h4>project 项目</h4><p>项目目标、任务状态、决策记录</p></div>
+        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:22px;flex-shrink:0">📌</div>
+          <div><h4 style="font-size:14px">project 项目</h4><p style="font-size:12px">项目目标、当前状态、关键决策、截止时间。AI 知道项目进行到哪一步了</p></div>
         </div>
-        <div class="card" style="padding:20px;display:flex;align-items:flex-start;gap:16px;margin-top:10px">
-          <div style="font-size:24px">🔗</div>
-          <div><h4>reference 参考</h4><p>外部系统位置、文档索引</p></div>
+        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:22px;flex-shrink:0">🔗</div>
+          <div><h4 style="font-size:14px">reference 参考</h4><p style="font-size:12px">外部系统位置、文档索引、工具地址。比如：Bug 在 Linear 的 INGEST 项目里跟踪</p></div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;justify-content:center">
-        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;font-family:monospace;font-size:12px;line-height:2">
-          <div style="color:var(--t2)">.claude/projects/{hash}/memory/</div>
-          <div style="color:var(--t)">├── <span style="color:var(--p)">MEMORY.md</span> <span style="color:var(--t2);font-size:11px">// 索引（始终加载）</span></div>
-          <div style="color:var(--t)">├── about-user.md</div>
-          <div style="color:var(--t)">├── project-overview.md</div>
-          <div style="color:var(--t)">├── feedback-*.md</div>
-          <div style="color:var(--t)">└── reference-*.md</div>
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
+          <h4 style="font-size:14px;margin-bottom:10px">📂 记忆文件结构</h4>
+          <div style="font-family:monospace;font-size:12px;line-height:2.2">
+            <div style="color:var(--t2)">.claude/projects/{hash}/memory/</div>
+            <div style="color:var(--t)">├── <span style="color:var(--p)">MEMORY.md</span> <span style="color:var(--t2)">← 索引（始终加载）</span></div>
+            <div style="color:var(--t)">├── about-user.md</div>
+            <div style="color:var(--t)">├── project-overview.md</div>
+            <div style="color:var(--t)">├── feedback-*.md</div>
+            <div style="color:var(--t)">└── reference-*.md</div>
+          </div>
+          <div class="divider"></div>
+          <p style="font-size:12px;color:var(--t2);line-height:1.6">
+            <strong style="color:var(--t)">效果：</strong>AI 不再是"每次都从零认识你"。重启对话后，它还记得你的偏好、项目进展、之前踩过的坑。这就相当于每个项目都有一个"了解全部上下文"的 AI 助手。
+          </p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 11: GIT ══════ -->
-<div class="slide" data-title="Git提交">
+<!-- ══════ SLIDE 10: VERSION CONTROL ══════ -->
+<div class="slide" data-title="版本管理">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-green">第8步</span></div>
-    <h2 class="anim-fade-1">Git 提交 &amp; 版本管理</h2>
-    <p class="subtitle anim-fade-2">每次重要变更对应一个提交，形成可追溯的演进历史</p>
-    <div class="grid-2 anim-fade-3" style="gap:20px">
+    <div class="anim-fade"><span class="badge badge-green">第5步</span></div>
+    <h2 class="anim-fade-1">版本管理 —— 文档和代码一起版本化</h2>
+    <p class="subtitle anim-fade-2">不只是代码需要 Git 管理，文档、原型、配置都纳入版本控制，形成完整的项目演进历史</p>
+    <div class="grid-2 anim-fade-3" style="gap:16px">
       <div>
-        <div class="card" style="padding:20px">
-          <h4>📝 提交规范</h4>
-          <ul style="list-style:none;margin-top:10px;font-size:14px;color:var(--t2);line-height:2.2">
-            <li>• 提交信息使用<strong style="color:var(--t)">中文</strong></li>
-            <li>• 格式：<code style="color:var(--s);background:rgba(52,168,83,.1);padding:1px 6px;border-radius:4px">{动词}{名词} — {补充说明}</code></li>
-            <li style="margin-top:6px">示例：</li>
-            <li style="color:var(--t)">  「初始化项目结构」</li>
-            <li style="color:var(--t)">  「新增 organize-docs skill」</li>
-            <li style="color:var(--t)">  「人事通原型 V1.0 — 三端交互原型」</li>
-          </ul>
+        <div class="card" style="padding:18px">
+          <h4 style="margin-bottom:6px">📝 一条好的提交信息</h4>
+          <p style="font-size:13px;margin-bottom:10px">使用中文，格式：「做什么事 — 补充说明」</p>
+          <div style="font-family:monospace;font-size:13px;line-height:2.2;background:rgba(0,0,0,.2);padding:10px 14px;border-radius:8px">
+            <div style="color:var(--s)">✓ 新增人事通原型 V1.0 — 三端完整交互原型</div>
+            <div style="color:var(--s)">✓ 初始化项目结构 — 骨架目录 + .gitignore</div>
+            <div style="color:var(--s)">✓ 存档项目工作法 HTML 演示文稿及相关产物</div>
+            <div style="color:var(--r);opacity:.5">✗ feat: update prototype</div>
+            <div style="color:var(--r);opacity:.5">✗ fix bug</div>
+          </div>
         </div>
       </div>
       <div>
-        <div class="card" style="padding:20px">
-          <h4>📋 提交时机</h4>
-          <ul style="list-style:none;margin-top:10px;font-size:13px;color:var(--t2);line-height:2.2">
-            <li>• 🟦 <strong style="color:var(--t)">项目初始化</strong> — 骨架目录 + CLAUDE.md</li>
-            <li>• 🟦 <strong style="color:var(--t)">文档更新</strong> — 需求、架构文档变更</li>
-            <li>• 🟩 <strong style="color:var(--t)">文档归类</strong> — 移动文件后的目录调整</li>
-            <li>• 🟪 <strong style="color:var(--t)">新增 Skill</strong> — 新的 skill 目录和文件</li>
-            <li>• 🟨 <strong style="color:var(--t)">原型产出</strong> — HTML + .md 原型方案</li>
-            <li>• 🟥 <strong style="color:var(--t)">代码实现</strong> — 功能代码 + 测试</li>
-          </ul>
+        <div class="card" style="padding:18px">
+          <h4 style="margin-bottom:6px">🔖 什么东西要提交？</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+            <span class="tech-tag" style="font-size:12px">📄 requirements.md</span>
+            <span class="tech-tag" style="font-size:12px">🏗️ architecture.md</span>
+            <span class="tech-tag" style="font-size:12px">📂 docs/ 目录结构</span>
+            <span class="tech-tag" style="font-size:12px">🎨 原型文件 .html</span>
+            <span class="tech-tag" style="font-size:12px">⚙️ Skills/</span>
+            <span class="tech-tag" style="font-size:12px">🧠 memory/ 记忆</span>
+            <span class="tech-tag" style="font-size:12px">📜 CLAUDE.md</span>
+            <span class="tech-tag" style="font-size:12px">💻 源代码</span>
+            <span class="tech-tag" style="font-size:12px">🧪 测试用例</span>
+            <span class="tech-tag" style="font-size:12px">🔧 配置文件</span>
+          </div>
+        </div>
+        <div class="card" style="padding:16px;margin-top:8px">
+          <h4 style="font-size:13px;margin-bottom:2px">💡 为什么文档也要版本化管理？</h4>
+          <p style="font-size:12px;color:var(--t2);line-height:1.5">因为文档和代码是"同步演进"的。需求变了 → 先改文档 → 再改代码 → 一起提交。这样任何时候回头看，都知道"当时为什么要这么改"。</p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 12: PROJECT EVOLUTION ══════ -->
-<div class="slide" data-title="演进日志">
+<!-- ══════ SLIDE 11: ACHIEVEMENTS ══════ -->
+<div class="slide" data-title="成果">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-amber">演进日志</span></div>
-    <h2 class="anim-fade-1">项目演进史</h2>
-    <p class="subtitle anim-fade-2">9 次提交，从空空如也到完整的方法论体系</p>
-    <div class="grid-2 anim-fade-3" style="gap:20px">
-      <div class="timeline">
-        <div class="tl-item"><div class="tl-dot done">1</div><div class="tl-content"><div class="tl-hash">28c26d5</div><div class="tl-text">初始化项目结构</div><div class="tl-desc">骨架目录 + .gitignore + 基础配置</div></div></div>
-        <div class="tl-item"><div class="tl-dot done">2</div><div class="tl-content"><div class="tl-hash">8aab796</div><div class="tl-text">补充项目背景与需求</div><div class="tl-desc">项目目标、功能模块划分</div></div></div>
-        <div class="tl-item"><div class="tl-dot done">3</div><div class="tl-content"><div class="tl-hash">caf727a</div><div class="tl-text">添加 Skills 目录体系</div><div class="tl-desc">项目级 .claude/skills/</div></div></div>
-        <div class="tl-item"><div class="tl-dot done">4</div><div class="tl-content"><div class="tl-hash">c4f5078</div><div class="tl-text">原型设计 Skill + 记忆系统</div><div class="tl-desc">prototype-designer + memory</div></div></div>
-        <div class="tl-item"><div class="tl-dot done">5</div><div class="tl-content"><div class="tl-hash">bca6fa4</div><div class="tl-text">文档按模块拆分</div><div class="tl-desc">按功能模块拆分业务需求</div></div></div>
+    <div class="anim-fade"><span class="badge badge-green">实战验证</span></div>
+    <h2 class="anim-fade-1">这套方法论产出了什么？</h2>
+    <p class="subtitle anim-fade-2">这不仅仅是理论 —— 以下是实际项目（人事通模块）中应用这套方法后的产出物</p>
+    <div class="results-grid anim-fade-3">
+      <div class="result-card">
+        <div class="r-icon">📄</div>
+        <div class="r-count">2</div>
+        <div class="r-label">核心文档<br><span style="font-size:11px">需求总纲 + 架构设计</span></div>
       </div>
-      <div class="timeline">
-        <div class="tl-item"><div class="tl-dot done">6</div><div class="tl-content"><div class="tl-hash">8f32386</div><div class="tl-text">文档归类 Skill</div><div class="tl-desc">organize-docs 自动归类</div></div></div>
-        <div class="tl-item"><div class="tl-dot done">7</div><div class="tl-content"><div class="tl-hash">b494642</div><div class="tl-text">同步蓝图 V0.5 + 归类</div><div class="tl-desc">飞书+若依架构更新</div></div></div>
-        <div class="tl-item"><div class="tl-dot done">8</div><div class="tl-content"><div class="tl-hash">c0ccd6e</div><div class="tl-text">人事通原型 V1.0</div><div class="tl-desc">三端完整交互原型</div></div></div>
-        <div class="tl-item"><div class="tl-dot done">9</div><div class="tl-content"><div class="tl-hash">31dc9fe</div><div class="tl-text">项目工作法文档</div><div class="tl-desc">方法论完整沉淀（当前）</div></div></div>
+      <div class="result-card">
+        <div class="r-icon">📂</div>
+        <div class="r-count">4</div>
+        <div class="r-label">业务模块<br><span style="font-size:11px">HR/行政/生产/通用</span></div>
       </div>
+      <div class="result-card">
+        <div class="r-icon">🎨</div>
+        <div class="r-count">47</div>
+        <div class="r-label">原型页面<br><span style="font-size:11px">22手机+16PC+9门户</span></div>
+      </div>
+      <div class="result-card">
+        <div class="r-icon">⚙️</div>
+        <div class="r-count">4</div>
+        <div class="r-label">AI Skills<br><span style="font-size:11px">可重复使用的工作流</span></div>
+      </div>
+      <div class="result-card">
+        <div class="r-icon">🧠</div>
+        <div class="r-count">5</div>
+        <div class="r-label">记忆条目<br><span style="font-size:11px">上下文持久化</span></div>
+      </div>
+      <div class="result-card">
+        <div class="r-icon">🔖</div>
+        <div class="r-count">10</div>
+        <div class="r-label">Git 提交<br><span style="font-size:11px">完整演进历史</span></div>
+      </div>
+    </div>
+    <div class="anim-fade-4" style="margin-top:14px;padding:12px 18px;background:rgba(52,168,83,.06);border:1px solid rgba(52,168,83,.12);border-radius:10px;text-align:center">
+      <span style="font-size:13px;color:var(--s)">✅ 人事通原型验证：全部通过 · 零断链 · 零错误</span>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 13: TOOL CHAIN ══════ -->
-<div class="slide" data-title="工具链">
+<!-- ══════ SLIDE 12: COMPARISON ══════ -->
+<div class="slide" data-title="对比">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">工具链</span></div>
-    <h2 class="anim-fade-1">完整工具链</h2>
-    <p class="subtitle anim-fade-2">从需求到交付，每个环节都有对应的工具和方法</p>
-    <div class="grid-2 anim-fade-3" style="gap:14px">
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">📜</span>
-        <div><h4 style="margin-bottom:2px">CLAUDE.md</h4><p style="font-size:12px;margin:0">项目规范和行为约束</p></div>
+    <div class="anim-fade"><span class="badge badge-amber">价值对比</span></div>
+    <h2 class="anim-fade-1">用了这套方法，有什么区别？</h2>
+    <p class="subtitle anim-fade-2">不是颠覆性的改变，而是每个环节都"多做了一点点"，但合起来效果显著</p>
+    <div class="comp-grid anim-fade-3" style="gap:16px">
+      <div class="comp-box bad">
+        <h4><span class="icon-bad">✗</span> 传统方式</h4>
+        <ul>
+          <li>需求在口头/微信里，找起来靠问</li>
+          <li>文档写一次就归档，开发和需求脱节</li>
+          <li>原型用 Axure/图片，没法自动化检查</li>
+          <li>重复工作每次重新做一遍</li>
+          <li>AI 聊完就忘，每次重新交代</li>
+          <li>Git 只有代码，看不出为什么改</li>
+          <li>项目交接要花大量时间讲上下文</li>
+        </ul>
       </div>
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">📋</span>
-        <div><h4 style="margin-bottom:2px">requirements.md</h4><p style="font-size:12px;margin:0">需求总纲</p></div>
-      </div>
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">🏗️</span>
-        <div><h4 style="margin-bottom:2px">architecture.md</h4><p style="font-size:12px;margin:0">架构设计</p></div>
-      </div>
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">🚀</span>
-        <div><h4 style="margin-bottom:2px">init-project skill</h4><p style="font-size:12px;margin:0">项目脚手架</p></div>
-      </div>
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">📂</span>
-        <div><h4 style="margin-bottom:2px">organize-docs skill</h4><p style="font-size:12px;margin:0">文档分类</p></div>
-      </div>
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">🎨</span>
-        <div><h4 style="margin-bottom:2px">prototype-designer skill</h4><p style="font-size:12px;margin:0">原型 + PRD</p></div>
-      </div>
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">🔍</span>
-        <div><h4 style="margin-bottom:2px">validate-prototype skill</h4><p style="font-size:12px;margin:0">原型验证</p></div>
-      </div>
-      <div class="card" style="padding:18px;display:flex;align-items:center;gap:16px">
-        <span style="font-size:24px">🧠</span>
-        <div><h4 style="margin-bottom:2px">Memory System</h4><p style="font-size:12px;margin:0">上下文持久化</p></div>
+      <div class="comp-box good">
+        <h4><span class="icon-good">✓</span> 这套方法</h4>
+        <ul>
+          <li>需求在文档里，所有人看到的一致</li>
+          <li>文档是开发依据，随需求持续更新</li>
+          <li>HTML 原型可交互、可自动校验</li>
+          <li>重复工作写成 Skill，一键执行</li>
+          <li>记忆系统让 AI 记住项目上下文</li>
+          <li>Git 包含文档+原型+代码，历史完整</li>
+          <li>新成员看文档+记忆系统就了解全局</li>
+        </ul>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 14: ARCHITECTURE DIAGRAM ══════ -->
-<div class="slide" data-title="系统架构">
+<!-- ══════ SLIDE 13: GET STARTED ══════ -->
+<div class="slide" data-title="开始使用">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-purple">架构</span></div>
-    <h2 class="anim-fade-1">系统架构图</h2>
-    <p class="subtitle anim-fade-2">飞书 + 若依双层耦合架构</p>
-    <div class="anim-fade-3" style="margin-top:12px">
-      <!-- Layer 1 -->
-      <div style="background:linear-gradient(135deg,rgba(30,109,242,.12),rgba(30,109,242,.05));border:1px solid rgba(30,109,242,.2);border-radius:10px;padding:14px 20px;margin-bottom:6px;text-align:center">
-        <span style="font-size:12px;color:var(--t2);font-weight:500">接入层</span>
-        <div style="display:flex;gap:16px;justify-content:center;margin-top:4px;flex-wrap:wrap">
-          <span style="font-size:13px;color:var(--t)">🌐 统一门户</span>
-          <span style="font-size:13px;color:var(--t)">💻 PC端</span>
-          <span style="font-size:13px;color:var(--t)">📱 移动端</span>
-          <span style="font-size:13px;color:var(--t)">🔐 统一认证</span>
-          <span style="font-size:13px;color:var(--t)">📨 消息中心</span>
-          <span style="font-size:13px;color:var(--t)">🔑 单点登录</span>
+    <div class="anim-fade"><span class="badge badge-blue">行动指南</span></div>
+    <h2 class="anim-fade-1">如何开始使用这套方法？</h2>
+    <p class="subtitle anim-fade-2">不用一步到位，从最简单的入手，逐步建立习惯</p>
+    <div class="anim-fade-3" style="margin-top:16px">
+      <div class="step-card">
+        <span class="s-badge">1</span>
+        <div class="s-content">
+          <h4>先写一份 CLAUDE.md</h4>
+          <p>这是投入最小的第一步。只需要记录项目名称、技术栈、基本规范。下次 AI 辅助时就会自动遵守这些规则。</p>
         </div>
       </div>
-      <!-- Arrow -->
-      <div style="text-align:center;color:var(--t2);font-size:12px;margin:2px 0">↓</div>
-      <!-- Layer 2 -->
-      <div style="background:linear-gradient(135deg,rgba(6,182,212,.12),rgba(6,182,212,.05));border:1px solid rgba(6,182,212,.2);border-radius:10px;padding:14px 20px;margin-bottom:6px;text-align:center">
-        <span style="font-size:12px;color:var(--t2);font-weight:500">应用层</span>
-        <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;flex-wrap:wrap">
-          <span class="tech-tag" style="padding:4px 14px;font-size:12px">人事通</span>
-          <span class="tech-tag" style="padding:4px 14px;font-size:12px">行政通</span>
-          <span class="tech-tag" style="padding:4px 14px;font-size:12px">生产通</span>
-          <span class="tech-tag" style="padding:4px 14px;font-size:12px">制造资讯</span>
-          <span class="tech-tag" style="padding:4px 14px;font-size:12px">数据服务</span>
+      <div class="step-card">
+        <span class="s-badge">2</span>
+        <div class="s-content">
+          <h4>下一个需求，先写文档再做原型</h4>
+          <p>不要急着写代码。先花 30 分钟写个简单的需求文档，再做一份 HTML 原型。你会发现在这个阶段改方案的成本几乎为零。</p>
         </div>
       </div>
-      <!-- Arrow -->
-      <div style="text-align:center;color:var(--t2);font-size:12px;margin:2px 0">↓</div>
-      <!-- Layer 3 -->
-      <div style="background:linear-gradient(135deg,rgba(52,168,83,.12),rgba(52,168,83,.05));border:1px solid rgba(52,168,83,.2);border-radius:10px;padding:14px 20px;margin-bottom:6px;text-align:center">
-        <span style="font-size:12px;color:var(--t2);font-weight:500">流程层</span>
-        <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;flex-wrap:wrap">
-          <span style="font-size:13px;color:var(--t)">若依流程引擎</span>
-          <span style="font-size:13px;color:var(--t)">表单中心</span>
-          <span style="font-size:13px;color:var(--t)">审批配置</span>
-          <span style="font-size:13px;color:var(--t)">工单闭环</span>
+      <div class="step-card">
+        <span class="s-badge">3</span>
+        <div class="s-content">
+          <h4>遇到重复工作，就沉淀一个 Skill</h4>
+          <p>当 AI 帮你做完某件事两次时，就把它写成 Skill。下次再说"用 xxx skill 做"就全自动完成了。积累越多，效率越高。</p>
         </div>
       </div>
-      <!-- Arrow -->
-      <div style="text-align:center;color:var(--t2);font-size:12px;margin:2px 0">↓</div>
-      <!-- Layer 4 -->
-      <div style="background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.05));border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px 20px;text-align:center">
-        <span style="font-size:12px;color:var(--t2);font-weight:500">集成层</span>
-        <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;flex-wrap:wrap">
-          <span style="font-size:12px;color:var(--t2)">夏谷（HR主数据）</span>
-          <span style="font-size:12px;color:var(--t2)">暖心宝（生活服务）</span>
-          <span style="font-size:12px;color:var(--t2)">TMS（安全通行）</span>
-          <span style="font-size:12px;color:var(--t2)">EAM（设备运维）</span>
-          <span style="font-size:12px;color:var(--t2)">MES（生产数据）</span>
+      <div class="step-card">
+        <span class="s-badge">4</span>
+        <div class="s-content">
+          <h4>把重要的上下文写进记忆系统</h4>
+          <p>当 AI 问过你某个问题两次以上，或者你纠正过 AI 同一个错误两次，就把它记下来。Session 压缩后，记忆还在。</p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 15: SUMMARY ══════ -->
+<!-- ══════ SLIDE 14: SUMMARY ══════ -->
 <div class="slide" data-title="总结">
   <div class="slide-content">
     <div class="anim-fade"><span class="badge badge-green">总结</span></div>
-    <h2 class="anim-fade-1">方法论地图</h2>
-    <p class="subtitle anim-fade-2">一份属于你自己的项目工作法</p>
-    <div class="anim-fade-3" style="margin-top:20px">
+    <h2 class="anim-fade-1">核心就四句话</h2>
+    <p class="subtitle anim-fade-2">简单，但做到位了效果显著</p>
+    <div class="anim-fade-3" style="margin-top:24px">
       <div class="quote-block">
         <div class="quote-mark">"</div>
         <div class="quote-text" style="color:var(--t)">
@@ -671,29 +774,27 @@ h3 { font-size: clamp(18px, 2vw, 24px); font-weight: 600; margin-bottom: 8px; }
         </div>
       </div>
     </div>
-    <div class="anim-fade-4" style="text-align:center;margin-top:24px">
-      <div style="display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center">
-        <span class="tech-tag" style="background:rgba(30,109,242,.1);border-color:rgba(30,109,242,.2)">📋 文档驱动</span>
-        <span class="tech-tag" style="background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)">🎨 原型验证</span>
-        <span class="tech-tag" style="background:rgba(52,168,83,.1);border-color:rgba(52,168,83,.2)">⚙️ 技能固化</span>
-        <span class="tech-tag" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.2)">📈 渐进交付</span>
-        <span class="tech-tag" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">🔖 版本对应</span>
-      </div>
+    <div class="anim-fade-4" style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <span class="tech-tag" style="background:rgba(30,109,242,.1);border-color:rgba(30,109,242,.2)">📋 文档驱动</span>
+      <span class="tech-tag" style="background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)">🎨 原型验证</span>
+      <span class="tech-tag" style="background:rgba(52,168,83,.1);border-color:rgba(52,168,83,.2)">⚙️ 技能固化</span>
+      <span class="tech-tag" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.2)">📈 渐进交付</span>
+      <span class="tech-tag" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">🔖 版本对应</span>
+    </div>
+    <div class="anim-fade-5" style="margin-top:28px;text-align:center;font-size:13px;color:var(--t2)">
+      完整文档：<span style="background:rgba(255,255,255,.05);padding:4px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.06)">docs/项目工作法.md</span>
     </div>
   </div>
 </div>
 
-<!-- ══════ SLIDE 16: END ══════ -->
-<div class="slide slide-intro" data-title="结尾" style="background:#0F172A">
+<!-- ══════ SLIDE 15: END ══════ -->
+<div class="slide slide-intro" style="background:#0F172A">
   <div class="slide-content">
-    <div class="anim-scale" style="font-size:48px;margin-bottom:20px">🚀</div>
-    <h1 class="anim-fade" style="font-weight:700">谢谢</h1>
-    <p class="anim-fade-1" style="font-size:18px;color:var(--t2);margin-top:16px;font-weight:300;max-width:600px;margin-left:auto;margin-right:auto">文档驱动 · 原型验证 · 技能固化 · 渐进交付</p>
-    <div class="anim-fade-2" style="margin-top:40px;font-size:13px;color:var(--t2)">
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <span style="background:rgba(255,255,255,.05);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.06)">📄 docs/项目工作法.md</span>
-        <span style="background:rgba(255,255,255,.05);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.06)">🖥️ 项目工作法.pptx</span>
-      </div>
+    <div class="anim-scale" style="font-size:46px;margin-bottom:16px">🚀</div>
+    <h1 class="anim-fade" style="font-weight:700">感谢阅读</h1>
+    <p class="anim-fade-1" style="font-size:16px;color:var(--t2);margin-top:14px;font-weight:300;max-width:560px;margin-left:auto;margin-right:auto">这份文档会随着项目推进持续更新<br>每次新需求的沉淀，都会让它更完善</p>
+    <div class="anim-fade-2" style="margin-top:32px;font-size:13px;color:var(--t2)">
+      <span style="background:rgba(255,255,255,.05);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.06)">特步 · XTEP ｜ 一站式服务平台</span>
     </div>
   </div>
 </div>
@@ -712,26 +813,21 @@ function updateSlide() {
   const container = document.getElementById('slides');
   container.style.transform = `translateX(-${current * 100}vw)`;
 
-  // Progress
   document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
   document.getElementById('curSlide').textContent = current + 1;
 
-  // Dots
   document.querySelectorAll('#nav .dot').forEach((d, i) => {
     d.classList.toggle('active', i === current);
   });
 
-  // Active class for animations
   slides.forEach((s, i) => s.classList.toggle('active', i === current));
 
-  // Arrows
   document.getElementById('prevBtn').classList.toggle('show', current > 0);
   document.getElementById('nextBtn').classList.toggle('show', current < total - 1);
 
   isAnimating = false;
 }
 
-// Build navigation dots
 const navContainer = document.getElementById('nav');
 slides.forEach((_, i) => {
   const dot = document.createElement('button');
@@ -757,7 +853,6 @@ function goPrev() {
 document.getElementById('nextBtn').addEventListener('click', goNext);
 document.getElementById('prevBtn').addEventListener('click', goPrev);
 
-// Keyboard
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
     e.preventDefault(); goNext();
@@ -769,7 +864,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'End') { e.preventDefault(); current = total - 1; updateSlide(); }
 });
 
-// Touch support
 let touchStartX = 0, touchEndX = 0;
 document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
 document.addEventListener('touchend', e => {
@@ -781,11 +875,9 @@ document.addEventListener('touchend', e => {
   }
 });
 
-// Wheel
 let wheelTimeout = false;
 document.addEventListener('wheel', e => {
   if (wheelTimeout || isAnimating) return;
-  // Only if vertical scroll is significant
   if (Math.abs(e.deltaY) < 30) return;
   wheelTimeout = true;
   if (e.deltaY > 0) goNext();
@@ -793,7 +885,6 @@ document.addEventListener('wheel', e => {
   setTimeout(() => wheelTimeout = false, 600);
 }, { passive: true });
 
-// Init
 updateSlide();
 </script>
 </body>
