@@ -9,6 +9,7 @@
       "Bash(cat:*)",
       "Bash(head:*)",
       "Bash(echo:*)",
+      "Bash(*)",
       "Edit(*)",
       "Write(*)",
       "Read(*)",

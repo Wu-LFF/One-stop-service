@@ -1,0 +1,5 @@
+- [用户信息](about-user.md) — 用户角色和项目职责
+- [项目概览](project-overview.md) — 制物流园区项目目标与状态
+- [反馈：文档归类偏好](feedback-organize-docs.md) — 文档分类的业务方向
+- [反馈：Skills目录管理](feedback-skills-dir.md) — Skills目录的使用规范
+- [反馈：权限偏好](feedback-permissions-auto.md) — 默认允许文件读写操作
