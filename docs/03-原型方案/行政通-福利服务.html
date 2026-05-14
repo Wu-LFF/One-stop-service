@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>行政通 · 福利服务 — 三端交互原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #1E6DF2; --primary-dark: #1557C4; --success: #34A853; --warning: #FBBC04; --danger: #EF4444;
+  --bg: #F5F7FA; --card: #FFFFFF; --text: #1F2937; --text2: #6B7280; --border: #E5E7EB;
+  --shadow: 0 2px 12px rgba(0,0,0,.08); --radius: 12px;
+}
+body { font-family: -apple-system,'PingFang SC','Microsoft YaHei',sans-serif; background: #0F172A; overflow: hidden; height: 100vh; }
+#viewport-tabs { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; display: flex; background: #1E293B; padding: 4px; gap: 4px; }
+#viewport-tabs button { flex: 1; padding: 6px 0; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: #64748B; }
+#viewport-tabs button.active { background: var(--primary); color: #fff; }
+.device-frame { display: none; margin: 48px auto 0; background: var(--bg); position: relative; overflow-y: auto; }
+.device-frame.active { display: block; }
+.device-frame.mobile { width: 390px; height: calc(100vh - 52px); border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+.device-frame.pc { width: 100%; height: calc(100vh - 52px); }
+.device-frame.portal { width: 100%; height: calc(100vh - 52px); }
+.m-header { background: var(--primary); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+.m-header .back { font-size: 20px; cursor: pointer; min-width: 24px; }
+.m-header h1 { font-size: 17px; font-weight: 600; flex: 1; }
+.m-content { padding: 16px; padding-bottom: 80px; }
+.pc-layout { display: flex; height: 100%; }
+.pc-sidebar { width: 220px; background: #1E293B; color: #fff; padding: 16px 0; flex-shrink: 0; overflow-y: auto; }
+.pc-sidebar h2 { font-size: 15px; padding: 0 16px 12px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 8px; color: #94A3B8; font-weight: 600; }
+.pc-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; color: #CBD5E1; font-size: 14px; border-left: 3px solid transparent; }
+.pc-nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.pc-nav-item.active { background: rgba(30,109,242,.15); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
+.pc-main { flex: 1; padding: 20px 24px; overflow-y: auto; background: var(--bg); }
+.portal-layout { display: flex; height: 100%; }
+.portal-sidebar { width: 200px; background: #0F172A; color: #fff; padding: 16px 0; flex-shrink: 0; }
+.portal-sidebar h2 { font-size: 13px; padding: 0 16px 12px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 8px; color: #64748B; font-weight: 600; }
+.portal-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; color: #94A3B8; font-size: 13px; }
+.portal-nav-item:hover { background: rgba(255,255,255,.05); color: #fff; }
+.portal-nav-item.active { background: rgba(30,109,242,.12); color: var(--primary); font-weight: 600; }
+.portal-main { flex: 1; padding: 20px 24px; overflow-y: auto; background: #F1F5F9; }
+.card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+.tag-blue { background: #E8F0FE; color: var(--primary); }
+.tag-green { background: #E6F7ED; color: var(--success); }
+.tag-red { background: #FDE8E8; color: var(--danger); }
+.tag-amber { background: #FEF3E2; color: #D97706; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-block { display: flex; width: 100%; }
+.btn-sm { padding: 4px 12px; font-size: 12px; border-radius: 6px; }
+.input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
+.input:focus { border-color: var(--primary); }
+.textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px; font-family: inherit; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 4px; }
+.menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.menu-card { background: var(--card); border-radius: var(--radius); padding: 20px 12px; text-align: center; box-shadow: var(--shadow); cursor: pointer; border: 2px solid transparent; }
+.menu-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+.menu-card .icon { font-size: 30px; margin-bottom: 6px; display: block; }
+.menu-card .name { font-size: 14px; font-weight: 600; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { background: #F8FAFC; padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text2); border-bottom: 2px solid var(--border); }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.data-table tr:hover td { background: #F8FAFC; }
+.m-tabs { display: flex; background: #F3F4F6; border-radius: 8px; padding: 3px; margin-bottom: 12px; }
+.m-tab { flex: 1; padding: 6px 0; text-align: center; font-size: 13px; border-radius: 6px; cursor: pointer; color: var(--text2); }
+.m-tab.active { background: #fff; color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.progress-steps { display: flex; align-items: flex-start; margin: 16px 0; }
+.progress-step { flex: 1; text-align: center; position: relative; }
+.progress-step .dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 12px; font-weight: 600; }
+.progress-step .dot.done { background: var(--success); color: #fff; }
+.progress-step .dot.active { background: var(--primary); color: #fff; }
+.progress-step .dot.pending { background: #E5E7EB; color: var(--text2); }
+.progress-step .label { font-size: 11px; color: var(--text2); }
+.progress-step::after { content: ''; position: absolute; top: 14px; right: -50%; width: 100%; height: 2px; background: #E5E7EB; z-index: 0; }
+.progress-step:last-child::after { display: none; }
+.jump-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 20px; }
+.jump-page .j-icon { font-size: 56px; margin-bottom: 16px; }
+.jump-page h2 { font-size: 20px; margin-bottom: 8px; }
+.jump-page p { font-size: 14px; color: var(--text2); margin-bottom: 24px; max-width: 300px; line-height: 1.6; }
+.toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: #1F2937; color: #fff; padding: 10px 24px; border-radius: 10px; font-size: 14px; z-index: 99999; display: none; }
+.m-page, .pc-page, .portal-page { display: none; }
+.m-page.active, .pc-page.active, .portal-page.active { display: block; }
+.device-frame::-webkit-scrollbar { width: 4px; }
+.device-frame::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div id="viewport-tabs">
+  <button class="active" data-view="mobile">📱 移动端</button>
+  <button data-view="pc">💻 PC 端</button>
+  <button data-view="portal">🔐 管理门户</button>
+</div>
+
+<!-- ===== MOBILE ===== -->
+<div class="device-frame mobile active" id="view-mobile">
+
+<!-- 福利服务首页 -->
+<div class="m-page active" id="mp-fl-index">
+  <div class="m-header"><h1>福利服务</h1><div>🔔</div></div>
+  <div class="m-content">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:4px">欢迎使用</div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:16px">福利服务</div>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="mNav('mp-fl-knbz')"><span class="icon">🆘</span><div class="name">困难补助</div></div>
+      <div class="menu-card" onclick="mNav('mp-fl-hxdd')"><span class="icon">🚩</span><div class="name">红心向党</div></div>
+      <div class="menu-card" onclick="mNav('mp-fl-sdb')"><span class="icon">👶</span><div class="name">四点半学堂</div></div>
+      <div class="menu-card" onclick="mNav('mp-fl-yeybt')"><span class="icon">🏫</span><div class="name">幼儿园补贴</div></div>
+      <div class="menu-card" onclick="mNav('mp-fl-cflq')"><span class="icon">👔</span><div class="name">厂服领取</div></div>
+      <div class="menu-card" onclick="mNav('mp-fl-cyfl')"><span class="icon">🎁</span><div class="name">员工福利</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 困难补助 -->
+<div class="m-page" id="mp-fl-knbz">
+  <div class="m-header"><span class="back" onclick="mNav('mp-fl-index')">‹</span><h1>困难补助</h1></div>
+  <div class="m-content">
+    <div class="card">
+      <div class="form-group"><label>姓名</label><input class="input" value="张三" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label>工号</label><input class="input" value="EMP001" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label class="required">困难类型</label><select class="input" style="appearance:none"><option>请选择</option><option>大病医疗</option><option>意外事故</option><option>自然灾害</option><option>其他</option></select></div>
+      <div class="form-group"><label class="required">补助金额</label><input class="input" type="number" placeholder="请输入金额"></div>
+      <div class="form-group"><label class="required">申请事由</label><textarea class="textarea" placeholder="请详细描述困难情况..."></textarea></div>
+      <div class="form-group"><label>证明材料</label><div style="display:flex;gap:8px"><div style="width:72px;height:72px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#CBD5E1;border:2px dashed var(--border);cursor:pointer">+</div></div><div style="font-size:11px;color:var(--text2);margin-top:4px">最多5张，支持拍照或相册</div></div>
+      <div class="form-group"><label>联系方式</label><input class="input" value="138****5678"></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="showToast('✅ 补助申请已提交')" style="padding:12px">提交申请</button>
+    <div style="text-align:center;margin-top:10px"><span style="font-size:13px;color:var(--primary);cursor:pointer" onclick="mNav('mp-fl-knbz-list')">查看申请记录 →</span></div>
+  </div>
+</div>
+
+<!-- 困难补助记录 -->
+<div class="m-page" id="mp-fl-knbz-list">
+  <div class="m-header"><span class="back" onclick="mNav('mp-fl-knbz')">‹</span><h1>申请记录</h1></div>
+  <div class="m-content">
+    <div class="m-tabs"><div class="m-tab active" onclick="switchTab(this)">全部</div><div class="m-tab" onclick="switchTab(this)">审批中</div><div class="m-tab" onclick="switchTab(this)">已通过</div></div>
+    <div class="card"><div style="display:flex;justify-content:space-between"><span style="font-weight:600">大病医疗补助</span><span class="tag tag-amber">审批中</span></div><div style="font-size:12px;color:var(--text2);margin-top:4px">¥3,000 · 05-14</div></div>
+    <div class="card"><div style="display:flex;justify-content:space-between"><span style="font-weight:600">意外事故补助</span><span class="tag tag-green">已通过</span></div><div style="font-size:12px;color:var(--text2);margin-top:4px">¥5,000 · 05-10</div></div>
+  </div>
+</div>
+
+<!-- 红心向党 -->
+<div class="m-page" id="mp-fl-hxdd">
+  <div class="m-header"><span class="back" onclick="mNav('mp-fl-index')">‹</span><h1>红心向党</h1></div>
+  <div class="m-content">
+    <div class="card" style="background:#FEF3E2;border:1px solid #FDE68A"><div style="font-size:13px;font-weight:600">📌 入党流程</div><div style="font-size:12px;color:var(--text2);margin-top:4px;line-height:1.8">① 入党申请 → ② 积极分子 → ③ 发展对象 → ④ 预备党员 → ⑤ 转正</div></div>
+    <div class="card">
+      <div class="form-group"><label>姓名</label><input class="input" value="张三" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label>工号</label><input class="input" value="EMP001" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label class="required">申请类型</label><select class="input" style="appearance:none"><option>入党申请</option><option>思想汇报</option><option>活动报名</option></select></div>
+      <div class="form-group"><label>备注</label><textarea class="textarea" placeholder="请填写申请内容或思想汇报..."></textarea></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="showToast('✅ 已提交，等待支部书记审核')" style="padding:12px">提交</button>
+  </div>
+</div>
+
+<!-- 四点半学堂 -->
+<div class="m-page" id="mp-fl-sdb">
+  <div class="m-header"><span class="back" onclick="mNav('mp-fl-index')">‹</span><h1>四点半学堂</h1></div>
+  <div class="m-content">
+    <div class="card">
+      <div class="form-group"><label>姓名</label><input class="input" value="张三" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label>工号</label><input class="input" value="EMP001" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label class="required">子女姓名</label><input class="input" placeholder="请输入子女姓名"></div>
+      <div class="form-group"><label class="required">子女身份证号</label><input class="input" placeholder="请输入子女身份证号"></div>
+      <div class="form-group"><label>证明材料</label><div style="display:flex;gap:8px"><div style="width:72px;height:72px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#CBD5E1;border:2px dashed var(--border);cursor:pointer">📎</div></div></div>
+      <div class="form-group"><label>联系方式</label><input class="input" value="138****5678"></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="showToast('✅ 已提交，等待行政审核')" style="padding:12px">提交申请</button>
+  </div>
+</div>
+
+<!-- 幼儿园补贴 -->
+<div class="m-page" id="mp-fl-yeybt">
+  <div class="m-header"><span class="back" onclick="mNav('mp-fl-index')">‹</span><h1>幼儿园补贴</h1></div>
+  <div class="m-content">
+    <div class="card" style="background:#F0F6FF;border:1px solid #D6E4FB;font-size:12px;line-height:1.8">
+      <strong>📌 补贴规则</strong><br>
+      当月15号前申请 → 补贴75元<br>
+      15号后申请 → 当月无补贴<br>
+      次月起 → 每月补贴150元
+    </div>
+    <div class="card">
+      <div class="form-group"><label>姓名</label><input class="input" value="张三" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label class="required">子女姓名</label><input class="input" placeholder="请输入子女姓名"></div>
+      <div class="form-group"><label class="required">子女身份证号</label><input class="input" placeholder="请输入子女身份证号"></div>
+      <div class="form-group"><label class="required">就读学校</label><input class="input" placeholder="请输入学校名称"></div>
+      <div class="form-group"><label class="required">证明材料</label><div style="display:flex;gap:8px;flex-wrap:wrap"><div style="width:72px;height:72px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#CBD5E1;border:2px dashed var(--border);cursor:pointer">+</div></div><div style="font-size:11px;color:var(--text2);margin-top:4px">户口本、结婚证、出生证明、居住证、厂牌</div></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="showToast('✅ 补贴申请已提交')" style="padding:12px">提交申请</button>
+  </div>
+</div>
+
+<!-- 厂服领取 -->
+<div class="m-page" id="mp-fl-cflq">
+  <div class="m-header"><span class="back" onclick="mNav('mp-fl-index')">‹</span><h1>厂服领取</h1></div>
+  <div class="m-content">
+    <div class="card">
+      <div class="form-group"><label>姓名</label><input class="input" value="张三" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label>工号</label><input class="input" value="EMP001" readonly style="background:#F9FAFB"></div>
+      <div class="form-group"><label class="required">厂服尺码</label><select class="input" style="appearance:none"><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>XXL</option></select></div>
+      <div class="form-group"><label class="required">申领件数</label><input class="input" type="number" value="2"></div>
+      <div class="form-group"><label class="required">申领原因</label><select class="input" style="appearance:none"><option>新入职</option><option>换新</option><option>尺码更换</option></select></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="showToast('✅ 厂服申领已提交')" style="padding:12px">提交申请</button>
+  </div>
+</div>
+
+<!-- 员工福利 - OA跳转 -->
+<div class="m-page" id="mp-fl-cyfl">
+  <div class="m-header"><span class="back" onclick="mNav('mp-fl-index')">‹</span><h1>员工福利</h1></div>
+  <div class="m-content">
+    <div class="card" style="background:#F0FFF4;border:1px solid #B8E6C9;text-align:center;padding:20px">
+      <div style="font-size:32px;margin-bottom:8px">🎂</div>
+      <div style="font-size:15px;font-weight:600">生日福利</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px">今天是您的生日，请到食堂享用免费生日餐！</div>
+    </div>
+    <div class="jump-page" style="min-height:auto;padding:12px 0">
+      <p style="margin-bottom:16px">节日福利申领请前往 OA 系统办理</p>
+      <button class="btn btn-primary btn-block" onclick="showToast('正在跳转 OA 系统...')">前往 OA 申领 →</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /mobile -->
+
+<!-- ===== PC ===== -->
+<div class="device-frame pc" id="view-pc">
+<div class="pc-layout">
+<div class="pc-sidebar">
+  <h2>行政通 · 福利服务</h2>
+  <div class="pc-nav-item active" data-pc="pc-fl-knbz" onclick="pcNav('pc-fl-knbz')">🆘 困难补助</div>
+  <div class="pc-nav-item" data-pc="pc-fl-hxdd" onclick="pcNav('pc-fl-hxdd')">🚩 党建管理</div>
+  <div class="pc-nav-item" data-pc="pc-fl-school" onclick="pcNav('pc-fl-school')">🏫 学堂/补贴</div>
+  <div class="pc-nav-item" data-pc="pc-fl-cflq" onclick="pcNav('pc-fl-cflq')">👔 厂服管理</div>
+</div>
+<div class="pc-main">
+<div class="pc-page active" id="pc-fl-knbz">
+  <h2 style="font-size:20px;margin-bottom:16px">困难补助管理</h2>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table"><thead><tr><th>编号</th><th>申请人</th><th>类型</th><th>金额</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+      <tr><td>KB-001</td><td>张三</td><td>大病医疗</td><td>¥3,000</td><td>05-14</td><td><span class="tag tag-amber">部门审核</span></td><td><button class="btn btn-sm btn-primary" onclick="showToast('✅ 已审核')">审核</button></td></tr>
+      <tr><td>KB-002</td><td>李四</td><td>意外事故</td><td>¥5,000</td><td>05-10</td><td><span class="tag tag-green">已发放</span></td><td><button class="btn btn-sm btn-outline">查看</button></td></tr>
+    </tbody></table>
+  </div>
+</div>
+<div class="pc-page" id="pc-fl-hxdd">
+  <h2 style="font-size:20px;margin-bottom:16px">党建管理</h2>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table"><thead><tr><th>申请人</th><th>类型</th><th>部门</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody><tr><td>张三</td><td>入党申请</td><td>生产一部</td><td>05-14</td><td><span class="tag tag-amber">支部审核</span></td><td><button class="btn btn-sm btn-primary" onclick="showToast('审核')">审核</button></td></tr></tbody></table>
+  </div>
+</div>
+<div class="pc-page" id="pc-fl-school">
+  <h2 style="font-size:20px;margin-bottom:16px">四点半学堂 &amp; 幼儿园补贴</h2>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table"><thead><tr><th>类型</th><th>申请人</th><th>子女</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+      <tr><td>四点半学堂</td><td>张三</td><td>张小明</td><td>05-14</td><td><span class="tag tag-amber">待审核</span></td><td><button class="btn btn-sm btn-primary" onclick="showToast('✅ 已审核')">审核</button></td></tr>
+      <tr><td>幼儿园补贴</td><td>李四</td><td>李小华</td><td>05-12</td><td><span class="tag tag-green">已发放</span></td><td><button class="btn btn-sm btn-outline">查看</button></td></tr>
+    </tbody></table>
+  </div>
+</div>
+<div class="pc-page" id="pc-fl-cflq">
+  <h2 style="font-size:20px;margin-bottom:16px">厂服管理</h2>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table"><thead><tr><th>申请人</th><th>尺码</th><th>件数</th><th>原因</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody><tr><td>张三</td><td>M</td><td>2</td><td>新入职</td><td>05-14</td><td><span class="tag tag-amber">组长审核</span></td><td><button class="btn btn-sm btn-primary" onclick="showToast('✅ 已审核')">审核</button></td></tr></tbody></table>
+  </div>
+</div>
+</div></div></div><!-- /pc -->
+
+<!-- ===== PORTAL ===== -->
+<div class="device-frame portal" id="view-portal">
+<div class="portal-layout">
+<div class="portal-sidebar">
+  <h2>福利服务配置</h2>
+  <div class="portal-nav-item active" data-portal="portal-fl-sz" onclick="portalNav('portal-fl-sz')">⚙️ 福利参数</div>
+</div>
+<div class="portal-main">
+<div class="portal-page active" id="portal-fl-sz">
+  <h2 style="font-size:18px;margin-bottom:16px">福利参数配置</h2>
+  <div class="card">
+    <table class="data-table"><thead><tr><th>参数名称</th><th>当前值</th><th>说明</th><th>操作</th></tr></thead>
+    <tbody>
+      <tr><td>困难补助-大病人群上限</td><td>¥10,000</td><td>大病医疗类单次最高</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+      <tr><td>幼儿园补贴-15号前</td><td>¥75</td><td>当月15号前申请</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+      <tr><td>幼儿园补贴-次月起</td><td>¥150/月</td><td>次月起每月补贴</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+      <tr><td>厂服库存-M码</td><td>56 件</td><td>当前库存</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+</div></div></div><!-- /portal -->
+
+<script>
+function mNav(id) {
+  document.querySelectorAll('.m-page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); document.getElementById('view-mobile').scrollTop = 0; }
+  else showToast('页面未找到: ' + id);
+}
+function pcNav(id) {
+  document.querySelectorAll('.pc-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.pc-nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); document.querySelector(`.pc-nav-item[data-pc="${id}"]`)?.classList.add('active'); document.getElementById('view-pc').scrollTop = 0; }
+}
+function portalNav(id) {
+  document.querySelectorAll('.portal-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.portal-nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); document.querySelector(`.portal-nav-item[data-portal="${id}"]`)?.classList.add('active'); document.getElementById('view-portal').scrollTop = 0; }
+}
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent = msg; t.style.display='block'; setTimeout(()=>t.style.display='none',2000); }
+function switchTab(el) { el.parentElement.querySelectorAll('.m-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); }
+document.querySelectorAll('#viewport-tabs button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#viewport-tabs button').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('.device-frame').forEach(f=>f.classList.remove('active'));
+    document.getElementById('view-'+this.dataset.view).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

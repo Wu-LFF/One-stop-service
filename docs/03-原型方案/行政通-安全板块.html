@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>行政通 · 安全板块 — 三端交互原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #1E6DF2;
+  --primary-dark: #1557C4;
+  --success: #34A853;
+  --warning: #FBBC04;
+  --danger: #EF4444;
+  --bg: #F5F7FA;
+  --card: #FFFFFF;
+  --text: #1F2937;
+  --text2: #6B7280;
+  --border: #E5E7EB;
+  --shadow: 0 2px 12px rgba(0,0,0,.08);
+  --radius: 12px;
+}
+
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #0F172A; color: var(--text); overflow: hidden; height: 100vh; width: 100vw; }
+
+/* ===== Viewport Tabs ===== */
+#viewport-tabs { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; display: flex; background: #1E293B; padding: 4px; gap: 4px; }
+#viewport-tabs button { flex: 1; padding: 6px 0; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: #64748B; transition: all .3s; }
+#viewport-tabs button.active { background: var(--primary); color: #fff; }
+#viewport-tabs button:hover { color: #fff; }
+
+/* ===== Device Frames ===== */
+.device-frame { display: none; margin: 48px auto 0; background: var(--bg); position: relative; overflow-y: auto; }
+.device-frame.active { display: block; }
+.device-frame.mobile { width: 390px; height: calc(100vh - 52px); border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+.device-frame.pc { width: 100%; height: calc(100vh - 52px); }
+.device-frame.portal { width: 100%; height: calc(100vh - 52px); }
+
+/* ===== Mobile Layout ===== */
+.m-header { background: var(--primary); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+.m-header .back { font-size: 20px; cursor: pointer; opacity: .9; min-width: 24px; }
+.m-header .back:hover { opacity: 1; }
+.m-header h1 { font-size: 17px; font-weight: 600; flex: 1; }
+.m-header .m-actions { display: flex; gap: 12px; font-size: 18px; }
+.m-content { padding: 16px; padding-bottom: 80px; }
+
+/* ===== PC Layout ===== */
+.pc-layout { display: flex; height: 100%; }
+.pc-sidebar { width: 220px; background: #1E293B; color: #fff; padding: 16px 0; flex-shrink: 0; overflow-y: auto; }
+.pc-sidebar h2 { font-size: 15px; padding: 0 16px 12px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 8px; color: #94A3B8; font-weight: 600; }
+.pc-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; color: #CBD5E1; font-size: 14px; transition: all .2s; border-left: 3px solid transparent; }
+.pc-nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.pc-nav-item.active { background: rgba(30,109,242,.15); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
+.pc-main { flex: 1; padding: 20px 24px; overflow-y: auto; background: var(--bg); }
+
+/* ===== Portal Layout ===== */
+.portal-layout { display: flex; height: 100%; }
+.portal-sidebar { width: 200px; background: #0F172A; color: #fff; padding: 16px 0; flex-shrink: 0; }
+.portal-sidebar h2 { font-size: 13px; padding: 0 16px 12px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 8px; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.portal-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; color: #94A3B8; font-size: 13px; transition: all .2s; }
+.portal-nav-item:hover { background: rgba(255,255,255,.05); color: #fff; }
+.portal-nav-item.active { background: rgba(30,109,242,.12); color: var(--primary); font-weight: 600; }
+.portal-main { flex: 1; padding: 20px 24px; overflow-y: auto; background: #F1F5F9; }
+
+/* ===== Common Components ===== */
+.card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+.tag-blue { background: #E8F0FE; color: var(--primary); }
+.tag-green { background: #E6F7ED; color: var(--success); }
+.tag-red { background: #FDE8E8; color: var(--danger); }
+.tag-amber { background: #FEF3E2; color: #D97706; }
+.tag-gray { background: #F3F4F6; color: var(--text2); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: all .2s; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-block { display: flex; width: 100%; }
+.btn-sm { padding: 4px 12px; font-size: 12px; border-radius: 6px; }
+.input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: border .2s; background: #fff; }
+.input:focus { border-color: var(--primary); }
+.textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px; font-family: inherit; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 4px; }
+.form-group .required::after { content: ' *'; color: var(--danger); }
+
+/* ===== Grid Menu ===== */
+.menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.menu-card { background: var(--card); border-radius: var(--radius); padding: 20px 12px; text-align: center; box-shadow: var(--shadow); cursor: pointer; transition: all .2s; border: 2px solid transparent; }
+.menu-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+.menu-card .icon { font-size: 32px; margin-bottom: 8px; display: block; }
+.menu-card .name { font-size: 14px; font-weight: 600; }
+.menu-card .desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* ===== Status Badge ===== */
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+.status-dot.green { background: var(--success); }
+.status-dot.red { background: var(--danger); }
+.status-dot.amber { background: var(--warning); }
+.status-dot.gray { background: #CBD5E1; }
+
+/* ===== Table ===== */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { background: #F8FAFC; padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text2); border-bottom: 2px solid var(--border); }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.data-table tr:hover td { background: #F8FAFC; }
+
+/* ===== Progress Steps ===== */
+.progress-steps { display: flex; align-items: flex-start; gap: 0; margin: 16px 0; }
+.progress-step { flex: 1; text-align: center; position: relative; }
+.progress-step .dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 12px; font-weight: 600; }
+.progress-step .dot.done { background: var(--success); color: #fff; }
+.progress-step .dot.active { background: var(--primary); color: #fff; }
+.progress-step .dot.pending { background: #E5E7EB; color: var(--text2); }
+.progress-step .label { font-size: 11px; color: var(--text2); }
+.progress-step::after { content: ''; position: absolute; top: 14px; right: -50%; width: 100%; height: 2px; background: #E5E7EB; z-index: 0; }
+.progress-step:last-child::after { display: none; }
+.progress-step.done::after { background: var(--success); }
+
+/* ===== Patrol Map ===== */
+.patrol-map-sim { background: #E8F0FE; border-radius: var(--radius); height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.patrol-map-sim .route-line { position: absolute; width: 80%; height: 2px; background: var(--primary); top: 50%; left: 10%; transform: translateY(-50%); }
+.patrol-map-sim .route-line::before, .patrol-map-sim .route-line::after { content: ''; position: absolute; width: 12px; height: 12px; border-radius: 50%; top: -5px; }
+.patrol-map-sim .route-line::before { left: 0; background: var(--success); }
+.patrol-map-sim .route-line::after { right: 0; background: #CBD5E1; }
+.patrol-map-sim .pin { position: absolute; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 700; }
+.pin.green { background: var(--success); }
+.pin.red { background: var(--danger); }
+.pin.gray { background: #CBD5E1; }
+
+/* ===== Toast ===== */
+.toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: #1F2937; color: #fff; padding: 10px 24px; border-radius: 10px; font-size: 14px; z-index: 99999; display: none; animation: fadeIn .3s ease; box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ===== Tabs ===== */
+.m-tabs { display: flex; gap: 0; margin-bottom: 12px; background: #F3F4F6; border-radius: 8px; padding: 3px; }
+.m-tab { flex: 1; padding: 6px 0; text-align: center; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all .2s; color: var(--text2); }
+.m-tab.active { background: #fff; color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+/* ===== Jump Page ===== */
+.jump-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 20px; }
+.jump-page .j-icon { font-size: 56px; margin-bottom: 16px; }
+.jump-page h2 { font-size: 20px; margin-bottom: 8px; }
+.jump-page p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; max-width: 300px; }
+
+/* ===== Hide scrollbar ===== */
+.device-frame::-webkit-scrollbar { width: 4px; }
+.device-frame::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
+
+/* ===== Page Transition ===== */
+.m-page, .pc-page, .portal-page { display: none; }
+.m-page.active, .pc-page.active, .portal-page.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Viewport Tabs -->
+<div id="viewport-tabs">
+  <button class="active" data-view="mobile">📱 移动端</button>
+  <button data-view="pc">💻 PC 端</button>
+  <button data-view="portal">🔐 管理门户</button>
+</div>
+
+<!-- ===== MOBILE FRAME ===== -->
+<div class="device-frame mobile active" id="view-mobile">
+
+  <!-- 安全板块首页 -->
+  <div class="m-page active" id="mp-aq-index">
+    <div class="m-header"><h1>安全服务</h1><div class="m-actions">🔔</div></div>
+    <div class="m-content">
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:4px">欢迎使用</div>
+        <div style="font-size:20px;font-weight:700">安全服务</div>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-card" onclick="mNav('mp-aq-wpfx')">
+          <span class="icon">📦</span>
+          <div class="name">物品放行</div>
+          <div class="desc">成品/裁片放行申请</div>
+        </div>
+        <div class="menu-card" onclick="mNav('mp-aq-ryfx')">
+          <span class="icon">🚶</span>
+          <div class="name">人员放行</div>
+          <div class="desc">公出/其他放行申请</div>
+        </div>
+        <div class="menu-card" onclick="mNav('mp-aq-lfyy')">
+          <span class="icon">🤝</span>
+          <div class="name">来访预约</div>
+          <div class="desc">外部人员来访登记</div>
+        </div>
+        <div class="menu-card" onclick="mNav('mp-aq-sspt')">
+          <span class="icon">📷</span>
+          <div class="name">安全随手拍</div>
+          <div class="desc">上报安全隐患</div>
+        </div>
+        <div class="menu-card" onclick="mNav('mp-aq-xgdk')" style="border-color:rgba(30,109,242,.2);background:#F0F6FF">
+          <span class="icon">📍</span>
+          <div class="name">安全巡更</div>
+          <div class="desc" style="color:var(--primary)">安保员专用</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 物品放行（跳转页） -->
+  <div class="m-page" id="mp-aq-wpfx">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-index')">‹</span><h1>物品放行</h1></div>
+    <div class="m-content">
+      <div class="jump-page">
+        <div class="j-icon">📦</div>
+        <h2>物品放行</h2>
+        <p>员工自行提交物品放行流程，当天有效，逾期作废。<br>前往特预约小程序办理。</p>
+        <button class="btn btn-primary btn-block" onclick="showToast('正在跳转特预约小程序...')" style="margin-bottom:12px">前往特预约办理 →</button>
+        <div class="card" style="width:100%;text-align:left;font-size:12px;color:var(--text2)">
+          ⏱ 当天未审批完成并出门 → 流程自动作废
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 人员放行（跳转页） -->
+  <div class="m-page" id="mp-aq-ryfx">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-index')">‹</span><h1>人员放行</h1></div>
+    <div class="m-content">
+      <div class="jump-page">
+        <div class="j-icon">🚶</div>
+        <h2>人员放行</h2>
+        <p>员工自行提交人员放行流程，当天有效，逾期作废。<br>前往特预约小程序办理。</p>
+        <button class="btn btn-primary btn-block" onclick="showToast('正在跳转特预约小程序...')" style="margin-bottom:12px">前往特预约办理 →</button>
+        <div class="card" style="width:100%;text-align:left;font-size:12px;color:var(--text2)">
+          ⏱ 当天未审批完成并出门 → 流程自动作废
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 来访预约（跳转页） -->
+  <div class="m-page" id="mp-aq-lfyy">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-index')">‹</span><h1>来访预约</h1></div>
+    <div class="m-content">
+      <div class="jump-page">
+        <div class="j-icon">🤝</div>
+        <h2>来访预约</h2>
+        <p>外加工厂来访对接，被访人确认后放行。<br>当天有效，逾期作废。</p>
+        <button class="btn btn-primary btn-block" onclick="showToast('正在跳转特预约小程序...')" style="margin-bottom:12px">前往特预约办理 →</button>
+        <div class="card" style="width:100%;text-align:left;font-size:12px;color:var(--text2)">
+          ⏱ 当日未完成到访 → 预约自动作废
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 安全随手拍 — 上报 -->
+  <div class="m-page" id="mp-aq-sspt">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-index')">‹</span><h1>安全隐患上报</h1></div>
+    <div class="m-content">
+      <div class="card">
+        <div class="form-group">
+          <label class="required">隐患分类</label>
+          <select class="input" style="appearance:none;background:#fff">
+            <option>请选择隐患分类</option>
+            <option>消防安全</option>
+            <option>用电安全</option>
+            <option>设备安全</option>
+            <option>环境安全</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="required">现场照片</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#CBD5E1;cursor:pointer;border:2px dashed var(--border)">+</div>
+            <div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px">🏭<span style="font-size:10px;position:relative;top:-12px;left:-4px;color:var(--danger)">×</span></div>
+            <div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px">🔌<span style="font-size:10px;position:relative;top:-12px;left:-4px;color:var(--danger)">×</span></div>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">最多上传3张，支持拍照或相册选择</div>
+        </div>
+        <div class="form-group">
+          <label class="required">隐患描述</label>
+          <textarea class="textarea" placeholder="请描述您发现的安全隐患..." maxlength="500"></textarea>
+          <div style="font-size:11px;color:var(--text2);text-align:right;margin-top:2px">0/500</div>
+        </div>
+        <div class="form-group">
+          <label>所在位置</label>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#F3F4F6;border-radius:8px;font-size:13px">
+            <span>📍</span>
+            <span style="color:var(--text2)">福建省泉州市晋江经济开发区...</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>联系电话</label>
+          <input class="input" value="138****5678">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="showToast('上报成功！已推送至安全管理部')" style="padding:12px;font-size:15px">提交上报</button>
+      <div style="text-align:center;margin-top:10px">
+        <span style="font-size:13px;color:var(--primary);cursor:pointer" onclick="mNav('mp-aq-sspt-list')">查看我的上报记录 →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 安全随手拍 — 我的上报记录 -->
+  <div class="m-page" id="mp-aq-sspt-list">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-index')">‹</span><h1>我的上报</h1></div>
+    <div class="m-content">
+      <div class="m-tabs">
+        <div class="m-tab active" onclick="switchTab(this)">全部</div>
+        <div class="m-tab" onclick="switchTab(this)">待处理</div>
+        <div class="m-tab" onclick="switchTab(this)">已完成</div>
+      </div>
+      <div class="card" style="cursor:pointer" onclick="mNav('mp-aq-sspt-detail')">
+        <div style="display:flex;gap:12px">
+          <div style="width:56px;height:56px;background:#FEE2E2;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px">🏭</div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:600;font-size:14px">消防通道堵塞</span>
+              <span class="tag tag-amber">待处理</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">消防安全 · 05-14 10:30</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">📍 3号厂房东侧楼梯间</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="cursor:pointer" onclick="mNav('mp-aq-sspt-detail')">
+        <div style="display:flex;gap:12px">
+          <div style="width:56px;height:56px;background:#E6F7ED;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px">🔌</div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:600;font-size:14px">插座裸露</span>
+              <span class="tag tag-green">已整改</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">用电安全 · 05-13 14:20</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">📍 食堂一楼取餐区</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 安全随手拍 — 详情 -->
+  <div class="m-page" id="mp-aq-sspt-detail">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-sspt-list')">‹</span><h1>上报详情</h1></div>
+    <div class="m-content">
+      <div class="card">
+        <div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto">
+          <div style="width:100%;height:160px;background:#FEE2E2;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px">🏭</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:16px;font-weight:600">消防通道堵塞</span>
+          <span class="tag tag-amber">待处理</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.8">
+          <div>📂 分类：消防安全</div>
+          <div>📅 上报时间：2026-05-14 10:30</div>
+          <div>📍 位置：3号厂房东侧楼梯间</div>
+          <div>📞 联系电话：138****5678</div>
+        </div>
+        <div style="margin-top:12px;padding:12px;background:#F9FAFB;border-radius:8px;font-size:13px;color:var(--text);line-height:1.6">
+          3号厂房东侧楼梯间堆放大量纸箱，堵塞消防通道，存在安全隐患。
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">处理进度</div>
+        <div class="progress-steps">
+          <div class="progress-step done"><div class="dot done">✓</div><div class="label">已上报</div></div>
+          <div class="progress-step active"><div class="dot active">2</div><div class="label">处理中</div></div>
+          <div class="progress-step"><div class="dot pending">3</div><div class="label">已整改</div></div>
+        </div>
+      </div>
+      <div class="card" style="background:#F0F6FF;border:1px solid #D6E4FB">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">安全管理部回复</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6">
+          已安排人员清理，预计今日内完成整改。
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-top:6px">05-14 11:20</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 安全巡更 — 打卡 -->
+  <div class="m-page" id="mp-aq-xgdk">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-index')">‹</span><h1>安全巡更</h1></div>
+    <div class="m-content">
+      <div class="card" style="background:var(--primary);color:#fff">
+        <div style="font-size:13px;opacity:.8">今日巡更路线</div>
+        <div style="font-size:18px;font-weight:700;margin:4px 0">A线 - 3号厂房</div>
+        <div style="display:flex;gap:16px;margin-top:8px">
+          <div><span style="font-size:20px;font-weight:700">3</span><span style="font-size:12px;opacity:.8"> /6 点位</span></div>
+          <div><span style="font-size:20px;font-weight:700">50%</span><span style="font-size:12px;opacity:.8"> 完成率</span></div>
+        </div>
+      </div>
+      <div class="card" style="text-align:center;padding:24px">
+        <div style="font-size:14px;color:var(--text2);margin-bottom:4px">当前点位</div>
+        <div style="font-size:22px;font-weight:700;margin-bottom:16px">东侧楼梯间 3F</div>
+        <div style="margin-bottom:16px">
+          <div style="width:80px;height:80px;background:#F3F4F6;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto;cursor:pointer;border:2px dashed var(--border)">
+            📷
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">拍照记录（可选）</div>
+        </div>
+        <div class="form-group" style="text-align:left">
+          <label>巡查情况</label>
+          <div style="display:flex;gap:12px">
+            <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid var(--success);border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--success)">
+              <input type="radio" name="patrol-status" checked> ✓ 正常
+            </label>
+            <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:14px;color:var(--text2)">
+              <input type="radio" name="patrol-status"> ✗ 异常
+            </label>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="showToast('✅ 东侧楼梯间 3F 打卡成功！')" style="padding:12px;font-size:16px">📍 打卡</button>
+      </div>
+      <div class="card">
+        <div class="card-title">今日打卡记录</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#F0FFF4;border-radius:8px;font-size:13px">
+            <span>✅</span>
+            <span style="flex:1">北门出入口</span>
+            <span style="color:var(--text2);font-size:12px">08:15</span>
+            <span class="tag tag-green" style="font-size:10px">正常</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#F0FFF4;border-radius:8px;font-size:13px">
+            <span>✅</span>
+            <span style="flex:1">西侧围墙</span>
+            <span style="color:var(--text2);font-size:12px">08:32</span>
+            <span class="tag tag-green" style="font-size:10px">正常</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#FFF5F5;border-radius:8px;font-size:13px">
+            <span>⚠️</span>
+            <span style="flex:1">消防栓 1F</span>
+            <span style="color:var(--text2);font-size:12px">08:45</span>
+            <span class="tag tag-red" style="font-size:10px">异常</span>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:8px">
+          <span style="font-size:13px;color:var(--primary);cursor:pointer" onclick="mNav('mp-aq-xgdk-list')">查看全部记录 →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 安全巡更 — 记录 -->
+  <div class="m-page" id="mp-aq-xgdk-list">
+    <div class="m-header"><span class="back" onclick="mNav('mp-aq-xgdk')">‹</span><h1>巡更记录</h1></div>
+    <div class="m-content">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1;text-align:center;padding:10px;background:var(--card);border-radius:8px;box-shadow:var(--shadow)">
+          <div style="font-size:20px;font-weight:700">6</div>
+          <div style="font-size:11px;color:var(--text2)">应巡点位</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:10px;background:var(--card);border-radius:8px;box-shadow:var(--shadow)">
+          <div style="font-size:20px;font-weight:700;color:var(--success)">5</div>
+          <div style="font-size:11px;color:var(--text2)">已巡点位</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:10px;background:var(--card);border-radius:8px;box-shadow:var(--shadow)">
+          <div style="font-size:20px;font-weight:700;color:var(--danger)">1</div>
+          <div style="font-size:11px;color:var(--text2)">异常点位</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">明细</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span class="status-dot green"></span><span style="flex:1">北门出入口</span><span style="color:var(--text2)">08:15</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span class="status-dot green"></span><span style="flex:1">西侧围墙</span><span style="color:var(--text2)">08:32</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span class="status-dot red"></span><span style="flex:1">消防栓 1F</span><span style="color:var(--text2)">08:45</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span class="status-dot green"></span><span style="flex:1">东侧楼梯间 1F</span><span style="color:var(--text2)">09:02</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px">
+            <span class="status-dot green"></span><span style="flex:1">东侧楼梯间 2F</span><span style="color:var(--text2)">09:18</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /mobile -->
+
+<!-- ===== PC FRAME ===== -->
+<div class="device-frame pc" id="view-pc">
+  <div class="pc-layout">
+    <div class="pc-sidebar">
+      <h2>行政通 · 安全板块</h2>
+      <div class="pc-nav-item active" data-pc="pc-aq-sspt" onclick="pcNav('pc-aq-sspt')">📷 随手拍管理</div>
+      <div class="pc-nav-item" data-pc="pc-aq-xgdk" onclick="pcNav('pc-aq-xgdk')">📍 巡更管理</div>
+    </div>
+    <div class="pc-main">
+
+      <!-- PC: 随手拍管理列表 -->
+      <div class="pc-page active" id="pc-aq-sspt">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div><h2 style="font-size:20px;margin-bottom:4px">安全隐患随手拍</h2><span style="font-size:13px;color:var(--text2)">共 12 条记录</span></div>
+          <button class="btn btn-sm btn-outline" onclick="showToast('已导出 Excel')">📥 导出</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <select class="input" style="width:auto;padding:6px 12px;font-size:12px">
+            <option>全部状态</option><option>待处理</option><option>处理中</option><option>已整改</option>
+          </select>
+          <select class="input" style="width:auto;padding:6px 12px;font-size:12px">
+            <option>全部分类</option><option>消防安全</option><option>用电安全</option><option>设备安全</option>
+          </select>
+          <input class="input" style="width:200px;padding:6px 12px;font-size:12px" placeholder="搜索关键词...">
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="data-table">
+            <thead><tr><th>编号</th><th>隐患分类</th><th>上报人</th><th>位置</th><th>上报时间</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>AQ-001</td><td>消防安全</td><td>张三</td><td>3号厂房东侧楼梯间</td><td>05-14 10:30</td><td><span class="tag tag-amber">待处理</span></td><td><button class="btn btn-sm btn-primary" onclick="pcNav('pc-aq-sspt-detail')">处理</button></td></tr>
+              <tr><td>AQ-002</td><td>用电安全</td><td>李四</td><td>食堂一楼取餐区</td><td>05-13 14:20</td><td><span class="tag tag-green">已整改</span></td><td><button class="btn btn-sm btn-outline" onclick="showToast('查看详情')">查看</button></td></tr>
+              <tr><td>AQ-003</td><td>设备安全</td><td>王五</td><td>2号厂房冲压区</td><td>05-12 09:15</td><td><span class="tag tag-blue">处理中</span></td><td><button class="btn btn-sm btn-outline" onclick="showToast('查看详情')">查看</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PC: 随手拍处理详情 -->
+      <div class="pc-page" id="pc-aq-sspt-detail">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <span style="cursor:pointer;font-size:18px" onclick="pcNav('pc-aq-sspt')">‹ 返回列表</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-title">上报信息</div>
+            <div style="font-size:13px;line-height:2">
+              <div><strong>编号：</strong>AQ-001</div>
+              <div><strong>分类：</strong>消防安全</div>
+              <div><strong>上报人：</strong>张三（138****5678）</div>
+              <div><strong>时间：</strong>2026-05-14 10:30</div>
+              <div><strong>位置：</strong>3号厂房东侧楼梯间</div>
+              <div><strong>描述：</strong>3号厂房东侧楼梯间堆放大量纸箱，堵塞消防通道</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">处理进度</div>
+            <div class="progress-steps">
+              <div class="progress-step done"><div class="dot done">✓</div><div class="label">已上报</div></div>
+              <div class="progress-step active"><div class="dot active">2</div><div class="label">处理中</div></div>
+              <div class="progress-step"><div class="dot pending">3</div><div class="label">已整改</div></div>
+            </div>
+            <div style="margin-top:16px">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">整改回复</label>
+              <textarea class="textarea" placeholder="填写整改说明..." style="min-height:60px">已安排人员清理纸箱，现场已整改完成。</textarea>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <button class="btn btn-primary" onclick="showToast('✅ 已确认受理')">受理</button>
+              <button class="btn btn-success" onclick="showToast('✅ 已标记为整改完成')">处理完成</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PC: 巡更管理 -->
+      <div class="pc-page" id="pc-aq-xgdk">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div><h2 style="font-size:20px;margin-bottom:4px">安全巡更记录</h2><span style="font-size:13px;color:var(--text2)">今日 · A线 3号厂房</span></div>
+          <div style="display:flex;gap:8px">
+            <select class="input" style="width:auto;padding:6px 12px;font-size:12px"><option>今日</option><option>昨日</option><option>本周</option></select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+          <div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;">6</div><div style="font-size:12px;color:var(--text2)">应巡点位</div></div>
+          <div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--success)">5</div><div style="font-size:12px;color:var(--text2)">已巡点位</div></div>
+          <div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--primary)">83%</div><div style="font-size:12px;color:var(--text2)">完成率</div></div>
+          <div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--danger)">1</div><div style="font-size:12px;color:var(--text2)">异常数</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-title">点位列表</div>
+            <table class="data-table">
+              <thead><tr><th>点位</th><th>计划时间</th><th>实际打卡</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td>北门出入口</td><td>08:00-08:15</td><td>08:15</td><td><span class="tag tag-green">正常</span></td></tr>
+                <tr><td>西侧围墙</td><td>08:15-08:30</td><td>08:32</td><td><span class="tag tag-green">正常</span></td></tr>
+                <tr><td>消防栓 1F</td><td>08:30-08:45</td><td>08:45</td><td><span class="tag tag-red">异常</span></td></tr>
+                <tr><td>东侧楼梯间 1F</td><td>08:45-09:00</td><td>09:02</td><td><span class="tag tag-green">正常</span></td></tr>
+                <tr><td>东侧楼梯间 2F</td><td>09:00-09:15</td><td>09:18</td><td><span class="tag tag-green">正常</span></td></tr>
+                <tr><td>东侧楼梯间 3F</td><td>09:15-09:30</td><td>—</td><td><span class="tag tag-gray">未巡</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">路线视图</div>
+            <div class="patrol-map-sim">
+              <div class="route-line"></div>
+              <div class="pin green" style="left:10%;top:30%">北</div>
+              <div class="pin green" style="left:25%;top:55%">西</div>
+              <div class="pin red" style="left:40%;top:35%">消</div>
+              <div class="pin green" style="left:55%;top:60%">东1</div>
+              <div class="pin green" style="left:70%;top:40%">东2</div>
+              <div class="pin gray" style="left:85%;top:55%">东3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /pc -->
+
+<!-- ===== PORTAL FRAME ===== -->
+<div class="device-frame portal" id="view-portal">
+  <div class="portal-layout">
+    <div class="portal-sidebar">
+      <h2>安全板块配置</h2>
+      <div class="portal-nav-item active" data-portal="portal-aq-xgdk" onclick="portalNav('portal-aq-xgdk')">📍 巡更配置</div>
+      <div class="portal-nav-item" data-portal="portal-aq-sspt" onclick="portalNav('portal-aq-sspt')">📷 随手拍配置</div>
+    </div>
+    <div class="portal-main">
+
+      <!-- Portal: 巡更配置 -->
+      <div class="portal-page active" id="portal-aq-xgdk">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h2 style="font-size:18px">巡更路线与点位配置</h2>
+          <button class="btn btn-primary btn-sm" onclick="showToast('新增路线')">+ 新增路线</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-title">巡查路线</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#F0F6FF;border-radius:6px;font-size:13px">
+                <span><strong>A线</strong> - 3号厂房</span>
+                <span style="color:var(--primary);font-size:12px;cursor:pointer">编辑</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fff;border-radius:6px;font-size:13px;border:1px solid var(--border)">
+                <span><strong>B线</strong> - 2号厂房</span>
+                <span style="color:var(--primary);font-size:12px;cursor:pointer">编辑</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fff;border-radius:6px;font-size:13px;border:1px solid var(--border)">
+                <span><strong>C线</strong> - 生活区</span>
+                <span style="color:var(--primary);font-size:12px;cursor:pointer">编辑</span>
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">安保员分配</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span class="tag tag-blue">A线 → 陈强</span>
+                <span class="tag tag-blue">B线 → 刘明</span>
+                <span class="tag tag-blue">C线 → 赵刚</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">点位配置（A线）</div>
+            <table class="data-table">
+              <thead><tr><th>排序</th><th>点位名称</th><th>GPS坐标</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>北门出入口</td><td style="font-size:11px">24.813,118.568</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+                <tr><td>2</td><td>西侧围墙</td><td style="font-size:11px">24.812,118.565</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+                <tr><td>3</td><td>消防栓 1F</td><td style="font-size:11px">24.811,118.570</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+                <tr><td>4</td><td>东侧楼梯间1F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+                <tr><td>5</td><td>东侧楼梯间2F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+                <tr><td>6</td><td>东侧楼梯间3F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+              </tbody>
+            </table>
+            <div style="margin-top:8px">
+              <button class="btn btn-sm btn-outline" onclick="showToast('新增点位')">+ 新增点位</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portal: 随手拍配置 -->
+      <div class="portal-page" id="portal-aq-sspt">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h2 style="font-size:18px">随手拍分类配置</h2>
+          <button class="btn btn-primary btn-sm" onclick="showToast('新增分类')">+ 新增分类</button>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead><tr><th>分类</th><th>图标</th><th>负责人/部门</th><th>处理时限</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>消防安全</td><td>🔥</td><td>安全管理部</td><td>24小时</td><td><span class="tag tag-green">启用</span></td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+              <tr><td>用电安全</td><td>⚡</td><td>工程部</td><td>48小时</td><td><span class="tag tag-green">启用</span></td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+              <tr><td>设备安全</td><td>⚙️</td><td>设备部</td><td>48小时</td><td><span class="tag tag-green">启用</span></td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+              <tr><td>环境安全</td><td>🌿</td><td>行政部</td><td>72小时</td><td><span class="tag tag-green">启用</span></td><td><span style="font-size:12px;color:var(--primary);cursor:pointer">编辑</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /portal -->
+
+<script>
+// ===== Navigation Functions =====
+
+// Mobile navigation
+function mNav(pageId) {
+  document.querySelectorAll('.m-page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active');
+    document.getElementById('view-mobile').scrollTop = 0;
+  } else {
+    showToast('页面未找到: ' + pageId);
+  }
+}
+
+// PC navigation
+function pcNav(pageId) {
+  document.querySelectorAll('.pc-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.pc-nav-item').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active');
+    document.querySelector(`.pc-nav-item[data-pc="${pageId}"]`)?.classList.add('active');
+    document.getElementById('view-pc').scrollTop = 0;
+  } else {
+    showToast('页面未找到: ' + pageId);
+  }
+}
+
+// Portal navigation
+function portalNav(pageId) {
+  document.querySelectorAll('.portal-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.portal-nav-item').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active');
+    document.querySelector(`.portal-nav-item[data-portal="${pageId}"]`)?.classList.add('active');
+    document.getElementById('view-portal').scrollTop = 0;
+  } else {
+    showToast('页面未找到: ' + pageId);
+  }
+}
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2000);
+}
+
+// Tab switch (mobile)
+function switchTab(el) {
+  const parent = el.parentElement;
+  parent.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Viewport tabs
+document.querySelectorAll('#viewport-tabs button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#viewport-tabs button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const view = this.dataset.view;
+    document.querySelectorAll('.device-frame').forEach(f => f.classList.remove('active'));
+    document.getElementById('view-' + view).classList.add('active');
+  });
+});
+
+console.log('✅ 行政通·安全板块原型已加载');
+console.log('📱 移动端页面: mp-aq-index, mp-aq-wpfx, mp-aq-ryfx, mp-aq-lfyy, mp-aq-sspt, mp-aq-sspt-list, mp-aq-sspt-detail, mp-aq-xgdk, mp-aq-xgdk-list');
+console.log('💻 PC端页面: pc-aq-sspt, pc-aq-sspt-detail, pc-aq-xgdk');
+console.log('🔐 门户页面: portal-aq-xgdk, portal-aq-sspt');
+</script>
+</body>
+</html>
