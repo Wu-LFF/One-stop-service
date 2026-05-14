@@ -1,3 +1,4 @@
 - [Project Overview](memory/project-overview.md) — 一站式服务平台项目概览、模块、阶段规划
 - [About User](memory/about-user.md) — 吴龙飞，项目负责人/需求方
 - [Skills Directory](memory/feedback-skills-dir.md) — 项目初始化必须包含 .claude/skills/ 目录
+- [Organize Docs](memory/feedback-organize-docs.md) — 新增文档需用 organize-docs skill 归类
