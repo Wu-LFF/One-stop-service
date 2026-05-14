@@ -9,6 +9,7 @@
 - 功能实现前先阅读 `docs/requirements.md` 和 `docs/architecture.md`
 - 修改代码后同步更新相关 `docs/` 文档
 - 遵循 `docs/architecture.md` 中定义的技术栈和架构约束
+- 涉及新增工作方法/流程/规范时，同步更新 `docs/项目工作法.md`（项目工作法文档）
 - 提交信息使用中文，简洁描述变更原因
 
 ## 工作流
