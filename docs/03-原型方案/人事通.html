@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人事通 — 原型方案</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --p: #1E6DF2; --pd: #1557C4; --pl: #E8F0FE;
+  --xp: #E60012; --xpd: #CC0010; --xpl: #FFE8EA;
+  --s: #34A853; --w: #FBBC04; --d: #EA4335; --di: #FEE8E8;
+  --bg: #F5F7FA; --cd: #FFF; --t1: #1F2937; --t2: #6B7280;
+  --bd: #E5E7EB; --sd: 0 2px 12px rgba(0,0,0,.08);
+  --r: 12px; --r-sm: 8px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --trans: all .3s cubic-bezier(.4,0,.2,1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: #E8ECF1; color: var(--t1); overflow: hidden; height: 100vh; }
+
+/* View Switcher */
+.vs { position: fixed; top: 0; left: 0; right: 0; z-index: 999; display: flex; align-items: center; justify-content: center; gap: 4px; background: #1F2937; padding: 8px 16px; height: 48px; }
+.vs button { padding: 6px 16px; border: none; background: transparent; color: #9CA3AF; font-size: 13px; cursor: pointer; border-radius: 6px; font-family: var(--font); transition: var(--trans); }
+.vs button:hover { color: #fff; background: rgba(255,255,255,.1); }
+.vs button.active { color: #fff; background: var(--p); }
+.vs .vs-title { color: #fff; font-size: 14px; font-weight: 600; margin-right: auto; }
+.vs .vs-share { background: var(--s); color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 12px; border: none; cursor: pointer; font-family: var(--font); margin-left: auto; transition: var(--trans); }
+.vs .vs-share:hover { opacity: .85; }
+
+/* View Container */
+.view { display: none; width: 100%; height: calc(100vh - 48px); margin-top: 48px; position: relative; }
+
+/* ===== MOBILE VIEW ===== */
+#mobileView { display: none; justify-content: center; align-items: center; background: #E8ECF1; padding: 20px; }
+#mobileView .phone { width: 380px; height: 780px; background: var(--bg); border-radius: 32px; box-shadow: 0 20px 60px rgba(0,0,0,.2), 0 0 0 1px rgba(0,0,0,.05); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.phone .status-bar { height: 44px; background: var(--p); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #fff; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.phone .app-header { height: 48px; background: var(--p); display: flex; align-items: center; padding: 0 16px; color: #fff; flex-shrink: 0; position: relative; }
+.phone .app-header .back { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; transition: var(--trans); font-size: 18px; border: none; color: #fff; background: transparent; }
+.phone .app-header .back:hover { background: rgba(255,255,255,.15); }
+.phone .app-header .title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; }
+.phone .app-header .right { width: 36px; }
+.phone .page-content { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
+.phone .page-content::-webkit-scrollbar { width: 0; }
+
+/* Mobile Pages */
+.m-page { display: none; padding: 16px; animation: mFadeIn .35s ease; }
+.m-page.active { display: block; }
+@keyframes mFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mSlideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes mSlideOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-40px); } }
+
+.phone .bottom-nav { height: 56px; background: #fff; border-top: 1px solid var(--bd); display: flex; flex-shrink: 0; width: 100%; box-sizing: border-box; }
+.phone .bottom-nav .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--t2); cursor: pointer; transition: var(--trans); gap: 2px; border: none; background: none; font-family: var(--font); }
+.phone .bottom-nav .tab i { font-size: 20px; transition: var(--trans); }
+.phone .bottom-nav .tab.active { color: var(--p); }
+.phone .bottom-nav .tab:hover { color: var(--p); }
+
+/* ===== PC VIEW ===== */
+#pcView { display: none; }
+.pc-layout { display: flex; height: 100%; background: var(--bg); }
+.pc-sidebar { width: 240px; background: #fff; border-right: 1px solid var(--bd); display: flex; flex-direction: column; flex-shrink: 0; min-width: 160px; }
+.pc-resizer { width: 6px; background: transparent; cursor: col-resize; flex-shrink: 0; transition: background .2s; position: relative; z-index: 10; }
+.pc-resizer:hover,
+.pc-resizer.active { background: var(--p); }
+.pc-resizer::after { content: ""; position: absolute; inset: 0 -4px; }
+.pc-sidebar .logo { padding: 20px 20px 16px; font-size: 18px; font-weight: 700; color: var(--p); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--bd); }
+.pc-sidebar .logo i { font-size: 24px; }
+.pc-sidebar .nav-group { padding: 12px 0; }
+.pc-sidebar .nav-group .g-label { padding: 4px 20px 8px; font-size: 11px; color: var(--t2); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+.pc-sidebar .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; color: var(--t1); font-size: 14px; transition: var(--trans); border: none; background: none; width: 100%; text-align: left; font-family: var(--font); }
+.pc-sidebar .nav-item i { width: 20px; text-align: center; color: var(--t2); font-size: 16px; transition: var(--trans); }
+.pc-sidebar .nav-item:hover { background: var(--pl); color: var(--p); }
+.pc-sidebar .nav-item:hover i { color: var(--p); }
+.pc-sidebar .nav-item.active { background: var(--pl); color: var(--p); font-weight: 600; }
+.pc-sidebar .nav-item.active i { color: var(--p); }
+.pc-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.pc-header { height: 60px; background: #fff; border-bottom: 1px solid var(--bd); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+.pc-header .bc { font-size: 14px; color: var(--t2); }
+.pc-header .bc span { color: var(--t1); font-weight: 500; }
+.pc-header .user { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.pc-header .user .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--pl); color: var(--p); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.pc-content { flex: 1; overflow-y: auto; padding: 24px; position: relative; }
+.pc-content::-webkit-scrollbar { width: 6px; }
+.pc-content::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+/* ===== PORTAL VIEW ===== */
+#portalView { display: none; }
+.portal-layout { display: flex; height: 100%; }
+.portal-sidebar { width: 260px; background: linear-gradient(180deg, #1F2937 0%, #111827 100%); display: flex; flex-direction: column; flex-shrink: 0; min-width: 180px; }
+.portal-resizer { width: 6px; background: transparent; cursor: col-resize; flex-shrink: 0; transition: background .2s; position: relative; z-index: 10; }
+.portal-resizer:hover, .portal-resizer.active { background: #60A5FA; }
+.portal-resizer::after { content: ""; position: absolute; inset: 0 -4px; }
+.portal-sidebar .logo { padding: 20px 20px 16px; font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.portal-sidebar .logo i { font-size: 22px; color: #60A5FA; }
+.portal-sidebar .nav-group { padding: 16px 0; }
+.portal-sidebar .nav-group .g-label { padding: 4px 20px 8px; font-size: 11px; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+.portal-sidebar .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; cursor: pointer; color: rgba(255,255,255,.7); font-size: 14px; transition: var(--trans); border: none; background: none; width: 100%; text-align: left; font-family: var(--font); }
+.portal-sidebar .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+.portal-sidebar .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+.portal-sidebar .nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-right: 3px solid #60A5FA; font-weight: 500; }
+.portal-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #F0F2F5; min-width: 400px; }
+.portal-header { height: 60px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.06); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; z-index: 10; }
+.portal-header .search-box { display: flex; align-items: center; gap: 8px; background: var(--bg); padding: 8px 16px; border-radius: 8px; width: 320px; }
+.portal-header .search-box i { color: var(--t2); }
+.portal-header .search-box input { border: none; background: none; outline: none; font-size: 14px; width: 100%; font-family: var(--font); }
+.portal-header .user { display: flex; align-items: center; gap: 16px; }
+.portal-header .user .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--p); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.portal-content { flex: 1; overflow-y: auto; padding: 24px; }
+.portal-content::-webkit-scrollbar { width: 6px; }
+.portal-content::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+/* Shared Components */
+.card { background: var(--cd); border-radius: var(--r); padding: 20px; box-shadow: var(--sd); transition: var(--trans); }
+.card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+.badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.badge-p0 { background: var(--di); color: var(--d); }
+.badge-p1 { background: #FEF3C7; color: #D97706; }
+.badge-s { background: #DCFCE7; color: #16A34A; }
+.badge-info { background: var(--pl); color: var(--p); }
+.btn { padding: 10px 24px; border: none; border-radius: var(--r-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--trans); font-family: var(--font); }
+.btn-p { background: var(--p); color: #fff; }
+.btn-p:hover { background: var(--pd); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,109,242,.3); }
+.btn-s { background: var(--s); color: #fff; }
+.btn-s:hover { opacity: .9; transform: translateY(-1px); }
+.btn-outline { background: transparent; border: 1px solid var(--bd); color: var(--t1); }
+.btn-outline:hover { border-color: var(--p); color: var(--p); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-block { width: 100%; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: var(--t2); margin-bottom: 6px; font-weight: 500; }
+.form-control { width: 100%; padding: 10px 14px; border: 1px solid var(--bd); border-radius: var(--r-sm); font-size: 14px; outline: none; transition: var(--trans); font-family: var(--font); background: #FFF; }
+.form-control:focus { border-color: var(--p); box-shadow: 0 0 0 3px rgba(30,109,242,.12); }
+select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+.stat-card { text-align: center; padding: 16px; }
+.stat-card .num { font-size: 28px; font-weight: 700; color: var(--t1); }
+.stat-card .label { font-size: 13px; color: var(--t2); margin-top: 4px; }
+
+/* Calendar */
+.calendar { width: 100%; }
+.calendar .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.calendar .cal-header h3 { font-size: 16px; font-weight: 600; }
+.calendar .weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: 12px; color: var(--t2); margin-bottom: 8px; }
+.calendar .days { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.calendar .days .day { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; border-radius: 6px; cursor: pointer; transition: var(--trans); padding: 6px 2px; min-height: 44px; position: relative; }
+.calendar .days .day:hover { opacity: .8; transform: scale(1.05); }
+.calendar .days .day.att-end { background: #DCFCE7; color: #16A34A; }
+.calendar .days .day.att-absent { background: var(--di); color: var(--d); }
+.calendar .days .day.att-leave { background: #FEF3C7; color: #D97706; }
+.calendar .days .day.att-late { background: #FFEDD5; color: #EA580C; }
+.calendar .days .day.att-business { background: #E8F0FE; color: var(--p); }
+.calendar .days .day.att-weekend { background: #F3F4F6; color: #9CA3AF; }
+.calendar .days .day.today { border: 2px solid var(--p); font-weight: 700; box-shadow: 0 0 0 3px rgba(30,109,242,.15); }
+.calendar .days .day.selected { outline: 2px solid var(--p); outline-offset: -2px; box-shadow: 0 0 0 3px rgba(30,109,242,.2); transform: scale(1.05); background: var(--pl) !important; z-index: 2; position: relative; }
+
+
+
+/* Calendar - small status dot */
+.calendar .days .day .status-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; margin-top: 2px; }
+.calendar .days .day .day-num { font-size: 15px; font-weight: 600; line-height: 1.2; }
+.calendar .days .day.att-end { background: #ECFDF5; color: #065F46; }
+.calendar .days .day.att-end .status-dot { background: #34A853; }
+.calendar .days .day.att-absent { background: #FEF2F2; color: #991B1B; }
+.calendar .days .day.att-absent .status-dot { background: #EA4335; }
+.calendar .days .day.att-leave { background: #FFFBEB; color: #92400E; }
+.calendar .days .day.att-leave .status-dot { background: #FBBC04; }
+.calendar .days .day.att-late { background: #FFF7ED; color: #9A3412; }
+.calendar .days .day.att-late .status-dot { background: #D97706; }
+.calendar .days .day.att-business { background: #EFF6FF; color: #1E40AF; }
+.calendar .days .day.att-business .status-dot { background: #1E6DF2; }
+.calendar .days .day.att-weekend { background: #F9FAFB; color: #9CA3AF; }
+.calendar .days .day.att-weekend .status-dot { background: #D1D5DB; }
+
+/* Checklist */
+.checklist { display: flex; flex-direction: column; gap: 8px; }
+.checklist .item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg); border-radius: var(--r-sm); transition: var(--trans); }
+.checklist .item.done { opacity: .6; }
+.checklist .item.done .step-num { background: var(--s); }
+.checklist .item .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.checklist .item .step-info { flex: 1; }
+.checklist .item .step-info .name { font-size: 14px; font-weight: 500; }
+.checklist .item .step-info .desc { font-size: 12px; color: var(--t2); margin-top: 2px; }
+.checklist .item .step-status { font-size: 12px; font-weight: 500; }
+
+/* Todo List */
+.todo-list { display: flex; flex-direction: column; gap: 8px; }
+.todo-list .todo-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg); border-radius: var(--r-sm); cursor: pointer; transition: var(--trans); }
+.todo-list .todo-item:hover { background: var(--pl); }
+.todo-list .todo-item .todo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* Quick Nav */
+.quick-nav { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.quick-nav .qn-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; background: var(--bg); border-radius: var(--r); cursor: pointer; transition: var(--trans); border: none; font-family: var(--font); color: var(--t1); }
+.quick-nav .qn-item:hover { background: var(--pl); transform: translateY(-2px); }
+.quick-nav .qn-item i { font-size: 24px; color: var(--p); }
+.quick-nav .qn-item span { font-size: 12px; }
+
+/* Notification */
+.notif-list { display: flex; flex-direction: column; gap: 8px; }
+.notif-item { display: flex; gap: 12px; padding: 12px 16px; background: var(--bg); border-radius: var(--r-sm); cursor: pointer; transition: var(--trans); }
+.notif-item:hover { background: var(--pl); }
+.notif-item .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--d); flex-shrink: 0; margin-top: 4px; }
+.notif-item .notif-body { flex: 1; }
+.notif-item .notif-body .title { font-size: 14px; font-weight: 500; }
+.notif-item .notif-body .desc { font-size: 12px; color: var(--t2); margin-top: 2px; }
+.notif-item .notif-body .time { font-size: 11px; color: var(--t2); margin-top: 4px; }
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+/* Portal Dashboard */
+.db-card { background: #fff; border-radius: var(--r); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: var(--trans); }
+.db-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+.db-card .db-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.db-card .db-header h3 { font-size: 16px; font-weight: 600; }
+.db-card .db-header a { font-size: 13px; color: var(--p); text-decoration: none; cursor: pointer; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+table th { text-align: left; padding: 10px 12px; font-weight: 600; color: var(--t2); font-size: 12px; border-bottom: 1px solid var(--bd); text-transform: uppercase; letter-spacing: .3px; }
+table td { padding: 12px 12px; border-bottom: 1px solid var(--bd); }
+table tr:hover td { background: #FAFBFC; }
+table .actions { display: flex; gap: 6px; }
+table .actions button { padding: 4px 10px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: var(--trans); font-family: var(--font); }
+
+/* Portal Dropdowns & Modals */
+.bell-wrap { position: relative; cursor: pointer; padding: 6px; border-radius: 8px; transition: var(--trans); }
+.bell-wrap:hover { background: var(--bg); }
+.bell-wrap .bell-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--d); border-radius: 50%; border: 2px solid #fff; }
+.user-dropdown { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: var(--trans); position: relative; }
+.user-dropdown:hover { background: var(--bg); }
+.dropdown-panel { position: absolute; top: 56px; right: 80px; width: 360px; background: #fff; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.15); border: 1px solid var(--bd); z-index: 100; display: none; opacity: 0; transform: translateY(-8px); transition: all .25s ease; }
+.dropdown-panel.show { display: block; opacity: 1; transform: translateY(0); }
+.dropdown-panel .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--bd); font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+.dropdown-panel .panel-body { max-height: 360px; overflow-y: auto; }
+.dropdown-panel .notif-row { display: flex; gap: 12px; padding: 14px 20px; cursor: pointer; transition: var(--trans); border-bottom: 1px solid #F3F4F6; }
+.dropdown-panel .notif-row:hover { background: var(--pl); }
+.dropdown-panel .notif-row .n-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p); flex-shrink: 0; margin-top: 4px; }
+.dropdown-panel .notif-row .n-info { flex: 1; }
+.dropdown-panel .notif-row .n-info .n-title { font-size: 14px; font-weight: 500; }
+.dropdown-panel .notif-row .n-info .n-desc { font-size: 12px; color: var(--t2); margin-top: 2px; }
+.dropdown-panel .notif-row .n-info .n-time { font-size: 11px; color: var(--t2); margin-top: 4px; }
+.dropdown-menu { position: absolute; top: 56px; right: 16px; width: 180px; background: #fff; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.15); border: 1px solid var(--bd); z-index: 100; display: none; opacity: 0; transform: translateY(-8px); transition: all .25s ease; overflow: hidden; }
+.dropdown-menu.show { display: block; opacity: 1; transform: translateY(0); }
+.dropdown-menu .menu-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; transition: var(--trans); border: none; background: none; width: 100%; font-size: 14px; font-family: var(--font); color: var(--t1); text-align: left; }
+.dropdown-menu .menu-item:hover { background: var(--bg); }
+.dropdown-menu .menu-item i { width: 18px; color: var(--t2); }
+.dropdown-menu .menu-divider { height: 1px; background: var(--bd); margin: 4px 0; }
+.dropdown-menu .menu-item.danger { color: var(--d); }
+.dropdown-menu .menu-item.danger i { color: var(--d); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: modalFadeIn .2s ease; }
+.modal-overlay.show { display: flex; }
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-content { background: #fff; border-radius: 16px; width: 560px; max-width: 90vw; max-height: 80vh; box-shadow: 0 20px 60px rgba(0,0,0,.2); animation: modalSlideIn .25s ease; overflow: hidden; display: flex; flex-direction: column; }
+@keyframes modalSlideIn { from { opacity: 0; transform: translateY(20px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal-content .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--bd); }
+.modal-content .modal-header h3 { font-size: 17px; font-weight: 600; }
+.modal-content .modal-header button { width: 32px; height: 32px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; font-size: 18px; transition: var(--trans); display: flex; align-items: center; justify-content: center; color: var(--t2); }
+.modal-content .modal-header button:hover { background: var(--di); color: var(--d); }
+.modal-content .modal-body { padding: 24px; overflow-y: auto; }
+.modal-content .modal-footer { padding: 16px 24px; border-top: 1px solid var(--bd); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Clickable Table Row */
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td { background: var(--pl) !important; }
+
+/* Detail Grid in Modal */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.detail-grid .field { }
+.detail-grid .field label { display: block; font-size: 12px; color: var(--t2); margin-bottom: 4px; }
+.detail-grid .field .value { font-size: 15px; font-weight: 500; }
+.detail-grid .field.full { grid-column: 1 / -1; }
+
+/* Page Transitions */
+.pc-page { display: none; animation: pcIn .4s ease; }
+.pc-page.active { display: block; }
+@keyframes pcIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.portal-page { display: none; animation: portalIn .4s ease; }
+.portal-page.active { display: block; }
+@keyframes portalIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Salary Card */
+.salary-card .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+.salary-card .row.total { border-top: 2px solid var(--t1); margin-top: 8px; padding-top: 12px; font-weight: 700; font-size: 16px; color: var(--p); }
+.salary-card .row.sub { color: var(--t2); }
+.salary-card .row.sub-total { font-weight: 600; border-top: 1px solid var(--bd); padding-top: 8px; margin-top: 4px; }
+
+/* ===== AI Assistant ===== */
+
+/* Mobile AI */
+.ai-fab-wrap { position: absolute; bottom: 76px; right: 12px; z-index: 100; }
+.ai-fab-m { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: none; box-shadow: 0 4px 16px rgba(102,126,234,.4); transition: all .3s ease; position: relative; }
+.ai-fab-m:hover { transform: scale(1.1); }
+.ai-fab-m .ai-pulse { position: absolute; inset: -3px; border-radius: 50%; border: 2px solid rgba(102,126,234,.4); animation: aiPulse 2s ease-out infinite; }
+@keyframes aiPulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+
+.ai-chat-m { position: absolute; bottom: 56px; left: 8px; right: 8px; height: 420px; background: #fff; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,.2); display: flex; flex-direction: column; z-index: 99; opacity: 0; transform: translateY(16px) scale(.95); pointer-events: none; transition: all .3s cubic-bezier(.4,0,.2,1); overflow: hidden; }
+.ai-chat-m.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+
+/* PC AI */
+.ai-fab-wrap-pc { position: absolute; bottom: 28px; right: 32px; z-index: 100; }
+.ai-fab-pc { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; border: none; box-shadow: 0 4px 16px rgba(102,126,234,.4); transition: all .3s ease; position: relative; }
+.ai-fab-pc:hover { transform: scale(1.1); }
+.ai-fab-pc .ai-pulse { position: absolute; inset: -3px; border-radius: 50%; border: 2px solid rgba(102,126,234,.4); animation: aiPulse 2s ease-out infinite; }
+
+.ai-chat-pc { position: absolute; bottom: 92px; right: 24px; width: 400px; height: 520px; background: #fff; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,.15); display: flex; flex-direction: column; z-index: 99; opacity: 0; transform: translateY(16px) scale(.95); pointer-events: none; transition: all .3s cubic-bezier(.4,0,.2,1); overflow: hidden; }
+.ai-chat-pc.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+
+/* Shared chat styles */
+.ai-chat-header { background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: #fff; padding: 14px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.ai-chat-header .ai-avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.ai-chat-header .ai-title { flex: 1; font-size: 14px; font-weight: 600; }
+.ai-chat-header .ai-subtitle { font-size: 10px; opacity: .8; }
+.ai-chat-header .ai-close { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.15); border: none; color: #fff; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: var(--trans); }
+.ai-chat-header .ai-close:hover { background: rgba(255,255,255,.25); }
+
+.ai-chat-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: #F8F9FB; }
+.ai-chat-body::-webkit-scrollbar { width: 4px; }
+.ai-chat-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+.ai-msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; animation: msgIn .3s ease; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.ai-msg.user { align-self: flex-end; background: var(--p); color: #fff; border-bottom-right-radius: 4px; }
+.ai-msg.ai { align-self: flex-start; background: #fff; color: var(--t1); border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.ai-msg .ai-typing { display: flex; gap: 4px; padding: 4px 0; }
+.ai-msg .ai-typing span { width: 6px; height: 6px; border-radius: 50%; background: #9CA3AF; animation: dotBounce 1.4s ease-in-out infinite both; }
+.ai-msg .ai-typing span:nth-child(1) { animation-delay: 0s; }
+.ai-msg .ai-typing span:nth-child(2) { animation-delay: .16s; }
+.ai-msg .ai-typing span:nth-child(3) { animation-delay: .32s; }
+@keyframes dotBounce { 0%,80%,100% { transform: scale(.6); } 40% { transform: scale(1); } }
+
+.ai-chat-footer { padding: 10px 14px; background: #fff; border-top: 1px solid var(--bd); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.ai-chat-footer input { flex: 1; border: 1px solid var(--bd); border-radius: 20px; padding: 8px 14px; font-size: 13px; outline: none; font-family: var(--font); transition: var(--trans); }
+.ai-chat-footer input:focus { border-color: var(--p); }
+.ai-chat-footer button { width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: var(--trans); }
+.ai-send { background: linear-gradient(135deg, #667EEA, #764BA2); color: #fff; }
+.ai-send:hover { opacity: .85; }
+.ai-voice { background: var(--bg); color: var(--t2); }
+.ai-voice:hover { background: #E8ECF1; }
+.ai-voice.recording { background: #FEE8E8; color: var(--d); animation: voicePulse .6s ease-in-out infinite; }
+@keyframes voicePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(234,67,53,.3); } 50% { box-shadow: 0 0 0 8px rgba(234,67,53,0); } }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vs .vs-title { display: none; }
+  #mobileView .phone { width: 100%; height: 100%; border-radius: 0; }
+}
+
+/* Share Toast */
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1F2937; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; opacity: 0; transition: all .5s ease; z-index: 9999; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Mobile Tab Content */
+.m-tab-content { display: none; }
+.m-tab-content.active { display: block; }
+
+/* Voucher styles */
+.voucher-list { display: flex; flex-direction: column; gap: 12px; }
+.voucher-item { display: flex; align-items: center; gap: 14px; padding: 16px; background: #fff; border-radius: var(--r); border: 1px solid var(--bd); transition: var(--trans); cursor: pointer; }
+.voucher-item:hover { border-color: var(--p); box-shadow: var(--sd); }
+.voucher-item .v-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #FF6B6B, #FF8E53); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0; }
+.voucher-item .v-info { flex: 1; }
+.voucher-item .v-info .v-name { font-size: 14px; font-weight: 500; }
+.voucher-item .v-info .v-amount { font-size: 18px; font-weight: 700; color: var(--d); margin-top: 2px; }
+.voucher-item .v-info .v-expire { font-size: 11px; color: var(--t2); margin-top: 2px; }
+.voucher-item .v-status { font-size: 12px; padding: 4px 10px; border-radius: 20px; }
+
+/* Guide Steps */
+.guide-steps { display: flex; flex-direction: column; gap: 8px; }
+.guide-step { display: flex; align-items: center; gap: 14px; padding: 16px; background: #fff; border-radius: var(--r); cursor: pointer; transition: var(--trans); border: 1px solid var(--bd); }
+.guide-step:hover { border-color: var(--p); transform: translateX(4px); }
+.guide-step .g-num { width: 32px; height: 32px; border-radius: 50%; background: var(--pl); color: var(--p); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.guide-step .g-info { flex: 1; }
+.guide-step .g-info .g-name { font-size: 14px; font-weight: 500; }
+.guide-step .g-info .g-desc { font-size: 12px; color: var(--t2); margin-top: 2px; }
+.guide-step .g-action { color: var(--p); font-size: 14px; }
+
+/* Approve chain */
+.approve-chain { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.approve-chain .node { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 14px; background: var(--bg); border-radius: var(--r-sm); min-width: 56px; }
+.approve-chain .node .label { font-size: 11px; color: var(--t2); }
+.approve-chain .node .name { font-size: 13px; font-weight: 500; }
+.approve-chain .node.active { background: var(--pl); }
+.approve-chain .node.active .label { color: var(--p); }
+.approve-chain .node.active .name { color: var(--p); }
+.approve-chain .arrow { color: var(--t2); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- View Switcher -->
+<div class="vs" id="viewSwitcher">
+  <span class="vs-title"><i class="fas fa-bolt"></i> 人事通 · 原型</span>
+  <button class="active" data-view="mobile"><i class="fas fa-mobile-alt"></i> 手机端</button>
+  <button data-view="pc"><i class="fas fa-desktop"></i> 电脑端</button>
+  <button data-view="portal"><i class="fas fa-shield-alt"></i> 管理门户</button>
+  <button class="vs-share" onclick="shareProto()"><i class="fas fa-share-alt"></i> 分享</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================== MOBILE VIEW ============================== -->
+<div class="view" id="mobileView">
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span style="font-weight:800;letter-spacing:.5px;font-size:11px">XTEP 特步</span><span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-full"></i></span></div>
+    <div class="app-header"><button class="back" id="mBack" onclick="mGoBack()" style="visibility:hidden"><i class="fas fa-chevron-left"></i></button><span class="title" id="mTitle"><span style="display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-weight:900;font-style:italic;letter-spacing:-1px;font-size:13px;opacity:.9">XTEP</span> 人事通</span></span><span class="right"></span></div>
+    <div class="page-content" id="mContent">
+      <!-- M-Home -->
+      <div class="m-page active" id="mp-home">
+        <div style="padding:8px 0 16px"><span style="font-size:18px;font-weight:700">你好，张三</span><div style="font-size:13px;color:var(--t2);margin-top:4px">工号：123456 · 制造一部</div></div>
+        <div class="card" style="margin-bottom:16px"><h4 style="font-size:14px;margin-bottom:12px"><i class="fas fa-tasks" style="color:var(--p)"></i> 待办事项 (3)</h4><div class="todo-list"><div class="todo-item" onclick="mNav('mp-leave-approve')"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">请假审批</div><div style="font-size:12px;color:var(--t2)">李四 · 10分钟前</div></div><span class="badge badge-p1">待审批</span></div><div class="todo-item" onclick="mNav('mp-reissue-approve')"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">补卡审批</div><div style="font-size:12px;color:var(--t2)">王五 · 1小时前</div></div><span class="badge badge-p1">待审批</span></div><div class="todo-item"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">离职申请</div><div style="font-size:12px;color:var(--t2)">赵六 · 2小时前</div></div><span class="badge badge-p1">待审批</span></div></div></div>
+        <div class="card" style="margin-bottom:16px"><h4 style="font-size:14px;margin-bottom:12px"><i class="fas fa-th-large" style="color:var(--p)"></i> 快捷功能</h4><div class="quick-nav"><button class="qn-item" onclick="mNav('mp-reissue')"><i class="fas fa-pen-alt"></i><span>补卡</span></button><button class="qn-item" onclick="mNav('mp-leave')"><i class="fas fa-calendar-minus"></i><span>请假</span></button><button class="qn-item" onclick="mNav('mp-att-query')"><i class="fas fa-calendar-check"></i><span>考勤</span></button><button class="qn-item" onclick="mNav('mp-salary')"><i class="fas fa-money-bill-wave"></i><span>工资</span></button><button class="qn-item" onclick="mNav('mp-salary-confirm')"><i class="fas fa-hand-holding-usd"></i><span>确认</span></button><button class="qn-item" onclick="mNav('mp-voucher')"><i class="fas fa-gift"></i><span>福利券</span></button></div></div>
+        <div class="card"><h4 style="font-size:14px;margin-bottom:12px"><i class="fas fa-bell" style="color:var(--d)"></i> 消息通知</h4><div class="notif-list"><div class="notif-item" onclick="mNav('mp-att-alert')"><div class="notif-dot"></div><div class="notif-body"><div class="title">考勤异常提醒</div><div class="desc">5月14日 上班漏打卡，请及时处理</div><div class="time">10:30</div></div></div><div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><div class="title">工资已生成待确认</div><div class="desc">2026年4月工资已生成，请确认</div><div class="time">昨天</div></div></div></div></div>
+      </div>
+      <!-- M-Pages -->
+      <div class="m-page" id="mp-att-alert"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">考勤异常提醒</h3><div class="card" style="margin-bottom:12px"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="badge badge-p0">未处理</span><span style="font-size:13px;color:var(--t2)">推送第2次</span></div><div style="margin-bottom:12px"><div style="font-size:14px;margin-bottom:4px"><strong>异常类型：</strong>上班漏打卡</div><div style="font-size:14px;margin-bottom:4px"><strong>异常日期：</strong>2026年5月14日</div><div style="font-size:14px"><strong>期待处理：</strong>补卡或请假</div></div><button class="btn btn-p btn-block" onclick="mNav('mp-reissue')"><i class="fas fa-arrow-right"></i> 去处理</button></div><div class="card"><div style="font-size:13px;color:var(--t2)"><i class="fas fa-info-circle"></i> 每3天推送一次，直至处理完成</div></div></div>
+
+      <div class="m-page" id="mp-reissue"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">补卡申请</h3><div class="card"><div class="form-group"><label>姓名</label><div class="form-control" style="background:var(--bg)">张三</div></div><div class="form-group"><label>工号</label><div class="form-control" style="background:var(--bg)">123456</div></div><div class="form-group"><label>补卡日期</label><input type="date" class="form-control" value="2026-05-14"></div><div class="form-group"><label>补卡时间</label><select class="form-control"><option>上午 上班 (08:00-09:00)</option><option>上午 下班 (12:00-13:00)</option><option>下午 上班 (13:00-14:00)</option><option>下午 下班 (18:00-19:00)</option></select></div><div class="form-group"><label>补卡原因</label><select class="form-control"><option>忘记打卡</option><option>设备故障</option><option>其他</option></select></div><div class="form-group"><label>附件（可选）</label><div style="padding:20px;border:2px dashed var(--bd);border-radius:8px;text-align:center;color:var(--t2);cursor:pointer"><i class="fas fa-cloud-upload-alt" style="font-size:24px;display:block;margin-bottom:6px"></i>点击上传图片</div></div><button class="btn btn-p btn-block" onclick="showToast('已提交，等待审批')">提交申请</button></div></div>
+
+      <div class="m-page" id="mp-leave"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">请假申请</h3><div class="card"><div class="grid-2"><div class="form-group"><label>姓名</label><div class="form-control" style="background:var(--bg)">张三</div></div><div class="form-group"><label>工号</label><div class="form-control" style="background:var(--bg)">123456</div></div></div><div class="form-group"><label>请假类型</label><select class="form-control"><option>事假</option><option>病假</option><option>年假</option><option>婚假</option></select></div><div class="form-group"><label>开始时间</label><input type="datetime-local" class="form-control"></div><div class="form-group"><label>结束时间</label><input type="datetime-local" class="form-control"></div><div class="form-group"><label>请假天数</label><div class="form-control" style="background:var(--bg)">1 天（自动计算）</div></div><div class="form-group"><label>请假事由</label><textarea class="form-control" rows="3" placeholder="请输入请假事由"></textarea></div><div style="font-size:12px;color:var(--t2);margin-bottom:12px;padding:10px;background:#FEF3C7;border-radius:8px"><i class="fas fa-info-circle"></i> ≤3天 → 直接上级审批</div><button class="btn btn-p btn-block" onclick="showToast('已提交，等待审批')">提交申请</button></div></div>
+
+      <div class="m-page" id="mp-cancel-leave"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">销假申请</h3><div class="card"><div class="form-group"><label>姓名</label><div class="form-control" style="background:var(--bg)">张三</div></div><div class="form-group"><label>原请假记录</label><select class="form-control"><option>2026-05-10 ~ 2026-05-12 事假</option></select></div><div class="form-group"><label>实际返岗日期</label><input type="date" class="form-control"></div><div class="form-group"><label>销假天数</label><div class="form-control" style="background:var(--bg)">自动计算</div></div><div class="form-group"><label>销假原因（选填）</label><textarea class="form-control" rows="3" placeholder="请输入销假原因"></textarea></div><button class="btn btn-p btn-block" onclick="showToast('已提交销假申请')">提交申请</button></div></div>
+
+      <div class="m-page" id="mp-att-confirm"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">考勤确认</h3><div class="card" style="margin-bottom:12px"><div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:16px">2026年5月</div><div class="grid-2" style="margin-bottom:12px"><div><div style="font-size:12px;color:var(--t2)">应出勤</div><div style="font-size:24px;font-weight:700">22天</div></div><div><div style="font-size:12px;color:var(--t2)">实际出勤</div><div style="font-size:24px;font-weight:700;color:var(--s)">21天</div></div><div><div style="font-size:12px;color:var(--t2)">请假</div><div style="font-size:20px;font-weight:700;color:var(--w)">1天</div></div><div><div style="font-size:12px;color:var(--t2)">迟到/早退</div><div style="font-size:20px;font-weight:700;color:var(--s)">0次</div></div></div><div style="display:flex;gap:8px"><button class="btn btn-p" style="flex:1" onclick="showToast('考勤确认成功，数据已回传夏谷，<br>本月已单行锁定')">确认无误</button><button class="btn btn-outline" onclick="mNav('mp-att-query')">查看明细</button></div></div></div>
+
+      <div class="m-page" id="mp-att-query"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">考勤查询</h3><div style="display:flex;gap:8px;margin-bottom:12px"><select class="form-control" style="flex:1"><option>2026年5月</option><option>2026年4月</option></select></div><div class="card" style="margin-bottom:12px"><div class="calendar"><div class="weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div class="days"><span></span><span></span><span></span><span></span><span class="day att-end">1</span><span class="day att-end">2</span><span class="day att-weekend">3</span><span class="day att-end">4</span><span class="day att-end">5</span><span class="day att-end">6</span><span class="day att-end">7</span><span class="day att-end">8</span><span class="day att-late">9</span><span class="day att-end">10</span><span class="day att-end">11</span><span class="day att-end">12</span><span class="day att-end">13</span><span class="day today att-end">14</span><span class="day att-end">15</span><span class="day att-leave">16</span><span class="day att-end">17</span><span class="day att-end">18</span><span class="day att-end">19</span><span class="day att-end">20</span><span class="day att-end">21</span><span class="day att-absent">22</span><span class="day att-end">23</span><span class="day att-end">24</span><span class="day att-late">25</span><span class="day att-end">26</span><span class="day att-end">27</span><span class="day att-end">28</span><span class="day att-end">29</span><span class="day att-end">30</span><span class="day att-end">31</span></div><div style="display:flex;gap:10px;margin-top:12px;padding-top:8px;border-top:1px solid var(--bd);font-size:11px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;background:#DCFCE7;border-radius:3px;vertical-align:middle;margin-right:3px"></span>出勤</span><span><span style="display:inline-block;width:10px;height:10px;background:#FEF3C7;border-radius:3px;vertical-align:middle;margin-right:3px"></span>请假</span><span><span style="display:inline-block;width:10px;height:10px;background:#FFEDD5;border-radius:3px;vertical-align:middle;margin-right:3px"></span>迟到</span><span><span style="display:inline-block;width:10px;height:10px;background:#FEE8E8;border-radius:3px;vertical-align:middle;margin-right:3px"></span>旷工</span><span><span style="display:inline-block;width:10px;height:10px;background:#F3F4F6;border-radius:3px;vertical-align:middle;margin-right:3px"></span>休息</span></div></div></div></div>
+	      <div class="m-page" id="mp-transfer"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">调动申请</h3><div class="card"><div class="form-group"><label>调动类型</label><select class="form-control"><option>工厂/中心内调动</option><option>跨工厂/中心调动</option></select></div><div class="form-group"><label>原部门</label><div class="form-control" style="background:var(--bg)">制造一部-针车课</div></div><div class="form-group"><label>目标部门</label><select class="form-control"><option>制造二部-成型课</option><option>品质部-质检课</option></select></div><div class="form-group"><label>目标岗位</label><select class="form-control"><option>针车工</option><option>成型工</option></select></div><div class="form-group"><label>生效日期</label><input type="date" class="form-control"></div><div class="form-group"><label>调动原因</label><textarea class="form-control" rows="3" placeholder="请输入调动原因"></textarea></div><div style="font-size:12px;color:var(--t2);margin-bottom:12px;padding:10px;background:var(--pl);border-radius:8px"><i class="fas fa-sitemap"></i> 审批链：人事专员→员工确认→原上级→原经理→现上级→现经理→工厂负责人</div><button class="btn btn-p btn-block" onclick="showToast('调动申请已提交')">提交申请</button></div></div>
+
+      <div class="m-page" id="mp-resign"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">离职申请</h3><div class="card"><div class="form-group"><label>姓名</label><div class="form-control" style="background:var(--bg)">张三</div></div><div class="form-group"><label>入司时间</label><div class="form-control" style="background:var(--bg)">2020-03-01</div></div><div class="form-group"><label>计划离职日期</label><input type="date" class="form-control"></div><div class="form-group"><label>最后工作日</label><input type="date" class="form-control"></div><div class="form-group"><label>离职原因</label><select class="form-control"><option>个人原因</option><option>职业发展</option><option>家庭原因</option><option>其他</option></select></div><div class="form-group"><label>具体原因（选填）</label><textarea class="form-control" rows="3" placeholder="请输入具体原因"></textarea></div><button class="btn btn-p btn-block" onclick="showToast('离职申请已提交')">提交申请</button></div></div>
+
+      <div class="m-page" id="mp-resign-proc"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">离职手续办理</h3><div style="font-size:14px;color:var(--t2);margin-bottom:16px">员工：张三</div><div class="checklist"><div class="item done"><div class="step-num" style="background:var(--s)">✓</div><div class="step-info"><div class="name">员工确认</div><div class="desc">已确认</div></div><span class="step-status" style="color:var(--s)">已完成</span></div><div class="item"><div class="step-num" style="background:var(--w)">2</div><div class="step-info"><div class="name">直接上级确认</div><div class="desc">材料归还检查、扣款确认</div></div><span class="badge badge-p1">待处理</span></div><div class="item"><div class="step-num" style="background:var(--t2)">3</div><div class="step-info"><div class="name">人资窗口办理</div><div class="desc">合同终止、社保停缴</div></div><span class="badge badge-info">待处理</span></div><div class="item"><div class="step-num" style="background:var(--t2)">4</div><div class="step-info"><div class="name">行政窗口办理</div><div class="desc">工牌、厂服回收</div></div><span class="badge badge-info">待处理</span></div><div class="item"><div class="step-num" style="background:var(--t2)">5</div><div class="step-info"><div class="name">薪酬确认</div><div class="desc">抄送各工厂薪酬专员</div></div><span class="badge badge-info">待处理</span></div></div><div style="margin-top:16px"><button class="btn btn-p btn-block" onclick="showToast('手续办理完成，已触发电子签章')"><i class="fas fa-signature"></i> 触发电子签章</button></div></div>
+
+      <div class="m-page" id="mp-reissue-item"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">工牌/厂服补领</h3><div class="card"><div class="form-group"><label>补领类型</label><div style="display:flex;gap:12px"><label style="display:flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid var(--bd);border-radius:8px;cursor:pointer"><input type="checkbox"> 工牌</label><label style="display:flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid var(--bd);border-radius:8px;cursor:pointer"><input type="checkbox"> 厂服</label></div></div><div class="form-group"><label>数量</label><input type="number" class="form-control" value="1" min="1"></div><div class="form-group"><label>补领原因</label><textarea class="form-control" rows="3" placeholder="请输入补领原因"></textarea></div><button class="btn btn-p btn-block" onclick="showToast('补领申请已提交')">提交申请</button></div></div>
+
+      <div class="m-page" id="mp-salary-confirm"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">工资确认</h3><div style="font-size:13px;color:var(--t2);margin-bottom:12px">2026年4月</div><div class="card salary-card"><div class="row"><span>基本工资</span><span>3,000.00</span></div><div class="row sub"><span>岗位津贴</span><span>500.00</span></div><div class="row sub"><span>加班费</span><span>1,200.00</span></div><div class="row sub"><span>全勤奖</span><span>300.00</span></div><div class="row sub"><span>绩效奖金</span><span>500.00</span></div><div class="row sub-total"><span>应发合计</span><span>5,500.00</span></div><div class="row sub"><span>社保</span><span>-450.00</span></div><div class="row sub"><span>公积金</span><span>-200.00</span></div><div class="row sub"><span>厂服扣款</span><span>-50.00</span></div><div class="row sub-total"><span>应扣合计</span><span>700.00</span></div><div class="row total"><span>实发工资</span><span>4,800.00</span></div></div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-p" style="flex:1" onclick="showToast('工资确认成功！<br>确认结果已回传夏谷，<br>本月数据已单行锁定')">确认无误</button><button class="btn btn-outline" onclick="showToast('请输入异议原因')">有异议</button></div></div>
+
+      <div class="m-page" id="mp-salary"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">工资查询</h3><div style="display:flex;gap:8px;margin-bottom:16px"><select class="form-control" style="flex:1"><option>2026年</option></select><select class="form-control" style="flex:1"><option>4月</option><option>5月</option></select></div><div class="card" style="margin-bottom:8px;cursor:pointer" onclick="mNav('mp-salary-confirm')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600">2026年4月</div><div style="font-size:12px;color:var(--t2);margin-top:4px">应发 5,500.00 · 扣款 700.00</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:700;color:var(--p)">4,800.00</div><div style="font-size:12px;color:var(--s)">已确认</div></div></div></div><div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600">2026年3月</div><div style="font-size:12px;color:var(--t2);margin-top:4px">应发 5,200.00 · 扣款 650.00</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:700;color:var(--p)">4,550.00</div><div style="font-size:12px;color:var(--s)">已确认</div></div></div></div></div>
+
+      <div class="m-page" id="mp-deduction"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">扣款确认</h3><div style="font-size:13px;color:var(--t2);margin-bottom:12px">2026年4月</div><div class="card salary-card"><div class="row"><span>社保扣款</span><span>450.00</span></div><div class="row"><span>公积金扣款</span><span>200.00</span></div><div class="row"><span>厂服扣款</span><span>50.00</span></div><div class="row total"><span>合计扣款</span><span>700.00</span></div></div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-p" style="flex:1" onclick="showToast('扣款确认成功')">确认无误</button><button class="btn btn-outline">有异议</button></div></div>
+
+      <div class="m-page" id="mp-onboarding"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">入职指引</h3><div style="background:linear-gradient(135deg,var(--p),#1557C4);color:#fff;padding:24px;border-radius:12px;margin-bottom:16px;text-align:center"><div style="font-size:20px;font-weight:700;margin-bottom:4px">欢迎加入！</div><div style="font-size:13px;opacity:.8">点击步骤开始办理</div></div><div class="guide-steps"><div class="guide-step" onclick="showToast('跳转至合同签署')" style="cursor:pointer"><div class="g-num">1</div><div class="g-info"><div class="g-name">签合同</div><div class="g-desc">签订劳动合同及保密协议</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至工牌领取')" style="cursor:pointer"><div class="g-num">2</div><div class="g-info"><div class="g-name">领工牌</div><div class="g-desc">领取员工工牌</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至报餐登记')" style="cursor:pointer"><div class="g-num">3</div><div class="g-info"><div class="g-name">报餐登记</div><div class="g-desc">登记用餐需求</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至行政通 → 住宿申请')" style="cursor:pointer"><div class="g-num">4</div><div class="g-info"><div class="g-name">住宿申请</div><div class="g-desc">申请员工宿舍 → 行政通</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至厂服领取')" style="cursor:pointer"><div class="g-num">5</div><div class="g-info"><div class="g-name">厂服领取</div><div class="g-desc">领取工作服</div></div><i class="fas fa-chevron-right g-action"></i></div></div></div>
+
+      <div class="m-page" id="mp-voucher"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">福利券</h3><div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-p btn-sm">可用</button><button class="btn btn-outline btn-sm">已过期</button><button class="btn btn-outline btn-sm">全部</button></div><div class="voucher-list"><div class="voucher-item"><div class="v-icon"><i class="fas fa-ticket-alt"></i></div><div class="v-info"><div class="v-name">人人达标·5月达标券</div><div class="v-amount">¥50.00</div><div class="v-expire">有效期至：2026-06-30</div></div><span class="v-status badge-s">未使用</span></div><div class="voucher-item"><div class="v-icon" style="background:linear-gradient(135deg,#667EEA,#764BA2)"><i class="fas fa-ticket-alt"></i></div><div class="v-info"><div class="v-name">端午节日券</div><div class="v-amount">¥20.00</div><div class="v-expire">有效期至：2026-06-15</div></div><span class="v-status badge-s">未使用</span></div><div class="voucher-item" style="opacity:.5"><div class="v-icon" style="background:#9CA3AF"><i class="fas fa-ticket-alt"></i></div><div class="v-info"><div class="v-name">4月全勤奖券</div><div class="v-amount">¥30.00</div><div class="v-expire">已过期</div></div><span class="v-status badge-p0">已过期</span></div></div></div>
+
+      <div class="m-page" id="mp-rules"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">消息提醒规则</h3><div class="card"><table style="font-size:13px"><tr><th>场景</th><th>推送对象</th><th>频率</th></tr><tr><td>考勤异常</td><td>员工</td><td>每3天</td></tr><tr><td>审批超期</td><td>审批人</td><td>每天</td></tr><tr><td>确认超期</td><td>直接上级</td><td>每天</td></tr><tr><td>离职预警</td><td>人事专员</td><td>提前3天</td></tr></table></div></div>
+
+      <div class="m-page" id="mp-leave-approve"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">请假审批</h3><div class="card"><div style="margin-bottom:16px"><div style="font-size:14px;font-weight:600">李四 · 事假</div><div style="font-size:13px;color:var(--t2);margin-top:6px">2026-05-15 09:00 ~ 2026-05-16 18:00</div><div style="font-size:13px;color:var(--t2);margin-top:4px">共2天 · 部门：制造二部</div><div style="font-size:13px;color:var(--t1);margin-top:8px;padding:8px;background:var(--bg);border-radius:6px">事由：家里有事需要处理</div></div><div class="grid-2"><button class="btn btn-s" onclick="showToast('已审批通过')"><i class="fas fa-check"></i> 通过</button><button class="btn" style="background:var(--d);color:#fff" onclick="showToast('已驳回')"><i class="fas fa-times"></i> 驳回</button></div></div></div>
+
+      <div class="m-page" id="mp-reissue-approve"><h3 style="font-size:18px;font-weight:700;margin-bottom:16px">补卡审批</h3><div class="card"><div style="margin-bottom:16px"><div style="font-size:14px;font-weight:600">王五 · 补卡申请</div><div style="font-size:13px;color:var(--t2);margin-top:6px">补卡日期：2026-05-14 上午</div><div style="font-size:13px;color:var(--t2)">原因：忘记打卡</div></div><div class="grid-2"><button class="btn btn-s" onclick="showToast('已审批通过')"><i class="fas fa-check"></i> 通过</button><button class="btn" style="background:var(--d);color:#fff" onclick="showToast('已驳回')"><i class="fas fa-times"></i> 驳回</button></div></div></div>
+
+      <!-- Tab: 考勤 -->
+      <div class="m-page" id="mp-tab-att">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:16px"><i class="fas fa-calendar-check" style="color:var(--p)"></i> 考勤管理</h3>
+        <div class="quick-nav" style="margin-bottom:16px;grid-template-columns:repeat(3,1fr)">
+          <button class="qn-item" onclick="mNav('mp-reissue')"><i class="fas fa-pen-alt"></i><span>补卡申请</span></button>
+          <button class="qn-item" onclick="mNav('mp-leave')"><i class="fas fa-calendar-minus"></i><span>请假申请</span></button>
+          <button class="qn-item" onclick="mNav('mp-cancel-leave')"><i class="fas fa-undo-alt"></i><span>销假申请</span></button>
+          <button class="qn-item" onclick="mNav('mp-att-query')"><i class="fas fa-calendar-alt"></i><span>考勤查询</span></button>
+          <button class="qn-item" onclick="mNav('mp-att-confirm')"><i class="fas fa-check-double"></i><span>考勤确认</span></button>
+          <button class="qn-item" onclick="mNav('mp-att-alert')"><i class="fas fa-exclamation-triangle"></i><span>异常处理</span></button>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:12px">本月概况</div>
+          <div style="display:flex;gap:12px">
+            <div style="flex:1;text-align:center;padding:8px;background:var(--bg);border-radius:8px"><div style="font-size:18px;font-weight:700">22</div><div style="font-size:11px;color:var(--t2)">应出勤</div></div>
+            <div style="flex:1;text-align:center;padding:8px;background:var(--bg);border-radius:8px"><div style="font-size:18px;font-weight:700;color:var(--s)">21</div><div style="font-size:11px;color:var(--t2)">实出勤</div></div>
+            <div style="flex:1;text-align:center;padding:8px;background:var(--bg);border-radius:8px"><div style="font-size:18px;font-weight:700;color:var(--w)">1</div><div style="font-size:11px;color:var(--t2)">请假</div></div>
+            <div style="flex:1;text-align:center;padding:8px;background:var(--bg);border-radius:8px"><div style="font-size:18px;font-weight:700;color:var(--d)">1</div><div style="font-size:11px;color:var(--t2)">异常</div></div>
+          </div>
+        </div>
+        <div class="notif-list"><div class="notif-item" onclick="mNav('mp-att-alert')"><div class="notif-dot"></div><div class="notif-body"><div class="title">考勤异常提醒</div><div class="desc">5月14日 上班漏打卡，请及时处理</div></div></div></div>
+      </div>
+
+      <!-- Tab: 审批 -->
+      <div class="m-page" id="mp-tab-approve">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:16px"><i class="fas fa-tasks" style="color:var(--p)"></i> 我的审批</h3>
+        <div style="font-size:13px;color:var(--t2);margin-bottom:12px">待审批 (3)</div>
+        <div class="todo-list" style="margin-bottom:16px">
+          <div class="todo-item" onclick="mNav('mp-leave-approve')"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">请假审批 — 李四</div><div style="font-size:12px;color:var(--t2)">事假2天 · 10分钟前</div></div><span class="badge badge-p1">待审批</span></div>
+          <div class="todo-item" onclick="mNav('mp-reissue-approve')"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">补卡审批 — 王五</div><div style="font-size:12px;color:var(--t2)">5月14日上午 · 1小时前</div></div><span class="badge badge-p1">待审批</span></div>
+          <div class="todo-item"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-size:14px;font-weight:500">离职申请 — 赵六</div><div style="font-size:12px;color:var(--t2)">最后工作日6月1日 · 2小时前</div></div><span class="badge badge-p1">待审批</span></div>
+        </div>
+        <div class="card"><div style="font-size:13px;color:var(--t2);margin-bottom:8px">已处理</div><div class="todo-item"><div class="todo-dot" style="background:var(--s)"></div><div style="flex:1"><div style="font-size:13px;font-weight:500">考勤确认 — 4月</div><div style="font-size:11px;color:var(--t2)">昨天 15:00</div></div><span class="badge badge-s">已通过</span></div></div>
+      </div>
+
+      <!-- Tab: 我的 -->
+      <div class="m-page" id="mp-tab-me">
+        <div style="display:flex;align-items:center;gap:16px;padding:20px;background:linear-gradient(135deg,var(--p),#1557C4);border-radius:12px;margin-bottom:20px;color:#fff">
+          <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;flex-shrink:0">张</div>
+          <div><div style="font-size:20px;font-weight:700">张三</div><div style="font-size:13px;opacity:.8;margin-top:4px">工号：123456</div><div style="font-size:12px;opacity:.7">制造一部 · 针车工</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--sd)">
+          <button style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;background:#fff;cursor:pointer;font-size:14px;font-family:var(--font);color:var(--t1);transition:var(--trans);text-align:left" onclick="mNav('mp-salary')"><i class="fas fa-money-bill-wave" style="width:20px;color:var(--p)"></i><span style="flex:1">工资查询</span><i class="fas fa-chevron-right" style="color:var(--t2);font-size:12px"></i></button>
+          <button style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;background:#fff;cursor:pointer;font-size:14px;font-family:var(--font);color:var(--t1);transition:var(--trans);text-align:left" onclick="mNav('mp-salary-confirm')"><i class="fas fa-hand-holding-usd" style="width:20px;color:var(--p)"></i><span style="flex:1">工资确认</span><i class="fas fa-chevron-right" style="color:var(--t2);font-size:12px"></i></button>
+          <button style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;background:#fff;cursor:pointer;font-size:14px;font-family:var(--font);color:var(--t1);transition:var(--trans);text-align:left" onclick="mNav('mp-deduction')"><i class="fas fa-minus-circle" style="width:20px;color:var(--p)"></i><span style="flex:1">扣款确认</span><i class="fas fa-chevron-right" style="color:var(--t2);font-size:12px"></i></button>
+          <button style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;background:#fff;cursor:pointer;font-size:14px;font-family:var(--font);color:var(--t1);transition:var(--trans);text-align:left" onclick="mNav('mp-reissue-item')"><i class="fas fa-tshirt" style="width:20px;color:var(--p)"></i><span style="flex:1">工牌/厂服补领</span><i class="fas fa-chevron-right" style="color:var(--t2);font-size:12px"></i></button>
+          <button style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;background:#fff;cursor:pointer;font-size:14px;font-family:var(--font);color:var(--t1);transition:var(--trans);text-align:left" onclick="mNav('mp-voucher')"><i class="fas fa-gift" style="width:20px;color:var(--p)"></i><span style="flex:1">福利券</span><i class="fas fa-chevron-right" style="color:var(--t2);font-size:12px"></i></button>
+          <button style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;background:#fff;cursor:pointer;font-size:14px;font-family:var(--font);color:var(--t1);transition:var(--trans);text-align:left" onclick="mNav('mp-onboarding')"><i class="fas fa-compass" style="width:20px;color:var(--p)"></i><span style="flex:1">入职指引</span><i class="fas fa-chevron-right" style="color:var(--t2);font-size:12px"></i></button>
+          <button style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;background:#fff;cursor:pointer;font-size:14px;font-family:var(--font);color:var(--t1);transition:var(--trans);text-align:left" onclick="mNav('mp-rules')"><i class="fas fa-cog" style="width:20px;color:var(--p)"></i><span style="flex:1">消息提醒规则</span><i class="fas fa-chevron-right" style="color:var(--t2);font-size:12px"></i></button>
+        </div>
+      </div>
+    </div>
+    
+      <!-- AI Assistant -->
+      <div class="ai-fab-wrap"><button class="ai-fab-m" id="aiFabM" onclick="toggleAiChat()"><span class="ai-pulse"></span><i class="fas fa-robot"></i></button></div>
+      <div class="ai-chat-m" id="aiChatM">
+        <div class="ai-chat-header"><div class="ai-avatar"><i class="fas fa-robot"></i></div><div><div class="ai-title">AI 智能助手</div><div class="ai-subtitle">您的智能办事助理</div></div><button class="ai-close" onclick="toggleAiChat()"><i class="fas fa-times"></i></button></div>
+        <div class="ai-chat-body" id="aiChatBodyM"><div class="ai-msg ai"><div style="font-size:13px;margin-bottom:4px"><i class="fas fa-robot" style="color:#667EEA"></i> 你好！有什么可以帮你的？</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"><span style="padding:4px 8px;background:#EFF6FF;border-radius:10px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">帮我请假</span><span style="padding:4px 8px;background:#EFF6FF;border-radius:10px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">查询考勤</span><span style="padding:4px 8px;background:#EFF6FF;border-radius:10px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">我要补卡</span><span style="padding:4px 8px;background:#EFF6FF;border-radius:10px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">查工资</span></div></div></div>
+        <div class="ai-chat-footer"><button class="ai-voice" id="aiVoiceBtnM" onclick="toggleAiVoice()"><i class="fas fa-microphone"></i></button><input type="text" id="aiInputM" placeholder="输入问题..." onkeydown="if(event.key=='Enter')sendAiMessage()"><button class="ai-send" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button></div>
+      </div>
+
+    <div class="bottom-nav">
+      <button class="tab active" onclick="mSwitchTab('home',this)"><i class="fas fa-home"></i><span>首页</span></button>
+      <button class="tab" onclick="mSwitchTab('att',this)"><i class="fas fa-calendar-check"></i><span>考勤</span></button>
+      <button class="tab" onclick="mSwitchTab('approve',this)"><i class="fas fa-tasks"></i><span>审批</span></button>
+      <button class="tab" onclick="mSwitchTab('me',this)"><i class="fas fa-user"></i><span>我的</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== PC VIEW ============================== -->
+<div class="view" id="pcView">
+  <div class="pc-layout">
+    <div class="pc-sidebar">
+      <div class="logo"><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;font-style:italic;font-size:22px;letter-spacing:-1px;color:var(--p);line-height:1">XTEP</span><span style="font-size:14px;color:var(--t2);font-weight:300;line-height:1">|</span><span style="font-weight:600;font-size:15px;line-height:1">人事通</span></span><div style="font-size:10px;color:var(--t2);margin-top:2px;letter-spacing:1px">特步 · 一站式服务平台</div></div>
+      <div class="nav-group"><div class="g-label">概览</div><button class="nav-item active" data-pc="pc-home"><i class="fas fa-home"></i> 首页</button></div>
+      <div class="nav-group"><div class="g-label">考勤管理</div><button class="nav-item" data-pc="pc-att-query"><i class="fas fa-calendar-alt"></i> 考勤查询</button><button class="nav-item" data-pc="pc-reissue"><i class="fas fa-pen-alt"></i> 补卡申请</button><button class="nav-item" data-pc="pc-leave"><i class="fas fa-calendar-minus"></i> 请假申请</button><button class="nav-item" data-pc="pc-cancel-leave"><i class="fas fa-undo-alt"></i> 销假申请</button><button class="nav-item" data-pc="pc-att-confirm"><i class="fas fa-check-double"></i> 考勤确认</button></div>
+      <div class="nav-group"><div class="g-label">人事变动</div><button class="nav-item" data-pc="pc-transfer"><i class="fas fa-exchange-alt"></i> 调动申请</button><button class="nav-item" data-pc="pc-resign"><i class="fas fa-sign-out-alt"></i> 离职申请</button><button class="nav-item" data-pc="pc-resign-proc"><i class="fas fa-clipboard-list"></i> 离职手续办理</button></div>
+      <div class="nav-group"><div class="g-label">薪酬管理</div><button class="nav-item" data-pc="pc-salary"><i class="fas fa-money-bill-wave"></i> 工资查询</button><button class="nav-item" data-pc="pc-salary-confirm"><i class="fas fa-hand-holding-usd"></i> 工资确认</button><button class="nav-item" data-pc="pc-deduction"><i class="fas fa-minus-circle"></i> 扣款确认</button></div>
+      <div class="nav-group"><div class="g-label">行政关联</div><button class="nav-item" data-pc="pc-reissue-item"><i class="fas fa-tshirt"></i> 工牌/厂服补领</button><button class="nav-item" data-pc="pc-voucher"><i class="fas fa-gift"></i> 福利券</button><button class="nav-item" data-pc="pc-onboarding"><i class="fas fa-compass"></i> 入职指引</button></div>
+    </div>
+    <div class="pc-resizer" id="pcResizer"></div>
+    <div class="pc-main" style="flex:1;min-width:320px">
+      <div class="pc-header"><div class="bc">人事通 / <span id="pcBreadcrumb">首页</span></div><div class="user"><span>张三</span><div class="avatar">张</div></div></div>
+      <div class="pc-content" id="pcContent">
+        <!-- PC-Home -->
+        <div class="pc-page active" id="pc-home">
+          <h2 style="font-size:22px;margin-bottom:6px">你好，张三</h2>
+          <p style="color:var(--t2);margin-bottom:24px">工号：123456 · 制造一部 · 针车工</p>
+          <div class="grid-3" style="margin-bottom:24px">
+            <div class="card stat-card"><div class="num" style="color:var(--w)">3</div><div class="label">待办事项</div></div>
+            <div class="card stat-card"><div class="num" style="color:var(--p)">5</div><div class="label">本月考勤异常</div></div>
+            <div class="card stat-card"><div class="num" style="color:var(--s)">1</div><div class="label">待确认工资</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card"><h3 style="font-size:16px;margin-bottom:16px"><i class="fas fa-tasks" style="color:var(--p)"></i> 待办事项</h3><div class="todo-list"><div class="todo-item"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-weight:500">请假审批 — 李四</div><div style="font-size:12px;color:var(--t2)">事假2天 · 10分钟前</div></div><span class="badge badge-p1">待审批</span></div><div class="todo-item"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-weight:500">补卡审批 — 王五</div><div style="font-size:12px;color:var(--t2)">5月14日上午 · 1小时前</div></div><span class="badge badge-p1">待审批</span></div><div class="todo-item"><div class="todo-dot" style="background:var(--w)"></div><div style="flex:1"><div style="font-weight:500">离职申请 — 赵六</div><div style="font-size:12px;color:var(--t2)">最后工作日6月1日 · 2小时前</div></div><span class="badge badge-p1">待审批</span></div></div></div>
+            <div class="card"><h3 style="font-size:16px;margin-bottom:16px"><i class="fas fa-bell" style="color:var(--d)"></i> 消息通知</h3><div class="notif-list"><div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><div class="title">考勤异常提醒</div><div class="desc">5月14日 上班漏打卡</div><div class="time">10:30</div></div></div><div class="notif-item"><div class="notif-dot"></div><div class="notif-body"><div class="title">工资待确认</div><div class="desc">4月工资已生成</div><div class="time">昨天</div></div></div></div></div>
+          </div>
+        </div>
+        <!-- PC pages (reuse same content, adapted for wide view) -->
+        	        	        <div class="pc-page" id="pc-att-query">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h2 style="font-size:20px">考勤查询</h2>
+            <select class="form-control" style="width:auto;padding:6px 32px 6px 12px" onchange="pcAttQueryMonth(this.value)" id="pcAttMonthSelect">
+              <option value="4">2026年4月</option>
+              <option value="5" selected>2026年5月</option>
+              <option value="6">2026年6月</option>
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="calendar">
+              
+              <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;text-align:center" id="pcAttMonthTitle">2026年5月</h3>
+              <div class="weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+              <div class="days" id="pcAttDays"></div>
+              <div style="display:flex;gap:14px;margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;flex-wrap:wrap" id="pcAttLegend">
+                <span><span style="display:inline-block;width:10px;height:10px;background:#34A853;border-radius:2px;vertical-align:middle;margin-right:4px"></span>正常</span>
+                <span><span style="display:inline-block;width:10px;height:10px;background:#FBBC04;border-radius:2px;vertical-align:middle;margin-right:4px"></span>请假</span>
+                <span><span style="display:inline-block;width:10px;height:10px;background:#D97706;border-radius:2px;vertical-align:middle;margin-right:4px"></span>迟到</span>
+                <span><span style="display:inline-block;width:10px;height:10px;background:#EA4335;border-radius:2px;vertical-align:middle;margin-right:4px"></span>旷工</span>
+                <span><span style="display:inline-block;width:10px;height:10px;background:#1E6DF2;border-radius:2px;vertical-align:middle;margin-right:4px"></span>出差</span>
+                <span><span style="display:inline-block;width:10px;height:10px;background:#D1D5DB;border-radius:2px;vertical-align:middle;margin-right:4px"></span>休息</span>
+              </div>
+              </div>
+            
+              </div>
+            <div>
+              <div class="card" style="margin-bottom:16px" id="pcAttSummary">
+                <h3 style="font-size:16px;margin-bottom:16px">月度汇总</h3>
+                <div style="display:flex;gap:12px;margin-bottom:16px">
+                  <div style="flex:1;text-align:center;padding:10px 4px;background:var(--bg);border-radius:8px"><div style="font-size:24px;font-weight:700" id="pcAttS1">22</div><div style="font-size:12px;color:var(--t2);margin-top:2px">应出勤</div></div>
+                  <div style="flex:1;text-align:center;padding:10px 4px;background:#DCFCE7;border-radius:8px"><div style="font-size:24px;font-weight:700;color:var(--s)" id="pcAttS2">19</div><div style="font-size:12px;color:#16A34A;margin-top:2px">实际出勤</div></div>
+                  <div style="flex:1;text-align:center;padding:10px 4px;background:#FEF3C7;border-radius:8px"><div style="font-size:20px;font-weight:700;color:#D97706" id="pcAttS3">1</div><div style="font-size:12px;color:#D97706;margin-top:2px">请假</div></div>
+                  <div style="flex:1;text-align:center;padding:10px 4px;background:#FEE8E8;border-radius:8px"><div style="font-size:20px;font-weight:700;color:var(--d)" id="pcAttS4">2</div><div style="font-size:12px;color:var(--d);margin-top:2px">异常</div></div>
+                </div>
+                <div style="padding:12px;background:linear-gradient(135deg,#FEF3C7,#FFFBEB);border-radius:8px;font-size:13px" id="pcAttCum">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>累计迟到</span><span><strong style="color:#D97706;font-size:16px">77</strong> 分钟</span></div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>累计旷工</span><span><strong style="color:var(--d);font-size:16px">1</strong> 天</span></div>
+                  <div style="display:flex;justify-content:space-between"><span>累计请假</span><span><strong style="color:#D97706;font-size:16px">1</strong> 天</span></div>
+                </div>
+              </div>
+              <div class="card" id="pcDayDetail" style="margin-bottom:16px">
+                <h3 style="font-size:14px;margin-bottom:12px;color:var(--t2)">点击日历中的日期查看详情</h3>
+                <div style="text-align:center;padding:20px 0;color:var(--t2);font-size:13px"><i class="fas fa-hand-pointer"></i> 点击日历中的日期查看打卡详情</div>
+              </div>
+              <div class="card" id="pcAttAnomalies">
+                <h3 style="font-size:14px;margin-bottom:12px">异常明细 <span style="font-size:12px;color:var(--t2);font-weight:400" id="pcAttAnomalyCount">本月共 3 天异常</span></h3>
+                <div style="display:flex;flex-direction:column;gap:8px" id="pcAttAnomalyList"></div>
+              </div>
+            </div>
+          </div>
+        </div><div class="pc-page" id="pc-reissue"><h2 style="font-size:20px;margin-bottom:20px">补卡申请</h2><div class="card" style="max-width:520px"><div class="form-group"><label>姓名/工号</label><div class="form-control" style="background:var(--bg)">张三 / 123456</div></div><div class="form-group"><label>补卡日期</label><input type="date" class="form-control"></div><div class="form-group"><label>补卡时间</label><select class="form-control"><option>上午 上班 (08:00-09:00)</option><option>上午 下班 (12:00-13:00)</option><option>下午 上班 (13:00-14:00)</option><option>下午 下班 (18:00-19:00)</option></select></div><div class="form-group"><label>补卡原因</label><select class="form-control"><option>忘记打卡</option><option>设备故障</option><option>其他</option></select></div><button class="btn btn-p" onclick="showToast('已提交，等待审批')">提交申请</button></div></div>
+        <div class="pc-page" id="pc-leave"><h2 style="font-size:20px;margin-bottom:20px">请假申请</h2><div class="card" style="max-width:560px"><div class="grid-2"><div class="form-group"><label>姓名</label><div class="form-control" style="background:var(--bg)">张三</div></div><div class="form-group"><label>工号</label><div class="form-control" style="background:var(--bg)">123456</div></div></div><div class="form-group"><label>请假类型</label><select class="form-control"><option>事假</option><option>病假</option><option>年假</option><option>婚假</option></select></div><div class="grid-2"><div class="form-group"><label>开始时间</label><input type="datetime-local" class="form-control"></div><div class="form-group"><label>结束时间</label><input type="datetime-local" class="form-control"></div></div><div class="form-group"><label>请假事由</label><textarea class="form-control" rows="3"></textarea></div><button class="btn btn-p" onclick="showToast('已提交，等待审批')">提交申请</button></div></div>
+        <div class="pc-page" id="pc-cancel-leave"><h2 style="font-size:20px;margin-bottom:20px">销假申请</h2><div class="card" style="max-width:520px"><div class="form-group"><label>姓名/工号</label><div class="form-control" style="background:var(--bg)">张三 / 123456</div></div><div class="form-group"><label>原请假记录</label><select class="form-control"><option>2026-05-10 ~ 2026-05-12 事假</option></select></div><div class="form-group"><label>实际返岗日期</label><input type="date" class="form-control"></div><div class="form-group"><label>销假原因</label><textarea class="form-control" rows="3"></textarea></div><button class="btn btn-p" onclick="showToast('已提交销假申请')">提交申请</button></div></div>
+        <div class="pc-page" id="pc-att-confirm"><h2 style="font-size:20px;margin-bottom:20px">考勤确认</h2><div class="card" style="max-width:480px"><h3 style="font-size:16px;margin-bottom:16px">2026年4月</h3><div class="grid-2" style="margin-bottom:20px"><div><div style="font-size:12px;color:var(--t2)">应出勤</div><div style="font-size:28px;font-weight:700">22天</div></div><div><div style="font-size:12px;color:var(--t2)">实际出勤</div><div style="font-size:28px;font-weight:700;color:var(--s)">21天</div></div><div><div style="font-size:12px;color:var(--t2)">请假</div><div style="font-size:22px;font-weight:700;color:var(--w)">1天</div></div><div><div style="font-size:12px;color:var(--t2)">迟到/早退</div><div style="font-size:22px;font-weight:700;color:var(--s)">0次</div></div></div><button class="btn btn-p" onclick="showToast('考勤确认成功，已回传夏谷，本月已单行锁定')">确认无误</button></div></div>
+        <div class="pc-page" id="pc-transfer"><h2 style="font-size:20px;margin-bottom:20px">调动申请</h2><div class="card" style="max-width:560px"><div class="form-group"><label>调动类型</label><select class="form-control"><option>工厂/中心内调动</option><option>跨工厂/中心调动</option></select></div><div class="grid-2"><div class="form-group"><label>原部门</label><div class="form-control" style="background:var(--bg)">制造一部-针车课</div></div><div class="form-group"><label>目标部门</label><select class="form-control"><option>制造二部-成型课</option><option>品质部-质检课</option></select></div></div><div class="form-group"><label>生效日期</label><input type="date" class="form-control"></div><div class="form-group"><label>调动原因</label><textarea class="form-control" rows="3"></textarea></div><div style="padding:12px;background:var(--pl);border-radius:8px;margin-bottom:16px;font-size:13px"><i class="fas fa-sitemap"></i> <strong>审批链：</strong>人事专员→员工确认→原上级→原经理→现上级→现经理→工厂负责人</div><button class="btn btn-p" onclick="showToast('调动申请已提交')">提交申请</button></div></div>
+        <div class="pc-page" id="pc-resign"><h2 style="font-size:20px;margin-bottom:20px">离职申请</h2><div class="card" style="max-width:520px"><div class="grid-2"><div class="form-group"><label>姓名</label><div class="form-control" style="background:var(--bg)">张三</div></div><div class="form-group"><label>入司时间</label><div class="form-control" style="background:var(--bg)">2020-03-01</div></div></div><div class="form-group"><label>计划离职日期</label><input type="date" class="form-control"></div><div class="form-group"><label>离职原因</label><select class="form-control"><option>个人原因</option><option>职业发展</option><option>家庭原因</option></select></div><div class="form-group"><label>具体原因</label><textarea class="form-control" rows="3"></textarea></div><button class="btn btn-p" onclick="showToast('离职申请已提交')">提交申请</button></div></div>
+        <div class="pc-page" id="pc-resign-proc"><h2 style="font-size:20px;margin-bottom:20px">离职手续办理</h2><div style="font-size:15px;color:var(--t2);margin-bottom:16px">员工：张三（工号：123456）</div><div class="card"><div class="checklist"><div class="item done"><div class="step-num" style="background:var(--s)">✓</div><div class="step-info"><div class="name">员工确认</div><div class="desc">已确认</div></div><span style="color:var(--s);font-weight:500">已完成</span></div><div class="item"><div class="step-num" style="background:var(--w)">2</div><div class="step-info"><div class="name">直接上级确认</div><div class="desc">材料归还检查、扣款确认</div></div><span class="badge badge-p1">待处理</span></div><div class="item"><div class="step-num" style="background:var(--t2)">3</div><div class="step-info"><div class="name">人资窗口办理</div><div class="desc">合同终止、社保停缴</div></div><span class="badge badge-info">待处理</span></div><div class="item"><div class="step-num" style="background:var(--t2)">4</div><div class="step-info"><div class="name">行政窗口办理</div><div class="desc">工牌、厂服回收</div></div><span class="badge badge-info">待处理</span></div><div class="item"><div class="step-num" style="background:var(--t2)">5</div><div class="step-info"><div class="name">薪酬确认</div><div class="desc">抄送各工厂薪酬专员</div></div><span class="badge badge-info">待处理</span></div></div><button class="btn btn-p" style="margin-top:16px" onclick="showToast('手续办理完成，已触发电子签章')"><i class="fas fa-signature"></i> 触发电子签章</button></div></div>
+        <div class="pc-page" id="pc-reissue-item"><h2 style="font-size:20px;margin-bottom:20px">工牌/厂服补领</h2><div class="card" style="max-width:480px"><div class="form-group"><label>补领类型</label><div style="display:flex;gap:16px"><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox"> 工牌</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox"> 厂服</label></div></div><div class="form-group"><label>数量</label><input type="number" class="form-control" value="1" style="max-width:100px"></div><div class="form-group"><label>补领原因</label><textarea class="form-control" rows="3"></textarea></div><button class="btn btn-p" onclick="showToast('补领申请已提交')">提交申请</button></div></div>
+        <div class="pc-page" id="pc-salary"><h2 style="font-size:20px;margin-bottom:20px">工资查询</h2><div style="margin-bottom:16px;display:flex;gap:8px;align-items:center"><select class="form-control" style="width:auto"><option>2026</option></select><select class="form-control" style="width:auto"><option>4月</option><option>5月</option></select><span style="font-size:13px;color:var(--t2);margin-left:8px">点击月份查看工资明细</span></div><div class="grid-2"><div class="card" style="cursor:pointer" onclick="pcShowSalary()"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:16px;font-weight:600">2026年4月</div><div style="font-size:13px;color:var(--t2)">应发 5,500.00 · 扣款 700.00</div></div><div style="text-align:right"><div style="font-size:22px;font-weight:700;color:var(--p)">4,800.00</div><span class="badge badge-s">已确认</span></div></div></div><div class="card" style="cursor:pointer" onclick="pcShowSalary()"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:16px;font-weight:600">2026年3月</div><div style="font-size:13px;color:var(--t2)">应发 5,200.00 · 扣款 650.00</div></div><div style="text-align:right"><div style="font-size:22px;font-weight:700;color:var(--p)">4,550.00</div><span class="badge badge-s">已确认</span></div></div></div></div></div>
+        <div class="pc-page" id="pc-salary-detail"><h2 style="font-size:20px;margin-bottom:6px">工资明细</h2><div style="color:var(--t2);margin-bottom:20px">2026年4月 · 张三 (123456) <span style="margin-left:12px"><a href="javascript:pcNav('pc-salary')" style="color:var(--p);text-decoration:none"><i class="fas fa-arrow-left"></i> 返回列表</a></span></div><div class="grid-2"><div class="card salary-card"><h3 style="font-size:16px;margin-bottom:16px">应发项目</h3><div class="row"><span>基本工资</span><span>3,000.00</span></div><div class="row sub"><span>岗位津贴</span><span>500.00</span></div><div class="row sub"><span>加班费</span><span>1,200.00</span></div><div class="row sub"><span>全勤奖</span><span>300.00</span></div><div class="row sub"><span>绩效奖金</span><span>500.00</span></div><div class="row sub-total"><span>应发合计</span><span>5,500.00</span></div></div><div><div class="card salary-card" style="margin-bottom:16px"><h3 style="font-size:16px;margin-bottom:16px">扣款项目</h3><div class="row sub"><span>社保（养老/医疗/失业）</span><span>-450.00</span></div><div class="row sub"><span>公积金</span><span>-200.00</span></div><div class="row sub"><span>厂服扣款</span><span>-50.00</span></div><div class="row sub-total"><span>应扣合计</span><span>700.00</span></div></div><div class="card" style="background:var(--pl);border:1px solid rgba(30,109,242,.15)"><div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700"><span>实发工资</span><span style="color:var(--p)">4,800.00</span></div></div></div></div></div>
+        <div class="pc-page" id="pc-salary-confirm"><h2 style="font-size:20px;margin-bottom:20px">工资确认</h2><div class="card salary-card" style="max-width:480px"><h3 style="font-size:16px;margin-bottom:16px">2026年4月</h3><div class="row"><span>基本工资</span><span>3,000.00</span></div><div class="row sub"><span>岗位津贴</span><span>500.00</span></div><div class="row sub"><span>加班费</span><span>1,200.00</span></div><div class="row sub"><span>全勤奖</span><span>300.00</span></div><div class="row sub"><span>绩效奖金</span><span>500.00</span></div><div class="row sub-total"><span>应发合计</span><span>5,500.00</span></div><div class="row sub"><span>社保</span><span>-450.00</span></div><div class="row sub"><span>公积金</span><span>-200.00</span></div><div class="row sub"><span>厂服扣款</span><span>-50.00</span></div><div class="row sub-total"><span>应扣合计</span><span>700.00</span></div><div class="row total"><span>实发工资</span><span>4,800.00</span></div></div><button class="btn btn-p" style="margin-top:16px" onclick="showToast('工资确认成功，已回传夏谷，本月已单行锁定')">确认无误</button></div>
+        <div class="pc-page" id="pc-deduction"><h2 style="font-size:20px;margin-bottom:20px">扣款确认</h2><div class="card salary-card" style="max-width:440px"><h3 style="font-size:16px;margin-bottom:16px">2026年4月</h3><div class="row"><span>社保扣款</span><span>450.00</span></div><div class="row"><span>公积金扣款</span><span>200.00</span></div><div class="row"><span>厂服扣款</span><span>50.00</span></div><div class="row total"><span>合计扣款</span><span>700.00</span></div></div><button class="btn btn-p" style="margin-top:16px" onclick="showToast('扣款确认成功')">确认无误</button></div>
+        <div class="pc-page" id="pc-onboarding"><h2 style="font-size:20px;margin-bottom:20px">入职指引</h2><div style="background:linear-gradient(135deg,var(--p),#1557C4);color:#fff;padding:32px;border-radius:12px;margin-bottom:24px"><div style="font-size:24px;font-weight:700">欢迎加入公司！</div><div style="opacity:.8;margin-top:4px">点击下方步骤开始办理入职手续</div></div><div class="grid-3"><div class="guide-step" onclick="showToast('跳转至合同签署页面')" style="cursor:pointer"><div class="g-num">1</div><div class="g-info"><div class="g-name">签合同 <i class="fas fa-external-link-alt" style="font-size:11px;color:var(--p)"></i></div><div class="g-desc">劳动合同及保密协议</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至工牌领取页面')" style="cursor:pointer"><div class="g-num">2</div><div class="g-info"><div class="g-name">领工牌 <i class="fas fa-external-link-alt" style="font-size:11px;color:var(--p)"></i></div><div class="g-desc">领取员工工牌</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至报餐登记页面')" style="cursor:pointer"><div class="g-num">3</div><div class="g-info"><div class="g-name">报餐登记 <i class="fas fa-external-link-alt" style="font-size:11px;color:var(--p)"></i></div><div class="g-desc">登记用餐需求</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至行政通 → 宿舍申请')" style="cursor:pointer"><div class="g-num">4</div><div class="g-info"><div class="g-name">住宿申请 <i class="fas fa-external-link-alt" style="font-size:11px;color:var(--p)"></i></div><div class="g-desc">行政通 → 宿舍申请</div></div><i class="fas fa-chevron-right g-action"></i></div><div class="guide-step" onclick="showToast('跳转至厂服领取页面')" style="cursor:pointer"><div class="g-num">5</div><div class="g-info"><div class="g-name">厂服领取 <i class="fas fa-external-link-alt" style="font-size:11px;color:var(--p)"></i></div><div class="g-desc">领取工作服</div></div><i class="fas fa-chevron-right g-action"></i></div></div></div>
+        <div class="pc-page" id="pc-voucher"><h2 style="font-size:20px;margin-bottom:20px">福利券</h2><div style="margin-bottom:16px;display:flex;gap:8px"><button class="btn btn-p btn-sm">可用</button><button class="btn btn-outline btn-sm">已过期</button><button class="btn btn-outline btn-sm">全部</button></div><div class="grid-2"><div class="voucher-item"><div class="v-icon"><i class="fas fa-ticket-alt"></i></div><div class="v-info"><div class="v-name">人人达标·5月达标券</div><div class="v-amount">¥50.00</div><div class="v-expire">有效期至：2026-06-30</div></div><span class="v-status badge-s">未使用</span></div><div class="voucher-item"><div class="v-icon" style="background:linear-gradient(135deg,#667EEA,#764BA2)"><i class="fas fa-ticket-alt"></i></div><div class="v-info"><div class="v-name">端午节日券</div><div class="v-amount">¥20.00</div><div class="v-expire">有效期至：2026-06-15</div></div><span class="v-status badge-s">未使用</span></div></div></div>
+      
+        <!-- AI Assistant (PC) -->
+        <div class="ai-fab-wrap-pc"><button class="ai-fab-pc" id="aiFabPC" onclick="toggleAiChat()"><span class="ai-pulse"></span><i class="fas fa-robot"></i></button></div>
+        <div class="ai-chat-pc" id="aiChatPC">
+          <div class="ai-chat-header"><div class="ai-avatar"><i class="fas fa-robot"></i></div><div><div class="ai-title">AI 智能助手</div><div class="ai-subtitle">人事通 · 您的智能办事助理</div></div><button class="ai-close" onclick="toggleAiChat()"><i class="fas fa-times"></i></button></div>
+          <div class="ai-chat-body" id="aiChatBodyPC"><div class="ai-msg ai"><div style="font-size:14px;margin-bottom:4px"><i class="fas fa-robot" style="color:#667EEA"></i> 你好！我是 AI 智能助手，有什么可以帮你的？</div><div style="font-size:12px;color:var(--t2)">试试这些：</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">帮我请假</span><span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">查询考勤</span><span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">我要补卡</span><span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">查工资</span></div></div></div>
+          <div class="ai-chat-footer"><button class="ai-voice" id="aiVoiceBtnPC" onclick="toggleAiVoice()"><i class="fas fa-microphone"></i></button><input type="text" id="aiInputPC" placeholder="输入你的问题..." onkeydown="if(event.key=='Enter')sendAiMessage()"><button class="ai-send" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== PORTAL VIEW ============================== -->
+<div class="view" id="portalView">
+  <div class="portal-layout">
+    <div class="portal-sidebar">
+      <div class="logo"><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;font-style:italic;font-size:22px;letter-spacing:-1px;color:#60A5FA;line-height:1">XTEP</span><span style="font-size:14px;color:rgba(255,255,255,.3);font-weight:300;line-height:1">|</span><span style="font-weight:600;font-size:15px;line-height:1">人事通 · 管理门户</span></span><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:1px">特步 · 一站式管理平台</div></div>
+      <div class="nav-group"><div class="g-label">管理首页</div><button class="nav-item active" data-portal="portal-home"><i class="fas fa-chart-pie"></i> 仪表盘</button></div>
+      <div class="nav-group"><div class="g-label">审批管理</div><button class="nav-item" data-portal="portal-approve"><i class="fas fa-tasks"></i> 待审批</button><button class="nav-item" data-portal="portal-history"><i class="fas fa-history"></i> 审批记录</button></div>
+      <div class="nav-group"><div class="g-label">员工管理</div><button class="nav-item" data-portal="portal-employee"><i class="fas fa-users"></i> 员工信息</button><button class="nav-item" data-portal="portal-transfer"><i class="fas fa-exchange-alt"></i> 调动管理</button><button class="nav-item" data-portal="portal-resign"><i class="fas fa-user-minus"></i> 离职管理</button></div>
+      <div class="nav-group"><div class="g-label">考勤薪酬</div><button class="nav-item" data-portal="portal-attendance"><i class="fas fa-calendar-alt"></i> 考勤总览</button><button class="nav-item" data-portal="portal-salary"><i class="fas fa-money-check"></i> 薪酬管理</button></div>
+      <div class="nav-group"><div class="g-label">系统</div><button class="nav-item" data-portal="portal-rules"><i class="fas fa-cog"></i> 提醒规则</button></div>
+    </div>
+    <div class="portal-resizer" id="portalResizer"></div>
+    <div class="portal-main">
+      <div class="portal-header"><div class="search-box"><i class="fas fa-search"></i><input placeholder="搜索员工姓名、工号..."></div><div class="user"><div class="bell-wrap" onclick="toggleNotif()"><i class="far fa-bell" style="font-size:20px"></i><span class="bell-dot"></span></div><div class="user-dropdown" onclick="toggleUserMenu()"><span style="font-size:14px">管理员</span><div class="avatar">管</div></div><div class="dropdown-panel" id="notifPanel"><div class="panel-header"><span>消息通知</span><span style="font-size:12px;color:var(--t2);cursor:pointer" onclick="showToast('标记全部已读');closeNotif()">全部已读</span></div><div class="panel-body"><div class="notif-row" onclick="showToast('跳转至审批详情');closeNotif()"><div class="n-dot"></div><div class="n-info"><div class="n-title">请假审批提醒</div><div class="n-desc">李四提交了事假2天申请</div><div class="n-time">10分钟前</div></div></div><div class="notif-row" onclick="showToast('跳转至审批详情');closeNotif()"><div class="n-dot"></div><div class="n-info"><div class="n-title">补卡审批提醒</div><div class="n-desc">王五提交了补卡申请（5/14上午）</div><div class="n-time">1小时前</div></div></div><div class="notif-row" onclick="showToast('跳转至离职手续');closeNotif()"><div class="n-dot"></div><div class="n-info"><div class="n-title">离职预警</div><div class="n-desc">赵六计划于6月1日离职</div><div class="n-time">昨天</div></div></div><div class="notif-row" onclick="showToast('查看确认进度');closeNotif()"><div class="n-dot" style="background:var(--t2);opacity:.4"></div><div class="n-info"><div class="n-title">工资确认提醒</div><div class="n-desc">4月工资尚有120人未确认</div><div class="n-time">昨天</div></div></div></div></div><div class="dropdown-menu" id="userMenu"><button class="menu-item" onclick="showToast('跳转至个人设置');closeUserMenu()"><i class="fas fa-user-cog"></i> 个人设置</button><button class="menu-item" onclick="showToast('跳转至账号安全');closeUserMenu()"><i class="fas fa-shield-alt"></i> 账号安全</button><div class="menu-divider"></div><button class="menu-item danger" onclick="showToast('已退出登录');closeUserMenu()"><i class="fas fa-sign-out-alt"></i> 退出登录</button></div></div></div>
+      <div class="portal-content" id="portalContent">
+        <div class="portal-page active" id="portal-home">
+          <h2 style="font-size:22px;margin-bottom:24px">仪表盘</h2>
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">1,247</div><div class="label">在岗员工</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--w)">18</div><div class="label">待审批</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--d)">6</div><div class="label">本月离职</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--s)">97.2%</div><div class="label">出勤率</div></div>
+          </div>
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="db-card"><div class="db-header"><h3>待审批事项</h3><a onclick="portalNav('portal-approve')" style="cursor:pointer">查看全部 →</a></div><div class="table-wrap"><table><tr><th>类型</th><th>申请人</th><th>部门</th><th>时间</th><th>操作</th></tr><tr><td><span class="badge badge-info">请假</span></td><td>李四</td><td>制造二部</td><td>10分钟前</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-info">补卡</span></td><td>王五</td><td>制造一部</td><td>1小时前</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-p0">离职</span></td><td>赵六</td><td>品质部</td><td>2小时前</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr></table></div></div>
+            <div class="db-card"><div class="db-header"><h3>快捷操作</h3></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><button class="btn btn-p btn-sm" onclick="showToast('跳转至新增员工页面')"><i class="fas fa-user-plus"></i> 新增员工</button><button class="btn btn-outline btn-sm" onclick="showToast('跳转至导入页面')"><i class="fas fa-upload"></i> 导入</button><button class="btn btn-outline btn-sm" onclick="showToast('正在导出报表...')"><i class="fas fa-download"></i> 导出报表</button><button class="btn btn-outline btn-sm" onclick="showToast('跳转至系统设置')"><i class="fas fa-cog"></i> 设置</button></div></div>
+          </div>
+          <div class="grid-2">
+            <div class="db-card"><div class="db-header"><h3>本月出勤趋势</h3></div><div style="display:flex;align-items:flex-end;height:120px;gap:8px;padding:12px 0"> <div style="flex:1;background:var(--pl);border-radius:4px 4px 0 0;height:70%;min-height:20px;text-align:center;font-size:10px;color:var(--t2);padding-top:4px">W1</div><div style="flex:1;background:var(--pl);border-radius:4px 4px 0 0;height:85%;min-height:20px;text-align:center;font-size:10px;color:var(--t2);padding-top:4px">W2</div><div style="flex:1;background:var(--pl);border-radius:4px 4px 0 0;height:75%;min-height:20px;text-align:center;font-size:10px;color:var(--t2);padding-top:4px">W3</div><div style="flex:1;background:var(--p);border-radius:4px 4px 0 0;height:92%;min-height:20px;text-align:center;font-size:10px;color:#fff;padding-top:4px">W4</div></div></div>
+            <div class="db-card"><div class="db-header"><h3>消息提醒规则</h3></div><table><tr><th>场景</th><th>推送对象</th><th>频率</th></tr><tr><td>考勤异常</td><td>员工</td><td>每3天</td></tr><tr><td>审批超期</td><td>审批人</td><td>每天</td></tr><tr><td>确认超期</td><td>直接上级</td><td>每天</td></tr><tr><td>离职预警</td><td>人事专员</td><td>提前3天</td></tr></table></div>
+          </div>
+        </div>
+        <div class="portal-page" id="portal-approve"><h2 style="font-size:22px;margin-bottom:24px">待审批</h2><div class="db-card"><div class="table-wrap"><table><tr><th>类型</th><th>申请人</th><th>工号</th><th>部门</th><th>详情</th><th>提交时间</th><th>操作</th></tr><tr><td><span class="badge badge-info">请假</span></td><td>李四</td><td>20240101</td><td>制造二部</td><td style="cursor:pointer" onclick="viewApprovalDetail('请假','李四','制造二部','2026-05-14 09:30','事假2天，家里有事需要处理','待审批')"><u>事假2天</u></td><td>2026-05-14 09:30</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-info">补卡</span></td><td>王五</td><td>20240102</td><td>制造一部</td><td style="cursor:pointer" onclick="viewApprovalDetail('补卡','王五','制造一部','2026-05-14 10:15','补卡申请：5月14日上午 忘记打卡','待审批')"><u>5/14上午</u></td><td>2026-05-14 10:15</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-p0">离职</span></td><td>赵六</td><td>20200015</td><td>品质部</td><td style="cursor:pointer" onclick="viewApprovalDetail('离职','赵六','品质部','2026-05-14 08:20','个人原因，最后工作日6月1日','待审批')"><u>个人原因</u></td><td>2026-05-14 08:20</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-info">销假</span></td><td>孙七</td><td>20240088</td><td>仓储部</td><td style="cursor:pointer" onclick="viewApprovalDetail('销假','孙七','仓储部','2026-05-13 16:40','提前返岗销假','待审批')"><u>提前返岗</u></td><td>2026-05-13 16:40</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-history"><h2 style="font-size:22px;margin-bottom:24px">审批记录</h2><div class="db-card"><div class="table-wrap"><table><tr><th>类型</th><th>申请人</th><th>结果</th><th>处理人</th><th>处理时间</th><th>操作</th></tr><tr class="clickable" onclick="viewApprovalDetail('请假','周八','制造一部','2026-05-13 14:20','事假3天，已休完','已通过')"><td><span class="badge badge-s">请假</span></td><td>周八</td><td><span class="badge badge-s">已通过</span></td><td>张经理</td><td>2026-05-13 14:20</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();viewApprovalDetail('请假','周八','制造一部','2026-05-13 14:20','事假3天，已休完','已通过')">详情</button></td></tr><tr class="clickable" onclick="viewApprovalDetail('补卡','吴九','制造二部','2026-05-13 11:00','补卡：5月12日下午忘记打卡','已通过')"><td><span class="badge badge-s">补卡</span></td><td>吴九</td><td><span class="badge badge-s">已通过</span></td><td>李主管</td><td>2026-05-13 11:00</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();viewApprovalDetail('补卡','吴九','制造二部','2026-05-13 11:00','补卡：5月12日下午忘记打卡','已通过')">详情</button></td></tr><tr class="clickable" onclick="viewApprovalDetail('离职','郑十','品质部','2026-05-12 16:30','个人原因辞职','已驳回')"><td><span class="badge badge-p0">离职</span></td><td>郑十</td><td><span class="badge badge-p0">已驳回</span></td><td>王经理</td><td>2026-05-12 16:30</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();viewApprovalDetail('离职','郑十','品质部','2026-05-12 16:30','个人原因辞职','已驳回')">详情</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-employee"><h2 style="font-size:22px;margin-bottom:24px">员工信息</h2><div style="display:flex;gap:12px;margin-bottom:16px"><select class="form-control" style="width:160px"><option>全部部门</option><option>制造一部</option><option>制造二部</option><option>品质部</option></select><select class="form-control" style="width:120px"><option>全部状态</option><option>在职</option><option>离职</option></select><button class="btn btn-p btn-sm" onclick="showToast('搜索中...')"><i class="fas fa-search"></i> 搜索</button></div><div class="db-card"><div class="table-wrap"><table><tr><th>工号</th><th>姓名</th><th>部门</th><th>岗位</th><th>状态</th><th>操作</th></tr><tr><td>20240101</td><td>张三</td><td>制造一部</td><td>针车工</td><td><span class="badge badge-s">在职</span></td><td><button class="btn btn-outline btn-sm" onclick="viewEmployeeDetail('张三','20240101','制造一部','针车工')">查看</button></td></tr><tr><td>20240102</td><td>李四</td><td>制造二部</td><td>成型工</td><td><span class="badge badge-s">在职</span></td><td><button class="btn btn-outline btn-sm" onclick="viewEmployeeDetail('李四','20240102','制造二部','成型工')">查看</button></td></tr><tr><td>20200015</td><td>赵六</td><td>品质部</td><td>质检员</td><td><span class="badge badge-p0">离职中</span></td><td><button class="btn btn-outline btn-sm" onclick="viewEmployeeDetail('赵六','20200015','品质部','质检员')">查看</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-transfer"><h2 style="font-size:22px;margin-bottom:24px">调动管理</h2><div class="db-card"><div class="table-wrap"><table><tr><th>姓名</th><th>原部门</th><th>目标部门</th><th>状态</th><th>操作</th></tr><tr><td>张三</td><td>制造一部</td><td>制造二部</td><td><span class="badge badge-p1">审批中</span></td><td><button class="btn btn-outline btn-sm" onclick="viewTransferDetail('张三','制造一部-针车课','制造二部-成型课','审批中')">查看</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-resign"><h2 style="font-size:22px;margin-bottom:24px">离职管理</h2><div class="db-card"><div class="table-wrap"><table><tr><th>姓名</th><th>部门</th><th>离职日期</th><th>状态</th><th>操作</th></tr><tr><td>赵六</td><td>品质部</td><td>2026-06-01</td><td><span class="badge badge-p1">审批中</span></td><td><button class="btn btn-outline btn-sm" onclick="viewResignDetail('赵六','品质部','2026-06-01','审批中')">查看</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-attendance"><h2 style="font-size:22px;margin-bottom:24px">考勤总览</h2><div class="grid-4" style="margin-bottom:24px"><div class="db-card stat-card" style="cursor:pointer" onclick="portalNav('portal-attendance')"><div class="num" style="color:var(--s)">97.2%</div><div class="label">出勤率</div></div><div class="db-card stat-card" style="cursor:pointer" onclick="showToast('查看请假中员工列表')"><div class="num" style="color:var(--w)">23</div><div class="label">请假中</div></div><div class="db-card stat-card" style="cursor:pointer" onclick="showToast('查看今日异常明细')"><div class="num" style="color:var(--d)">15</div><div class="label">今日异常</div></div><div class="db-card stat-card" style="cursor:pointer" onclick="showToast('查看确认详情')"><div class="num" style="color:var(--p)">89%</div><div class="label">确认率</div></div></div><div class="db-card"><div class="db-header"><h3>考勤确认统计</h3><a style="cursor:pointer" onclick="showToast('查看全部考勤统计')">查看全部 →</a></div><div class="table-wrap"><table><tr><th>部门</th><th>应确认</th><th>已确认</th><th>未确认</th><th>确认率</th><th>操作</th></tr><tr><td>制造一部</td><td>320</td><td>298</td><td>22</td><td>93%</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造一部未确认员工发送提醒')">提醒</button></td></tr><tr><td>制造二部</td><td>280</td><td>245</td><td>35</td><td>88%</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造二部未确认员工发送提醒')">提醒</button></td></tr><tr><td>品质部</td><td>85</td><td>80</td><td>5</td><td>94%</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向品质部未确认员工发送提醒')">提醒</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-salary"><h2 style="font-size:22px;margin-bottom:24px">薪酬管理</h2><div class="db-card"><div class="db-header"><h3>工资确认状态</h3></div><div class="table-wrap"><table><tr><th>部门</th><th>应确认</th><th>已确认</th><th>未确认</th><th>操作</th></tr><tr><td>制造一部</td><td>320</td><td>280</td><td>40</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造一部40名未确认员工发送提醒')">提醒</button></td></tr><tr><td>制造二部</td><td>280</td><td>230</td><td>50</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造二部50名未确认员工发送提醒')">提醒</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-rules"><h2 style="font-size:22px;margin-bottom:24px">提醒规则配置</h2><div class="db-card"><table><tr><th>场景</th><th>触发条件</th><th>推送对象</th><th>频率</th><th>操作</th></tr><tr><td>考勤异常</td><td>漏打卡/缺勤</td><td>员工</td><td>每3天</td><td><button class="btn btn-outline btn-sm" onclick="editRule('考勤异常','漏打卡/缺勤','员工','每3天')">编辑</button></td></tr><tr><td>审批超期</td><td>1天未审批</td><td>审批人</td><td>每天</td><td><button class="btn btn-outline btn-sm" onclick="editRule('审批超期','1天未审批','审批人','每天')">编辑</button></td></tr><tr><td>确认超期</td><td>1天未确认</td><td>直接上级</td><td>每天</td><td><button class="btn btn-outline btn-sm" onclick="editRule('确认超期','1天未确认','直接上级','每天')">编辑</button></td></tr><tr><td>离职预警</td><td>提前3天</td><td>人事专员</td><td>一次</td><td><button class="btn btn-outline btn-sm" onclick="editRule('离职预警','提前3天','人事专员','一次')">编辑</button></td></tr></table></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Portal Modal -->
+<div class="modal-overlay" id="portalModal" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3 id="modalTitle">详情</h3><button onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+// Mobile nav stack
+const mStack = ['home'];
+function mNav(page) {
+  const pages = document.querySelectorAll('.m-page');
+  pages.forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(page);
+  if (target) {
+    target.style.animation = 'mSlideIn .35s ease';
+    target.classList.add('active');
+  }
+  mStack.push(page);
+  updateMHeader();
+}
+function mGoBack() {
+  if (mStack.length <= 1) return;
+  mStack.pop();
+  const page = mStack[mStack.length - 1];
+  const pages = document.querySelectorAll('.m-page');
+  pages.forEach(p => p.classList.remove('active'));
+  const targetId = page === 'home' ? 'mp-home' : page;
+  const target = document.getElementById(targetId);
+  if (target) {
+    target.style.animation = 'mFadeIn .3s ease';
+    target.classList.add('active');
+  }
+  updateMHeader();
+}
+function updateMHeader() {
+  const titles = { 'home':'人事通','mp-tab-att':'考勤','mp-tab-approve':'审批','mp-tab-me':'我的','mp-att-alert':'考勤异常','mp-reissue':'补卡申请','mp-leave':'请假申请','mp-cancel-leave':'销假申请','mp-att-confirm':'考勤确认','mp-att-query':'考勤查询','mp-transfer':'调动申请','mp-resign':'离职申请','mp-resign-proc':'离职手续','mp-reissue-item':'工牌/厂服补领','mp-salary-confirm':'工资确认','mp-salary':'工资查询','mp-deduction':'扣款确认','mp-onboarding':'入职指引','mp-voucher':'福利券','mp-rules':'提醒规则','mp-leave-approve':'请假审批','mp-reissue-approve':'补卡审批' };
+  const current = mStack[mStack.length - 1];
+  document.getElementById('mTitle').textContent = titles[current] || '人事通';
+  document.getElementById('mBack').style.visibility = mStack.length > 1 ? 'visible' : 'hidden';
+}
+function mSwitchTab(tab, el) {
+  document.querySelectorAll('.bottom-nav .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  mStack.length = 0;
+  const tabHomes = { 'home': 'mp-home', 'att': 'mp-tab-att', 'approve': 'mp-tab-approve', 'me': 'mp-tab-me' };
+  const homeId = tabHomes[tab] || 'mp-home';
+  mStack.push(tab === 'home' ? 'home' : homeId);
+  updateMHeader();
+  const pages = document.querySelectorAll('.m-page');
+  pages.forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(homeId);
+  if (target) {
+    target.style.animation = 'mFadeIn .3s ease';
+    target.classList.add('active');
+  }
+}
+
+// PC Navigation
+function pcNav(pageId) {
+  document.querySelectorAll('.pc-page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.querySelectorAll('.pc-sidebar .nav-item').forEach(n => n.classList.remove('active'));
+  const nav = document.querySelector(`.pc-sidebar .nav-item[data-pc="${pageId}"]`);
+  if (nav) nav.classList.add('active');
+  const titles = { 'pc-home':'首页','pc-att-query':'考勤查询','pc-reissue':'补卡申请','pc-leave':'请假申请','pc-cancel-leave':'销假申请','pc-att-confirm':'考勤确认','pc-transfer':'调动申请','pc-resign':'离职申请','pc-resign-proc':'离职手续办理','pc-reissue-item':'工牌/厂服补领','pc-salary':'工资查询','pc-salary-confirm':'工资确认','pc-deduction':'扣款确认','pc-onboarding':'入职指引','pc-voucher':'福利券','pc-salary-detail':'工资明细' };
+  document.getElementById('pcBreadcrumb').textContent = titles[pageId] || '';
+}
+document.querySelectorAll('.pc-sidebar .nav-item').forEach(item => {
+  item.addEventListener('click', () => pcNav(item.dataset.pc));
+});
+
+// PC 考勤日历 - 点击日期查看详情
+// PC 考勤数据
+	const pcAttData = {
+	  4: {
+	    title: '2026年4月',
+	    startDay: 2, days: 30, worked: 20, absentTotal: 1, lateTotal: 1,
+	    leaveTotal: 1, anomalyTotal: 2, cumLate: 32, cumAbsent: 0, cumLeave: 1,
+	    dayData: {
+	      1:['正常出勤','08:00-12:00,13:00-17:30'],2:['正常出勤','08:00-12:00,13:00-17:30'],
+	      3:['正常出勤','08:01-12:00,13:00-17:30'],4:['正常出勤','07:58-12:00,13:00-17:30'],
+	      5:['休息',''],6:['休息',''],
+	      7:['迟到','08:32-12:00,13:00-17:30'],8:['正常出勤','08:00-12:00,13:00-17:30'],
+	      9:['正常出勤','08:00-12:00,13:00-17:30'],10:['正常出勤','08:00-12:00,13:00-17:30'],
+	      11:['正常出勤','08:00-12:00,13:00-17:30'],12:['休息',''],13:['休息',''],
+	      14:['正常出勤','08:00-12:00,13:00-17:30'],15:['事假','全天'],
+	      16:['正常出勤','08:02-12:00,13:00-17:30'],17:['正常出勤','08:00-12:00,13:00-17:30'],
+	      18:['正常出勤','08:00-12:00,13:00-17:30'],19:['正常出勤','08:00-12:00,13:00-17:30'],
+	      20:['正常出勤','08:00-12:00,13:00-17:30'],21:['正常出勤','08:00-12:00,13:00-17:30'],
+	      22:['正常出勤','08:00-12:00,13:00-17:30'],23:['正常出勤','08:00-12:00,13:00-17:30'],
+	      24:['正常出勤','08:00-12:00,13:00-17:30'],25:['正常出勤','08:00-12:00,13:00-17:30'],
+	      26:['休息',''],27:['休息',''],
+	      28:['正常出勤','08:00-12:00,13:00-17:30'],29:['正常出勤','08:00-12:00,13:00-17:30'],
+	      30:['正常出勤','08:00-12:00,13:00-17:30']
+	    },
+	    anomalies: [{d:7,s:'迟到','m':'08:32打卡，迟到32分钟','t':'08:32-12:00,13:00-17:30','e':'+32min'},{d:15,s:'事假','m':'全天请假','t':'全天','e':'1天'}]
+	  },
+	  5: {
+	    title: '2026年5月',
+	    startDay: 4, days: 31, worked: 19, absentTotal: 1, lateTotal: 2,
+	    leaveTotal: 1, anomalyTotal: 3, cumLate: 77, cumAbsent: 1, cumLeave: 1,
+	    dayData: {
+	      1:['正常出勤','08:01-12:00,13:00-17:30'],2:['正常出勤','08:00-12:00,13:00-17:30'],
+	      3:['休息',''],4:['正常出勤','08:02-12:00,13:00-17:30'],
+	      5:['正常出勤','07:58-12:00,13:00-17:30'],6:['正常出勤','08:00-12:00,13:00-17:30'],
+	      7:['正常出勤','08:00-12:00,13:00-17:30'],8:['正常出勤','08:00-12:00,13:00-17:30'],
+	      9:['迟到','08:35-12:00,13:00-17:30'],10:['正常出勤','08:00-12:00,13:00-17:30'],
+	      11:['正常出勤','08:00-12:00,13:00-17:30'],12:['正常出勤','08:00-12:00,13:00-17:30'],
+	      13:['正常出勤','08:00-12:00,13:00-17:30'],14:['正常出勤','08:00-12:00,13:00-17:30'],
+	      15:['正常出勤','08:00-12:00,13:00-17:30'],16:['事假','全天'],
+	      17:['正常出勤','08:00-12:00,13:00-17:30'],18:['正常出勤','08:00-12:00,13:00-17:30'],
+	      19:['正常出勤','08:00-12:00,13:00-17:30'],20:['正常出勤','08:00-12:00,13:00-17:30'],
+	      21:['正常出勤','08:00-12:00,13:00-17:30'],22:['旷工','未打卡'],
+	      23:['正常出勤','08:00-12:00,13:00-17:30'],24:['正常出勤','08:00-12:00,13:00-17:30'],
+	      25:['迟到','08:42-12:00,13:00-17:30'],26:['正常出勤','08:00-12:00,13:00-17:30'],
+	      27:['正常出勤','08:00-12:00,13:00-17:30'],28:['正常出勤','08:00-12:00,13:00-17:30'],
+	      29:['正常出勤','08:00-12:00,13:00-17:30'],30:['正常出勤','08:00-12:00,13:00-17:30'],
+	      31:['正常出勤','08:00-12:00,13:00-17:30']
+	    },
+	    anomalies: [{d:9,s:'迟到','m':'08:35打卡，迟到35分钟','t':'08:35-12:00,13:00-17:30','e':'+35min'},{d:16,s:'事假','m':'全天请假','t':'全天','e':'1天'},{d:22,s:'旷工','m':'全天未打卡','t':'未打卡','e':'全天'},{d:25,s:'迟到','m':'08:42打卡，迟到42分钟','t':'08:42-12:00,13:00-17:30','e':'+42min'}]
+	  },
+	  6: {
+	    title: '2026年6月',
+	    startDay: 0, days: 30, worked: 21, absentTotal: 0, lateTotal: 1,
+	    leaveTotal: 0, anomalyTotal: 1, cumLate: 15, cumAbsent: 0, cumLeave: 0,
+	    dayData: {
+	      1:['正常出勤','08:00-12:00,13:00-17:30'],2:['正常出勤','08:00-12:00,13:00-17:30'],
+	      3:['正常出勤','08:00-12:00,13:00-17:30'],4:['正常出勤','08:01-12:00,13:00-17:30'],
+	      5:['正常出勤','08:00-12:00,13:00-17:30'],6:['正常出勤','08:00-12:00,13:00-17:30'],
+	      7:['休息',''],8:['休息',''],
+	      9:['正常出勤','08:00-12:00,13:00-17:30'],10:['正常出勤','08:00-12:00,13:00-17:30'],
+	      11:['正常出勤','08:00-12:00,13:00-17:30'],12:['正常出勤','08:00-12:00,13:00-17:30'],
+	      13:['正常出勤','08:00-12:00,13:00-17:30'],14:['休息',''],15:['休息',''],
+	      16:['迟到','08:15-12:00,13:00-17:30'],17:['正常出勤','08:00-12:00,13:00-17:30'],
+	      18:['正常出勤','08:00-12:00,13:00-17:30'],19:['正常出勤','08:00-12:00,13:00-17:30'],
+	      20:['正常出勤','08:00-12:00,13:00-17:30'],21:['休息',''],22:['休息',''],
+	      23:['正常出勤','08:00-12:00,13:00-17:30'],24:['正常出勤','08:00-12:00,13:00-17:30'],
+	      25:['正常出勤','08:00-12:00,13:00-17:30'],26:['正常出勤','08:00-12:00,13:00-17:30'],
+	      27:['正常出勤','08:00-12:00,13:00-17:30'],28:['休息',''],29:['休息',''],
+	      30:['正常出勤','08:00-12:00,13:00-17:30']
+	    },
+	    anomalies: [{d:16,s:'迟到','m':'08:15打卡，迟到15分钟','t':'08:15-12:00,13:00-17:30','e':'+15min'}]
+	  }
+	};
+
+	// PC 考勤日历 - 渲染日历
+	function pcRenderAttCalendar(month) {
+	  const data = pcAttData[month];
+	  if (!data) return;
+	
+	  // Update title
+	  document.getElementById('pcAttMonthTitle').textContent = data.title;
+	
+	  // Render calendar days
+	  const daysEl = document.getElementById('pcAttDays');
+	  const clsMap = {
+	    '正常出勤':'att-end', '迟到':'att-late', '旷工':'att-absent',
+	    '事假':'att-leave', '病假':'att-leave', '出差':'att-business', '休息':'att-weekend'
+	  };
+	  const today = 14; // prototype showcase
+	  let html = '';
+	  for (let i = 0; i < data.startDay; i++) html += '<span></span>';
+	  for (let d = 1; d <= data.days; d++) {
+	    const dd = data.dayData[d];
+	    const status = dd ? dd[0] : '正常出勤';
+	    const cls = clsMap[status] || 'att-end';
+	    const isToday = (month == 5 && d === today) ? ' today' : '';
+	    const time = dd ? dd[1] : '';
+	    html += '<span class="day ' + cls + isToday + '" onclick="pcShowDayDetail(' + d + ',\'' + status + '\',\'' + time + '\')">';
+	    html += '<span class="day-num">' + d + '</span>';
+	    html += '<span class="status-dot"></span>';
+	    html += '</span>';
+	  }
+	  daysEl.innerHTML = html;
+	
+	  // Update summary
+	  document.getElementById('pcAttS1').textContent = data.worked + data.lateTotal + data.absentTotal + data.leaveTotal;
+	  document.getElementById('pcAttS2').textContent = data.worked;
+	  document.getElementById('pcAttS3').textContent = data.leaveTotal;
+	  document.getElementById('pcAttS4').textContent = data.anomalyTotal;
+	
+	  // Update cumulative
+	  document.getElementById('pcAttCum').innerHTML =
+	    '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>累计迟到</span><span><strong style="color:#D97706;font-size:16px">' + data.cumLate + '</strong> 分钟</span></div>' +
+	    '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>累计旷工</span><span><strong style="color:var(--d);font-size:16px">' + data.cumAbsent + '</strong> 天</span></div>' +
+	    '<div style="display:flex;justify-content:space-between"><span>累计请假</span><span><strong style="color:#D97706;font-size:16px">' + data.cumLeave + '</strong> 天</span></div>';
+	
+	  // Render anomaly list
+	  const anomalyList = document.getElementById('pcAttAnomalyList');
+	  const colors = { '迟到':'#FFEDD5','事假':'#FEF3C7','旷工':'#FEE8E8','病假':'#FEF3C7' };
+	  const txtColors = { '迟到':'#EA580C','事假':'#D97706','旷工':'var(--d)','病假':'#D97706' };
+	  const badgeColors = { '迟到':'badge-p1','事假':'badge-p1','旷工':'badge-p0','病假':'badge-p1' };
+	  if (data.anomalies.length === 0) {
+	    anomalyList.innerHTML = '<div style="text-align:center;padding:12px;color:var(--s);font-size:13px"><i class="fas fa-check-circle"></i> 本月无异常</div>';
+	  } else {
+	    let ah = '';
+	    for (const a of data.anomalies) {
+	      const bg = colors[a.s] || '#FFEDD5';
+	      const tc = txtColors[a.s] || '#EA580C';
+	      const bc = badgeColors[a.s] || 'badge-p1';
+	      ah += '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:' + bg + ';border-radius:8px;cursor:pointer" onclick="pcShowDayDetail(' + a.d + ',\'' + a.s + '\',\'' + a.t + '\')">';
+	      ah += '<span style="font-size:16px;font-weight:700;color:' + tc + ';min-width:44px">' + month + '/' + a.d + '</span>';
+	      ah += '<span style="flex:1"><span class="badge ' + bc + '" style="font-size:11px">' + a.s + '</span><span style="margin-left:8px;font-size:13px;color:var(--t2)">' + a.m + '</span></span>';
+	      ah += '<span style="font-size:13px;font-weight:600;color:' + tc + '">' + a.e + '</span></div>';
+	    }
+	    anomalyList.innerHTML = ah;
+	  }
+	
+	  document.getElementById('pcAttAnomalyCount').textContent = '本月共 ' + data.anomalies.length + ' 天异常';
+	
+	  // Reset detail view
+	  const detailEl = document.getElementById('pcDayDetail');
+	  detailEl.innerHTML = '<h3 style="font-size:14px;margin-bottom:12px;color:var(--t2)">点击日历中的日期查看详情</h3><div style="text-align:center;padding:20px 0;color:var(--t2);font-size:13px"><i class="fas fa-hand-pointer"></i> 点击日历中的日期查看打卡详情</div>';
+	}
+
+	// PC 考勤 - 切换月份
+	function pcAttQueryMonth(val) {
+	  pcRenderAttCalendar(parseInt(val));
+	  showToast('已切换至' + pcAttData[val].title);
+	}
+
+	// PC 考勤日历 - 点击日期查看详情
+	function pcShowDayDetail(day, status, time) {
+  const allDays = document.querySelectorAll('#pcAttDays .day');
+  allDays.forEach(el => el.classList.remove('selected'));
+  for (const el of allDays) {
+    const numEl = el.querySelector('.day-num');
+    if (numEl && parseInt(numEl.textContent) === day) {
+      el.classList.add('selected');
+      break;
+    }
+  }
+
+
+	  const el = document.getElementById('pcDayDetail');
+	  const icons = { '正常出勤':'fa-check-circle','迟到':'fa-clock','旷工':'fa-times-circle','事假':'fa-calendar-minus','病假':'fa-medkit' };
+	  const colors = { '正常出勤':'var(--s)','迟到':'#D97706','旷工':'var(--d)','事假':'#D97706','病假':'var(--p)' };
+	  const icon = icons[status] || 'fa-calendar';
+	  const color = colors[status] || 'var(--t2)';
+	  el.innerHTML = '<h3 style="font-size:14px;margin-bottom:12px;color:var(--t2)">' + pcAttMonthSelect.options[pcAttMonthSelect.selectedIndex].text + day + '日 打卡详情</h3>' +
+	    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><i class="fas ' + icon + '" style="font-size:20px;color:' + color + '"></i>' +
+	    '<span style="font-size:18px;font-weight:700;color:' + color + '">' + status + '</span></div>' +
+	    '<div style="background:var(--bg);border-radius:8px;padding:12px"><table style="width:100%;font-size:13px">' +
+	    '<tr><td style="padding:6px 8px;color:var(--t2)">打卡时间</td><td style="padding:6px 8px;font-weight:500">' + (status==='事假'?'全天 (已审批)':status==='旷工'?'未打卡':time) + '</td></tr>' +
+	    '<tr><td style="padding:6px 8px;color:var(--t2)">班次</td><td style="padding:6px 8px;font-weight:500">白班 (08:00-17:30)</td></tr>' +
+	    '<tr><td style="padding:6px 8px;border:none;color:var(--t2)">状态说明</td><td style="padding:6px 8px;border:none;font-weight:500">' + (status === '正常出勤' ? '✓ 正常' : status === '迟到' ? '⚠ 上班打卡晚于08:00' : status === '旷工' ? '✗ 未打卡' : status === '事假' ? '○ 已审批请假' : '') + '</td></tr>' +
+	    '</table></div>';
+	}
+
+// PC 工资查询 - 查看明细
+function pcShowSalary() {
+  pcNav('pc-salary-detail');
+}
+
+// Portal Navigation
+function portalNav(pageId) {
+  document.querySelectorAll('.portal-page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.querySelectorAll('.portal-sidebar .nav-item').forEach(n => n.classList.remove('active'));
+  const nav = document.querySelector(`.portal-sidebar .nav-item[data-portal="${pageId}"]`);
+  if (nav) nav.classList.add('active');
+}
+document.querySelectorAll('.portal-sidebar .nav-item').forEach(item => {
+  item.addEventListener('click', () => portalNav(item.dataset.portal));
+});
+
+// Portal Interactions
+let notifOpen = false, userMenuOpen = false;
+function toggleNotif() { const p = document.getElementById('notifPanel'); closeUserMenu(); notifOpen = !notifOpen; p.classList.toggle('show', notifOpen); }
+function closeNotif() { const p = document.getElementById('notifPanel'); if(p) p.classList.remove('show'); notifOpen = false; }
+function toggleUserMenu() { const m = document.getElementById('userMenu'); closeNotif(); userMenuOpen = !userMenuOpen; m.classList.toggle('show', userMenuOpen); }
+function closeUserMenu() { const m = document.getElementById('userMenu'); if(m) m.classList.remove('show'); userMenuOpen = false; }
+document.addEventListener('click', function(e) { if (!e.target.closest('.bell-wrap')&&!e.target.closest('#notifPanel')) closeNotif(); if (!e.target.closest('.user-dropdown')&&!e.target.closest('#userMenu')) closeUserMenu(); });
+
+function openModal(t, h, f) { document.getElementById('modalTitle').textContent=t; document.getElementById('modalBody').innerHTML=h; const ft=document.getElementById('modalFooter'); if(f){ft.innerHTML=f;ft.style.display='flex';}else{ft.style.display='none';} document.getElementById('portalModal').classList.add('show'); }
+function closeModal() { document.getElementById('portalModal').classList.remove('show'); }
+
+function viewApprovalDetail(type,name,dept,time,reason,status){
+  const c=status==='已通过'?'var(--s)':status==='已驳回'?'var(--d)':'var(--w)';
+  openModal('审批详情 — '+name,
+    '<div class="detail-grid"><div class="field"><label>审批类型</label><div class="value"><span class="badge badge-info">'+type+'</span></div></div><div class="field"><label>当前状态</label><div class="value"><span class="badge" style="background:'+c+'20;color:'+c+'">'+status+'</span></div></div><div class="field"><label>申请人</label><div class="value">'+name+'</div></div><div class="field"><label>部门</label><div class="value">'+dept+'</div></div><div class="field"><label>提交时间</label><div class="value">'+time+'</div></div><div class="field full"><label>申请内容</label><div class="value" style="padding:10px;background:var(--bg);border-radius:6px;font-weight:400">'+reason+'</div></div><div class="field full"><label>审批意见</label><div class="value" style="padding:10px;background:#FFFBEB;border-radius:6px;font-weight:400;color:#92400E">'+(status==='已通过'?'同意，已处理完毕。 — 张经理':status==='已驳回'?'不同意，请补充材料后重新提交。 — 王经理':'待审批')+'</div></div></div>');
+}
+
+function viewEmployeeDetail(name,id,dept,pos){
+  openModal('员工档案 — '+name,
+    '<div class="detail-grid"><div class="field"><label>姓名</label><div class="value">'+name+'</div></div><div class="field"><label>工号</label><div class="value">'+id+'</div></div><div class="field"><label>部门</label><div class="value">'+dept+'</div></div><div class="field"><label>岗位</label><div class="value">'+pos+'</div></div><div class="field"><label>状态</label><div class="value"><span class="badge badge-s">在职</span></div></div><div class="field"><label>入职日期</label><div class="value">2020-03-01</div></div><div class="field"><label>联系电话</label><div class="value">138****'+Math.floor(Math.random()*9000+1000)+'</div></div><div class="field full" style="margin-top:8px"><label>工作经历</label><div class="value" style="font-weight:400;line-height:1.8">2020-2022 制造一部 针车工<br>2022-2024 制造一部 组长<br>2024-至今 '+dept+' '+pos+'</div></div></div>');
+}
+
+function editRule(scene,condition,target,freq){
+  openModal('编辑提醒规则',
+    '<div class="form-group"><label>场景名称</label><input class="form-control" value="'+scene+'" readonly style="background:var(--bg)"></div><div class="form-group"><label>触发条件</label><input class="form-control" value="'+condition+'"></div><div class="form-group"><label>推送对象</label><select class="form-control"><option'+(target==='员工'?' selected':'')+'>员工</option><option'+(target==='审批人'?' selected':'')+'>审批人</option><option'+(target==='直接上级'?' selected':'')+'>直接上级</option><option'+(target==='人事专员'?' selected':'')+'>人事专员</option></select></div><div class="form-group"><label>推送频率</label><select class="form-control"><option'+(freq==='每3天'?' selected':'')+'>每3天</option><option'+(freq==='每天'?' selected':'')+'>每天</option><option'+(freq==='一次'?' selected':'')+'>一次</option></select></div>',
+    '<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-p" onclick="showToast(\'规则已保存\');closeModal()">保存</button>');
+}
+
+function viewTransferDetail(name,from,to,status){
+  openModal('调动详情 — '+name,
+    '<div class="detail-grid"><div class="field"><label>员工</label><div class="value">'+name+'</div></div><div class="field"><label>状态</label><div class="value"><span class="badge badge-p1">'+status+'</span></div></div><div class="field"><label>原部门</label><div class="value">'+from+'</div></div><div class="field"><label>目标部门</label><div class="value">'+to+'</div></div><div class="field full"><label>审批链进度</label><div class="value"><div class="approve-chain" style="margin-top:4px"><div class="node active"><span class="label">人事专员</span><span class="name">✓</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node active"><span class="label">员工确认</span><span class="name">✓</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node active"><span class="label">原上级</span><span class="name">✓</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node"><span class="label">原经理</span><span class="name">⏳</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node"><span class="label">现上级</span><span class="name">—</span></div></div></div></div></div>');
+}
+
+function viewResignDetail(name,dept,date,status){
+  openModal('离职详情 — '+name,
+    '<div class="detail-grid"><div class="field"><label>员工</label><div class="value">'+name+'</div></div><div class="field"><label>部门</label><div class="value">'+dept+'</div></div><div class="field"><label>计划离职日期</label><div class="value">'+date+'</div></div><div class="field"><label>状态</label><div class="value"><span class="badge badge-p0">'+status+'</span></div></div><div class="field full"><label>离职原因</label><div class="value" style="padding:10px;background:var(--bg);border-radius:6px;font-weight:400">个人原因，回老家发展</div></div><div class="field full"><label>手续进度</label><div class="value"><div class="checklist" style="margin-top:4px"><div class="item done"><div class="step-num" style="background:var(--s)">✓</div><div class="step-info"><div class="name">员工确认</div></div><span style="color:var(--s);font-size:12px">已完成</span></div><div class="item"><div class="step-num" style="background:var(--w)">2</div><div class="step-info"><div class="name">直接上级确认</div></div><span class="badge badge-p1" style="font-size:11px">待处理</span></div></div></div></div></div>');
+}
+
+// View switching
+function switchView(view) {
+  document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+  if (view === 'mobile') { document.getElementById('mobileView').style.display = 'flex'; }
+  else { document.getElementById(view + 'View').style.display = 'block'; }
+  document.querySelectorAll('.vs button[data-view]').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.vs button[data-view="${view}"]`);
+  if (btn) btn.classList.add('active');
+}
+document.querySelectorAll('.vs button[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Share
+function shareProto() {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: '人事通 — 原型方案', url: url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showToast('链接已复制，可分享给同事'));
+  } else {
+    showToast('请复制浏览器地址栏链接分享');
+  }
+}
+
+// Sidebar Resizers (PC + Portal)
+(function() {
+  function initResizer(resizerId, sidebarSelector, minW, maxW) {
+    var resizer = document.getElementById(resizerId);
+    if (!resizer) return;
+    var startX, startWidth;
+    resizer.addEventListener('mousedown', function(e) {
+      startX = e.clientX;
+      var sidebar = document.querySelector(sidebarSelector);
+      startWidth = sidebar.offsetWidth;
+      resizer.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      function onMove(e2) {
+        var dx = e2.clientX - startX;
+        var newWidth = Math.max(minW, Math.min(maxW, startWidth + dx));
+        sidebar.style.width = newWidth + 'px';
+      }
+      function onUp() {
+        resizer.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+  initResizer('pcResizer', '.pc-sidebar', 160, 400);
+  initResizer('portalResizer', '.portal-sidebar', 180, 420);
+})();
+
+
+// ===== AI Assistant =====
+let aiChatOpen = false;
+let aiVoiceOn = false;
+
+function toggleAiChat() {
+  const isMobile = document.getElementById('mobileView').style.display === 'flex';
+  const chat = document.getElementById(isMobile ? 'aiChatM' : 'aiChatPC');
+  const input = document.getElementById(isMobile ? 'aiInputM' : 'aiInputPC');
+  aiChatOpen = !aiChatOpen;
+  chat.classList.toggle('open', aiChatOpen);
+  if (aiChatOpen) { input.focus(); }
+  if (!aiChatOpen && aiVoiceOn) { aiVoiceOn = false; document.getElementById(isMobile ? 'aiVoiceBtnM' : 'aiVoiceBtnPC').classList.remove('recording'); }
+}
+
+function sendAiPreset(el) {
+  const isMobile = document.getElementById('mobileView').style.display === 'flex';
+  document.getElementById(isMobile ? 'aiInputM' : 'aiInputPC').value = el.textContent;
+  sendAiMessage();
+}
+
+function sendAiMessage() {
+  const isMobile = document.getElementById('mobileView').style.display === 'flex';
+  const input = document.getElementById(isMobile ? 'aiInputM' : 'aiInputPC');
+  const body = document.getElementById(isMobile ? 'aiChatBodyM' : 'aiChatBodyPC');
+  const text = input.value.trim();
+  if (!text) return;
+  const userMsg = document.createElement('div');
+  userMsg.className = 'ai-msg user';
+  userMsg.textContent = text;
+  body.appendChild(userMsg);
+  input.value = '';
+  body.scrollTop = body.scrollHeight;
+  const typing = document.createElement('div');
+  typing.className = 'ai-msg ai';
+  typing.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
+  body.appendChild(typing);
+  body.scrollTop = body.scrollHeight;
+  setTimeout(function() {
+    typing.remove();
+    var aiMsg = document.createElement('div');
+    aiMsg.className = 'ai-msg ai';
+    aiMsg.innerHTML = getAiResponse(text);
+    body.appendChild(aiMsg);
+    body.scrollTop = body.scrollHeight;
+  }, 1200 + Math.random() * 800);
+}
+
+function getAiResponse(text) {
+  if (text.indexOf('请假') >= 0) {
+    return '<div style="font-weight:600;margin-bottom:6px"><i class="fas fa-robot" style="color:#667EEA"></i> 好的，我来帮你提交请假申请</div>'
+      + '<div style="font-size:12px;color:var(--t2);margin-bottom:8px">根据你的信息，我已预填以下内容：</div>'
+      + '<div style="background:#F8F9FB;padding:10px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:8px">'
+      + '<div>📋 <b>类型：</b>事假</div>'
+      + '<div>📅 <b>日期：</b>2026-05-15 ~ 2026-05-16</div>'
+      + '<div>⏰ <b>天数：</b>2天</div>'
+      + '<div>📝 <b>事由：</b>' + (text.length > 10 ? text : '个人事务处理') + '</div>'
+      + '<div>👤 <b>审批人：</b>直接上级（李经理）</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:6px">'
+      + '<button class="btn btn-p btn-sm" style="font-size:11px;padding:6px 14px" onclick="showToast(&quot;已提交请假申请！AI 助手已自动生成请假单，提交至李经理审批&quot;)"><i class="fas fa-check"></i> 确认提交</button>'
+      + '<button class="btn btn-outline btn-sm" style="font-size:11px;padding:6px 14px" onclick="showToast(&quot;已取消&quot;)">修改</button>'
+      + '</div>';
+  }
+  if (text.indexOf('考勤') >= 0 || text.indexOf('打卡') >= 0) {
+    return '<div style="font-weight:600;margin-bottom:6px"><i class="fas fa-robot" style="color:#667EEA"></i> 你的考勤情况如下：</div>'
+      + '<div style="background:#F8F9FB;padding:10px;border-radius:8px;font-size:12px;line-height:1.6">'
+      + '<div>📅 <b>本月应出勤：</b>22天 | <b>实际出勤：</b>19天</div>'
+      + '<div>⚠️ <b>异常记录：</b>迟到2次（5/9、5/25）、旷工1次（5/22）</div>'
+      + '<div>🏖️ <b>请假：</b>1天（5/16 事假）</div>'
+      + '<div style="margin-top:6px;color:#D97706">💡 有2次迟到记录，建议及时处理补卡</div>'
+      + '</div>'
+      + '<div style="margin-top:8px"><a href="javascript:switchView(&quot;pc&quot;);pcNav(&quot;pc-att-query&quot;)" style="color:var(--p);font-size:12px"><i class="fas fa-external-link-alt"></i> 查看完整考勤 →</a></div>';
+  }
+  if (text.indexOf('补卡') >= 0) {
+    return '<div style="font-weight:600;margin-bottom:6px"><i class="fas fa-robot" style="color:#667EEA"></i> 帮你补卡</div>'
+      + '<div style="font-size:12px;color:var(--t2);margin-bottom:8px">检测到你最近有漏打卡记录：</div>'
+      + '<div style="background:#F8F9FB;padding:10px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:8px">'
+      + '<div>📅 <b>5月14日</b> 上午上班 漏打卡</div>'
+      + '<div>📅 <b>5月22日</b> 全天未打卡（旷工）</div>'
+      + '</div>'
+      + '<button class="btn btn-p btn-sm" style="font-size:11px;padding:6px 14px" onclick="showToast(&quot;已提交补卡申请！&quot;)"><i class="fas fa-check"></i> 一键补卡（5月14日）</button>';
+  }
+  if (text.indexOf('工资') >= 0) {
+    return '<div style="font-weight:600;margin-bottom:6px"><i class="fas fa-robot" style="color:#667EEA"></i> 你的工资信息：</div>'
+      + '<div style="background:#F8F9FB;padding:10px;border-radius:8px;font-size:12px;line-height:1.6">'
+      + '<div>💰 <b>2026年4月</b></div>'
+      + '<div>应发：<b>¥5,500.00</b> | 扣款：¥700.00</div>'
+      + '<div style="font-size:16px;font-weight:700;color:var(--p);margin-top:4px">实发：¥4,800.00</div>'
+      + '<div style="margin-top:4px;font-size:11px;color:var(--t2)">状态：<span style="color:var(--s)">✓ 已确认</span></div>'
+      + '</div>'
+      + '<div style="margin-top:8px"><a href="javascript:switchView(&quot;pc&quot;);pcNav(&quot;pc-salary-detail&quot;)" style="color:var(--p);font-size:12px"><i class="fas fa-external-link-alt"></i> 查看工资明细 →</a></div>';
+  }
+  return '<div><i class="fas fa-robot" style="color:#667EEA"></i> 收到你的问题！我是演示版 AI 助手，可以帮你：</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">'
+    + '<span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">帮我请假</span>'
+    + '<span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">查询考勤</span>'
+    + '<span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">我要补卡</span>'
+    + '<span style="padding:4px 10px;background:#EFF6FF;border-radius:12px;font-size:11px;color:#667EEA;cursor:pointer" onclick="sendAiPreset(this)">查工资</span>'
+    + '</div>';
+}
+
+function toggleAiVoice() {
+  const isMobile = document.getElementById('mobileView').style.display === 'flex';
+  const btn = document.getElementById(isMobile ? 'aiVoiceBtnM' : 'aiVoiceBtnPC');
+  const input = document.getElementById(isMobile ? 'aiInputM' : 'aiInputPC');
+  aiVoiceOn = !aiVoiceOn;
+  btn.classList.toggle('recording', aiVoiceOn);
+  if (aiVoiceOn) {
+    showToast('🎤 语音识别演示模式...（3秒后自动填入）');
+    setTimeout(function() {
+      if (aiVoiceOn) {
+        input.value = '帮我请假';
+        input.focus();
+        aiVoiceOn = false;
+        btn.classList.remove('recording');
+        showToast('语音识别完成！点击发送或按回车提交');
+      }
+    }, 3000);
+  }
+}
+
+
+// Init
+
+	// Init attendance calendar for May
+		switchView('mobile');
+		pcRenderAttCalendar(5);
+</script>
+</body>
+</html>
