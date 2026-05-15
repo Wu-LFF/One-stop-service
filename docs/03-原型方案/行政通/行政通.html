@@ -232,6 +232,31 @@ table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:1
 .approve-chain .node.active .name{color:var(--p)}
 .approve-chain .arrow{color:var(--t2);font-size:14px}
 @media(max-width:768px){.vs .vs-title{display:none}#mobileView .phone{width:100%;height:100%;border-radius:0}}
+
+/* ---- Colored table action buttons ---- */
+.btn-act{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:none;border-radius:4px;font-size:12px;cursor:pointer;transition:var(--trans);font-family:var(--font);font-weight:500}
+.btn-act-p{background:var(--pl);color:var(--p)}
+.btn-act-p:hover{background:#D6E4FB}
+.btn-act-s{background:#DCFCE7;color:#16A34A}
+.btn-act-s:hover{background:#BBF7D0}
+.btn-act-d{background:var(--di);color:var(--d)}
+.btn-act-d:hover{background:#FECACA}
+.btn-act-w{background:#FEF3C7;color:#D97706}
+.btn-act-w:hover{background:#FDE68A}
+
+/* ---- Menu card icon backgrounds per section ---- */
+#mp-aq-index .menu-card .icon{background:var(--pl);color:var(--p);border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+#mp-sh-index .menu-card .icon{background:#FEF3E2;color:#D97706;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+#mp-fl-index .menu-card .icon{background:#DCFCE7;color:#16A34A;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+#mp-qt-index .menu-card .icon{background:#F3F0FF;color:#7C3AED;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+
+/* ---- PC section title accent ---- */
+.pc-section-title{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.pc-section-title .bar{width:4px;height:22px;border-radius:2px;background:var(--p);flex-shrink:0}
+.pc-section-title .bar.green{background:var(--s)}
+.pc-section-title .bar.amber{background:var(--w)}
+.pc-section-title .bar.red{background:var(--d)}
+.pc-section-title h2{font-size:20px;font-weight:700}
 </style>
 </head>
 <body>
@@ -262,22 +287,22 @@ table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:1
         </div>
         <div class="menu-grid">
           <div class="menu-card" onclick="mNav('mp-aq-index')" style="border-color:#E8F0FE">
-            <span class="icon"><i class="fas fa-shield-alt"></i></span>
+            <span class="icon" style="background:var(--pl);color:var(--p)"><i class="fas fa-shield-alt"></i></span>
             <div class="name">安全板块</div>
             <div class="desc">物品放行·巡更·随手拍</div>
           </div>
           <div class="menu-card" onclick="mNav('mp-sh-index')" style="border-color:#FEF3E2">
-            <span class="icon"><i class="fas fa-home"></i></span>
+            <span class="icon" style="background:#FEF3E2;color:#D97706"><i class="fas fa-home"></i></span>
             <div class="name">生活板块</div>
             <div class="desc">住宿·报修·报餐·车位</div>
           </div>
           <div class="menu-card" onclick="mNav('mp-fl-index')" style="border-color:#F0FFF4">
-            <span class="icon"><i class="fas fa-gift"></i></span>
+            <span class="icon" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-gift"></i></span>
             <div class="name">福利服务</div>
             <div class="desc">补助·党建·学堂·厂服</div>
           </div>
           <div class="menu-card" onclick="mNav('mp-qt-index')" style="border-color:#F3F0FF">
-            <span class="icon"><i class="fas fa-clipboard-list"></i></span>
+            <span class="icon" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-clipboard-list"></i></span>
             <div class="name">其他服务</div>
             <div class="desc">调研·反馈·报修</div>
           </div>
@@ -591,9 +616,9 @@ table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:1
 
         <!-- PC: 安全·随手拍管理 -->
         <div class="pc-page active" id="pc-aq-sspt">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">安全隐患随手拍</h2><span style="font-size:13px;color:var(--t2)">共 12 条记录</span></div><button class="btn btn-sm btn-outline" onclick="showToast('已导出 Excel')"><i class="fas fa-download"></i> 导出</button></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">安全隐患随手拍</h2><span style="font-size:13px;color:var(--t2)">共 12 条记录</span></div><button class="btn-act btn-act-p" onclick="showToast('已导出 Excel')"><i class="fas fa-download"></i> 导出</button></div>
           <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><select class="form-control" style="width:auto;padding:6px 32px 6px 12px;font-size:12px"><option>全部状态</option><option>待处理</option><option>处理中</option><option>已整改</option></select><select class="form-control" style="width:auto;padding:6px 32px 6px 12px;font-size:12px"><option>全部分类</option><option>消防安全</option><option>用电安全</option><option>设备安全</option></select><input class="form-control" style="width:200px;padding:6px 12px;font-size:12px" placeholder="搜索关键词..."></div>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>编号</th><th>隐患分类</th><th>上报人</th><th>位置</th><th>上报时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>AQ-001</td><td>消防安全</td><td>张三</td><td>3号厂房东侧楼梯间</td><td>05-14 10:30</td><td><span class="badge badge-p1">待处理</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-aq-sspt-detail')">处理</button></td></tr><tr><td>AQ-002</td><td>用电安全</td><td>李四</td><td>食堂一楼取餐区</td><td>05-13 14:20</td><td><span class="badge badge-s">已整改</span></td><td><button class="btn btn-sm btn-outline" onclick="showToast('查看详情')">查看</button></td></tr><tr><td>AQ-003</td><td>设备安全</td><td>王五</td><td>2号厂房冲压区</td><td>05-12 09:15</td><td><span class="badge badge-info">处理中</span></td><td><button class="btn btn-sm btn-outline" onclick="showToast('查看详情')">查看</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>编号</th><th>隐患分类</th><th>上报人</th><th>位置</th><th>上报时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>AQ-001</td><td>消防安全</td><td>张三</td><td>3号厂房东侧楼梯间</td><td>05-14 10:30</td><td><span class="badge badge-p1">待处理</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-aq-sspt-detail')">处理</button></td></tr><tr><td>AQ-002</td><td>用电安全</td><td>李四</td><td>食堂一楼取餐区</td><td>05-13 14:20</td><td><span class="badge badge-s">已整改</span></td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-aq-sspt-detail')">查看</button></td></tr><tr><td>AQ-003</td><td>设备安全</td><td>王五</td><td>2号厂房冲压区</td><td>05-12 09:15</td><td><span class="badge badge-info">处理中</span></td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-aq-sspt-detail')">查看</button></td></tr></tbody></table></div>
         </div>
 
         <!-- PC: 安全·随手拍详情 -->
@@ -608,7 +633,7 @@ table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:1
         <!-- PC: 安全·巡更管理 -->
         <div class="pc-page" id="pc-aq-xgdk">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">安全巡更记录</h2><span style="font-size:13px;color:var(--t2)">今日 · A线 3号厂房</span></div><select class="form-control" style="width:auto;padding:6px 32px 6px 12px;font-size:12px"><option>今日</option><option>昨日</option><option>本周</option></select></div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700">6</div><div style="font-size:12px;color:var(--t2)">应巡点位</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--s)">5</div><div style="font-size:12px;color:var(--t2)">已巡点位</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--p)">83%</div><div style="font-size:12px;color:var(--t2)">完成率</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--d)">1</div><div style="font-size:12px;color:var(--t2)">异常数</div></div></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--p)">6</div><div style="font-size:12px;color:var(--t2)">应巡点位</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--s)">5</div><div style="font-size:12px;color:var(--t2)">已巡点位</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--p)">83%</div><div style="font-size:12px;color:var(--t2)">完成率</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--d)">1</div><div style="font-size:12px;color:var(--t2)">异常数</div></div></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div class="card"><div class="card-title">点位列表</div><table class="data-table"><thead><tr><th>点位</th><th>计划时间</th><th>实际打卡</th><th>状态</th></tr></thead><tbody><tr><td>北门出入口</td><td>08:00-08:15</td><td>08:15</td><td><span class="badge badge-s">正常</span></td></tr><tr><td>西侧围墙</td><td>08:15-08:30</td><td>08:32</td><td><span class="badge badge-s">正常</span></td></tr><tr><td>消防栓 1F</td><td>08:30-08:45</td><td>08:45</td><td><span class="badge badge-p0">异常</span></td></tr><tr><td>东侧楼梯间 1F</td><td>08:45-09:00</td><td>09:02</td><td><span class="badge badge-s">正常</span></td></tr><tr><td>东侧楼梯间 2F</td><td>09:00-09:15</td><td>09:18</td><td><span class="badge badge-s">正常</span></td></tr><tr><td>东侧楼梯间 3F</td><td>09:15-09:30</td><td>—</td><td><span class="badge" style="background:#F3F4F6;color:var(--t2)">未巡</span></td></tr></tbody></table></div>
             <div class="card"><div class="card-title">路线视图</div><div class="patrol-map-sim"><div class="route-line"></div><div class="pin green" style="left:10%;top:30%">北</div><div class="pin green" style="left:25%;top:55%">西</div><div class="pin red" style="left:40%;top:35%">消</div><div class="pin green" style="left:55%;top:60%">东1</div><div class="pin green" style="left:70%;top:40%">东2</div><div class="pin gray" style="left:85%;top:55%">东3</div></div></div>
@@ -618,64 +643,126 @@ table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:1
         <!-- PC: 生活·住宿管理 -->
         <div class="pc-page" id="pc-sh-zssq">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">住宿申请管理</h2><span style="font-size:13px;color:var(--t2)">共 8 条待处理</span></div><div style="display:flex;gap:8px"><select class="form-control" style="width:auto;padding:6px 32px 6px 12px;font-size:12px"><option>全部类型</option><option>入住</option><option>调换</option><option>退宿</option></select><select class="form-control" style="width:auto;padding:6px 32px 6px 12px;font-size:12px"><option>全部状态</option><option>待审核</option><option>已通过</option><option>已拒绝</option></select></div></div>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>编号</th><th>类型</th><th>申请人</th><th>宿舍</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>ZS-001</td><td>入住</td><td>张三</td><td>A栋3-205</td><td>05-14</td><td><span class="badge badge-p1">宿管审核</span></td><td><button class="btn btn-sm btn-p" onclick="showToast('审核通过')">审核</button></td></tr><tr><td>ZS-002</td><td>调换</td><td>李四</td><td>B栋5-101</td><td>05-14</td><td><span class="badge badge-s">已通过</span></td><td><button class="btn btn-sm btn-outline">查看</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>编号</th><th>类型</th><th>申请人</th><th>宿舍</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>ZS-001</td><td>入住</td><td>张三</td><td>A栋3-205</td><td>05-14</td><td><span class="badge badge-p1">宿管审核</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-sh-zssq-detail')">审核</button></td></tr><tr><td>ZS-002</td><td>调换</td><td>李四</td><td>B栋5-101</td><td>05-14</td><td><span class="badge badge-s">已通过</span></td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-sh-zssq-detail')">查看</button></td></tr></tbody></table></div>
+        </div>
+
+        <!-- PC: 生活·住宿申请详情 -->
+        <div class="pc-page" id="pc-sh-zssq-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="pcNav('pc-sh-zssq')"><i class="fas fa-arrow-left"></i> 返回列表</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card"><div class="card-title">申请信息</div><div style="font-size:13px;line-height:2"><div><strong>编号：</strong>ZS-001</div><div><strong>类型：</strong>入住申请</div><div><strong>申请人：</strong>张三（138****5678）</div><div><strong>部门：</strong>生产一部</div><div><strong>宿舍：</strong>A栋3-205</div><div><strong>时间：</strong>2026-05-14 09:30</div><div><strong>状态：</strong><span class="badge badge-p1">宿管审核</span></div></div></div>
+            <div class="card"><div class="card-title">审核进度</div><div class="progress-steps"><div class="progress-step done"><div class="dot done"><i class="fas fa-check"></i></div><div class="label">提交</div></div><div class="progress-step active"><div class="dot active">2</div><div class="label">宿管审核</div></div><div class="progress-step"><div class="dot pending">3</div><div class="label">后勤课长</div></div></div><div style="margin-top:16px"><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">审核意见</label><textarea class="form-control" rows="3" placeholder="请输入审核意见..."></textarea></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" onclick="showToast('已审核通过')">审核通过</button><button class="btn btn-sm btn-outline" onclick="showToast('已驳回')">驳回</button></div></div>
+          </div>
         </div>
 
         <!-- PC: 生活·报修管理 -->
         <div class="pc-page" id="pc-sh-ssbx">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">报修工单管理</h2><span style="font-size:13px;color:var(--t2)">共 3 个待接单</span></div></div>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>工单号</th><th>报修人</th><th>类型</th><th>宿舍</th><th>描述</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>BX-001</td><td>张三</td><td>水电</td><td>A栋3-205</td><td>水龙头漏水</td><td><span class="badge badge-p1">待接单</span></td><td><button class="btn btn-sm btn-p" onclick="showToast('已接单，派给李师傅')">接单</button></td></tr><tr><td>BX-002</td><td>王五</td><td>电器</td><td>C栋2-101</td><td>空调不制冷</td><td><span class="badge badge-info">维修中</span></td><td><button class="btn btn-sm btn-s" onclick="showToast('已完成')">完成</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>工单号</th><th>报修人</th><th>类型</th><th>宿舍</th><th>描述</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>BX-001</td><td>张三</td><td>水电</td><td>A栋3-205</td><td>水龙头漏水</td><td><span class="badge badge-p1">待接单</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-sh-ssbx-detail')">接单</button></td></tr><tr><td>BX-002</td><td>王五</td><td>电器</td><td>C栋2-101</td><td>空调不制冷</td><td><span class="badge badge-info">维修中</span></td><td><button class="btn btn-sm btn-s" onclick="pcNav('pc-sh-ssbx-detail')">完成</button></td></tr></tbody></table></div>
+        </div>
+
+        <!-- PC: 生活·报修工单详情 -->
+        <div class="pc-page" id="pc-sh-ssbx-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="pcNav('pc-sh-ssbx')"><i class="fas fa-arrow-left"></i> 返回列表</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card"><div class="card-title">工单信息</div><div style="font-size:13px;line-height:2"><div><strong>工单号：</strong>BX-001</div><div><strong>报修人：</strong>张三（138****5678）</div><div><strong>类型：</strong>水电</div><div><strong>宿舍：</strong>A栋3-205</div><div><strong>描述：</strong>水龙头关不紧，一直滴水</div><div><strong>时间：</strong>2026-05-14 09:00</div><div><strong>状态：</strong><span class="badge badge-p1">待接单</span></div></div></div>
+            <div class="card"><div class="card-title">工单进度</div><div class="progress-steps"><div class="progress-step done"><div class="dot done"><i class="fas fa-check"></i></div><div class="label">已提交</div></div><div class="progress-step active"><div class="dot active">2</div><div class="label">待接单</div></div><div class="progress-step"><div class="dot pending">3</div><div class="label">已完成</div></div></div><div style="margin-top:16px"><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">维修人员</label><select class="form-control" style="appearance:none"><option>李师傅（水电）</option><option>王师傅（水电）</option></select></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" onclick="showToast('已接单，派给李师傅')"><i class="fas fa-check"></i> 接单</button><button class="btn btn-sm btn-outline" onclick="showToast('已转派')">转派</button></div></div>
+          </div>
         </div>
 
         <!-- PC: 生活·报餐统计 -->
         <div class="pc-page" id="pc-sh-bc">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">报餐统计</h2><span style="font-size:13px;color:var(--t2)">2026年6月</span></div></div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px"><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700">1,286</div><div style="font-size:12px;color:var(--t2)">报餐总人数</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--s)">31</div><div style="font-size:12px;color:var(--t2)">报餐天数</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--p)">2</div><div style="font-size:12px;color:var(--t2)">用餐地点</div></div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px"><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--p)">1,286</div><div style="font-size:12px;color:var(--t2)">报餐总人数</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--s)">31</div><div style="font-size:12px;color:var(--t2)">报餐天数</div></div><div class="card" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--p)">2</div><div style="font-size:12px;color:var(--t2)">用餐地点</div></div></div>
           <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>食堂</th><th>报餐人数</th><th>占比</th></tr></thead><tbody><tr><td>园区食堂</td><td>892</td><td>69.4%</td></tr><tr><td>第二食堂</td><td>394</td><td>30.6%</td></tr></tbody></table></div>
         </div>
 
         <!-- PC: 生活·车位管理 -->
         <div class="pc-page" id="pc-sh-cwsq">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">车位申请管理</h2><span style="font-size:13px;color:var(--t2)">共 15 条申请</span></div><button class="btn btn-sm btn-outline" onclick="showToast('摇号结果已公示')"><i class="fas fa-bullhorn"></i> 公示结果</button></div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px"><div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:700">15</div><div style="font-size:12px;color:var(--t2)">申请数</div></div><div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:700;color:var(--p)">150</div><div style="font-size:12px;color:var(--t2)">可用车位</div></div><div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:700;color:var(--w)">06-01</div><div style="font-size:12px;color:var(--t2)">下次摇号</div></div></div>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>申请人</th><th>部门</th><th>车牌号</th><th>申请时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>张三</td><td>生产一部</td><td>闽C·12345</td><td>05-14</td><td><span class="badge badge-p1">待摇号</span></td><td><button class="btn btn-sm btn-p" onclick="showToast('已审核通过')">审核</button></td></tr><tr><td>李四</td><td>生产二部</td><td>闽C·67890</td><td>05-13</td><td><span class="badge badge-s">已中签</span></td><td><button class="btn btn-sm btn-outline">查看</button></td></tr></tbody></table></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><h2 style="font-size:20px;margin-bottom:4px">车位申请管理</h2><span style="font-size:13px;color:var(--t2)">共 15 条申请</span></div><button class="btn-act btn-act-p" onclick="showToast('摇号结果已公示')"><i class="fas fa-bullhorn"></i> 公示结果</button></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px"><div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:700;color:var(--p)">15</div><div style="font-size:12px;color:var(--t2)">申请数</div></div><div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:700;color:var(--p)">150</div><div style="font-size:12px;color:var(--t2)">可用车位</div></div><div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:700;color:var(--w)">06-01</div><div style="font-size:12px;color:var(--t2)">下次摇号</div></div></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>申请人</th><th>部门</th><th>车牌号</th><th>申请时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>张三</td><td>生产一部</td><td>闽C·12345</td><td>05-14</td><td><span class="badge badge-p1">待摇号</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-sh-cwsq-detail')">审核</button></td></tr><tr><td>李四</td><td>生产二部</td><td>闽C·67890</td><td>05-13</td><td><span class="badge badge-s">已中签</span></td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-sh-cwsq-detail')">查看</button></td></tr></tbody></table></div>
+        </div>
+
+        <!-- PC: 生活·车位申请详情 -->
+        <div class="pc-page" id="pc-sh-cwsq-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="pcNav('pc-sh-cwsq')"><i class="fas fa-arrow-left"></i> 返回列表</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card"><div class="card-title">申请信息</div><div style="font-size:13px;line-height:2"><div><strong>申请人：</strong>张三</div><div><strong>部门：</strong>生产一部</div><div><strong>工号：</strong>EMP001</div><div><strong>车牌号：</strong>闽C·12345</div><div><strong>联系电话：</strong>138****5678</div><div><strong>申请时间：</strong>2026-05-14</div><div><strong>状态：</strong><span class="badge badge-p1">待摇号</span></div></div></div>
+            <div class="card"><div class="card-title">处理</div><div style="font-size:13px;line-height:2"><strong>摇号信息</strong><br>下次摇号：2026-06-01 10:00<br>可用车位：150 个<br>当前申请：15 人</div><div style="margin-top:16px"><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">审核意见</label><select class="form-control" style="appearance:none"><option>审核通过</option><option>资料不齐，退回</option><option>不符合条件</option></select></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" onclick="showToast('已审核通过')">确认审核</button></div></div>
+          </div>
         </div>
 
         <!-- PC: 福利·困难补助 -->
         <div class="pc-page" id="pc-fl-knbz">
           <h2 style="font-size:20px;margin-bottom:16px">困难补助管理</h2>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>编号</th><th>申请人</th><th>类型</th><th>金额</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>KB-001</td><td>张三</td><td>大病医疗</td><td>¥3,000</td><td>05-14</td><td><span class="badge badge-p1">部门审核</span></td><td><button class="btn btn-sm btn-p" onclick="showToast('已审核')">审核</button></td></tr><tr><td>KB-002</td><td>李四</td><td>意外事故</td><td>¥5,000</td><td>05-10</td><td><span class="badge badge-s">已发放</span></td><td><button class="btn btn-sm btn-outline">查看</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>编号</th><th>申请人</th><th>类型</th><th>金额</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>KB-001</td><td>张三</td><td>大病医疗</td><td>¥3,000</td><td>05-14</td><td><span class="badge badge-p1">部门审核</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-fl-knbz-detail')">审核</button></td></tr><tr><td>KB-002</td><td>李四</td><td>意外事故</td><td>¥5,000</td><td>05-10</td><td><span class="badge badge-s">已发放</span></td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-fl-knbz-detail')">查看</button></td></tr></tbody></table></div>
+        </div>
+
+        <!-- PC: 福利·困难补助详情 -->
+        <div class="pc-page" id="pc-fl-knbz-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="pcNav('pc-fl-knbz')"><i class="fas fa-arrow-left"></i> 返回列表</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card"><div class="card-title">申请信息</div><div style="font-size:13px;line-height:2"><div><strong>编号：</strong>KB-001</div><div><strong>申请人：</strong>张三（138****5678）</div><div><strong>类型：</strong>大病医疗</div><div><strong>金额：</strong>¥3,000</div><div><strong>事由：</strong>家属重病住院，医疗费用较高</div><div><strong>时间：</strong>2026-05-14</div><div><strong>状态：</strong><span class="badge badge-p1">部门审核</span></div></div></div>
+            <div class="card"><div class="card-title">审核处理</div><div style="margin-top:4px"><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">审核意见</label><textarea class="form-control" rows="3" placeholder="请输入审核意见..."></textarea></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" onclick="showToast('已审核通过')">审核通过</button><button class="btn btn-sm btn-outline" onclick="showToast('已驳回')">驳回</button></div></div>
+          </div>
         </div>
 
         <!-- PC: 福利·党建管理 -->
         <div class="pc-page" id="pc-fl-hxdd">
           <h2 style="font-size:20px;margin-bottom:16px">党建管理</h2>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>申请人</th><th>类型</th><th>部门</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>张三</td><td>入党申请</td><td>生产一部</td><td>05-14</td><td><span class="badge badge-p1">支部审核</span></td><td><button class="btn btn-sm btn-p" onclick="showToast('审核')">审核</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>申请人</th><th>类型</th><th>部门</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>张三</td><td>入党申请</td><td>生产一部</td><td>05-14</td><td><span class="badge badge-p1">支部审核</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-fl-knbz-detail')">审核</button></td></tr></tbody></table></div>
         </div>
 
         <!-- PC: 福利·学堂/补贴 -->
         <div class="pc-page" id="pc-fl-school">
           <h2 style="font-size:20px;margin-bottom:16px">四点半学堂 &amp; 幼儿园补贴</h2>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>类型</th><th>申请人</th><th>子女</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>四点半学堂</td><td>张三</td><td>张小明</td><td>05-14</td><td><span class="badge badge-p1">待审核</span></td><td><button class="btn btn-sm btn-p" onclick="showToast('已审核')">审核</button></td></tr><tr><td>幼儿园补贴</td><td>李四</td><td>李小华</td><td>05-12</td><td><span class="badge badge-s">已发放</span></td><td><button class="btn btn-sm btn-outline">查看</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>类型</th><th>申请人</th><th>子女</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>四点半学堂</td><td>张三</td><td>张小明</td><td>05-14</td><td><span class="badge badge-p1">待审核</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-fl-school-detail')">审核</button></td></tr><tr><td>幼儿园补贴</td><td>李四</td><td>李小华</td><td>05-12</td><td><span class="badge badge-s">已发放</span></td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-fl-school-detail')">查看</button></td></tr></tbody></table></div>
+        </div>
+
+        <!-- PC: 福利·学堂/补贴详情 -->
+        <div class="pc-page" id="pc-fl-school-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="pcNav('pc-fl-school')"><i class="fas fa-arrow-left"></i> 返回列表</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card"><div class="card-title">申请信息</div><div style="font-size:13px;line-height:2"><div><strong>类型：</strong>四点半学堂</div><div><strong>申请人：</strong>张三（138****5678）</div><div><strong>子女：</strong>张小明</div><div><strong>子女身份证：</strong>350************5678</div><div><strong>时间：</strong>2026-05-14</div><div><strong>状态：</strong><span class="badge badge-p1">待审核</span></div></div></div>
+            <div class="card"><div class="card-title">证明材料</div><div style="display:flex;gap:8px;flex-wrap:wrap"><div style="width:80px;height:80px;background:var(--pl);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--p)"><i class="fas fa-file-alt"></i></div><div style="width:80px;height:80px;background:#FEF3E2;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#D97706"><i class="fas fa-id-card"></i></div></div><div style="margin-top:16px"><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">审核意见</label><select class="form-control" style="appearance:none"><option>审核通过</option><option>补充材料</option><option>不符合条件</option></select></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" onclick="showToast('已审核通过')">确认审核</button></div></div>
+          </div>
         </div>
 
         <!-- PC: 福利·厂服管理 -->
         <div class="pc-page" id="pc-fl-cflq">
           <h2 style="font-size:20px;margin-bottom:16px">厂服管理</h2>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>申请人</th><th>尺码</th><th>件数</th><th>原因</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>张三</td><td>M</td><td>2</td><td>新入职</td><td>05-14</td><td><span class="badge badge-p1">组长审核</span></td><td><button class="btn btn-sm btn-p" onclick="showToast('已审核')">审核</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>申请人</th><th>尺码</th><th>件数</th><th>原因</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>张三</td><td>M</td><td>2</td><td>新入职</td><td>05-14</td><td><span class="badge badge-p1">组长审核</span></td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-fl-knbz-detail')">审核</button></td></tr></tbody></table></div>
         </div>
 
         <!-- PC: 其他·调研管理 -->
         <div class="pc-page" id="pc-qt-myd">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:20px">调研管理</h2><button class="btn btn-p btn-sm" onclick="showToast('创建新问卷')"><i class="fas fa-plus"></i> 创建问卷</button></div>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>问卷名称</th><th>状态</th><th>参与人数</th><th>发布时间</th><th>截止日期</th><th>操作</th></tr></thead><tbody><tr><td>5月食堂满意度</td><td><span class="badge badge-s">进行中</span></td><td>328</td><td>05-01</td><td>05-31</td><td><div style="display:flex;gap:4px"><button class="btn btn-sm btn-outline" onclick="showToast('查看统计')">统计</button><button class="btn btn-sm btn-outline">关闭</button></div></td></tr><tr><td>宿舍环境满意度</td><td><span class="badge" style="background:#F3F4F6;color:var(--t2)">已结束</span></td><td>156</td><td>04-15</td><td>04-30</td><td><button class="btn btn-sm btn-outline" onclick="showToast('查看统计')">统计</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>问卷名称</th><th>状态</th><th>参与人数</th><th>发布时间</th><th>截止日期</th><th>操作</th></tr></thead><tbody><tr><td>5月食堂满意度</td><td><span class="badge badge-s">进行中</span></td><td>328</td><td>05-01</td><td>05-31</td><td><div style="display:flex;gap:4px"><button class="btn-act btn-act-p" onclick="pcNav('pc-qt-myd-stats')">统计</button><button class="btn-act btn-act-w">关闭</button></div></td></tr><tr><td>宿舍环境满意度</td><td><span class="badge" style="background:#F3F4F6;color:var(--t2)">已结束</span></td><td>156</td><td>04-15</td><td>04-30</td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-qt-myd-stats')">统计</button></td></tr></tbody></table></div>
           <div class="card" style="margin-top:12px"><div class="card-title"><i class="fas fa-chart-bar"></i> 统计概览 · 5月食堂满意度</div><div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px"><div style="flex:1;min-width:120px;background:#F0FFF4;border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--s)">52%</div><div style="font-size:12px;color:var(--t2)">非常满意</div></div><div style="flex:1;min-width:120px;background:var(--pl);border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--p)">28%</div><div style="font-size:12px;color:var(--t2)">满意</div></div><div style="flex:1;min-width:120px;background:#FEF3E2;border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--w)">15%</div><div style="font-size:12px;color:var(--t2)">一般</div></div><div style="flex:1;min-width:120px;background:#FDE8E8;border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--d)">5%</div><div style="font-size:12px;color:var(--t2)">不满意</div></div></div></div>
+        </div>
+
+        <!-- PC: 其他·调研统计详情 -->
+        <div class="pc-page" id="pc-qt-myd-stats">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="pcNav('pc-qt-myd')"><i class="fas fa-arrow-left"></i> 返回列表</span></div>
+          <div class="card"><div class="card-title"><i class="fas fa-chart-bar"></i> 统计详情 · 5月食堂满意度</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"><div style="background:#F0FFF4;border-radius:8px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--s)">52%</div><div style="font-size:12px;color:var(--t2)">非常满意</div><div style="font-size:11px;color:var(--t2)">171人</div></div><div style="background:var(--pl);border-radius:8px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--p)">28%</div><div style="font-size:12px;color:var(--t2)">满意</div><div style="font-size:11px;color:var(--t2)">92人</div></div><div style="background:#FEF3E2;border-radius:8px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#D97706">15%</div><div style="font-size:12px;color:var(--t2)">一般</div><div style="font-size:11px;color:var(--t2)">49人</div></div><div style="background:#FDE8E8;border-radius:8px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--d)">5%</div><div style="font-size:12px;color:var(--t2)">不满意</div><div style="font-size:11px;color:var(--t2)">16人</div></div></div>
+          </div>
+          <div class="card" style="margin-top:12px"><div class="card-title"><i class="fas fa-comment-dots"></i> 典型评论</div><div style="display:flex;flex-direction:column;gap:8px"><div style="padding:10px;background:#F9FAFB;border-radius:8px;font-size:13px"><div style="font-weight:600">菜品口味不错</div><div style="color:var(--t2);margin-top:2px">—— 匿名 · 05-15</div></div><div style="padding:10px;background:#F9FAFB;border-radius:8px;font-size:13px"><div style="font-weight:600">价格偏贵，希望调整</div><div style="color:var(--t2);margin-top:2px">—— 匿名 · 05-14</div></div><div style="padding:10px;background:#F9FAFB;border-radius:8px;font-size:13px"><div style="font-weight:600">希望能增加素食窗口</div><div style="color:var(--t2);margin-top:2px">—— 匿名 · 05-13</div></div></div></div>
         </div>
 
         <!-- PC: 其他·反馈管理 -->
         <div class="pc-page" id="pc-qt-yjfk">
           <h2 style="font-size:20px;margin-bottom:16px">意见反馈管理</h2>
-          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>主题</th><th>类型</th><th>提交人</th><th>时间</th><th>状态</th><th>处理时限</th><th>操作</th></tr></thead><tbody><tr><td>食堂菜价偏高</td><td>建议</td><td>张三</td><td>05-14</td><td><span class="badge badge-p1">处理中</span></td><td>05-15</td><td><button class="btn btn-sm btn-p" onclick="showToast('回复')">回复</button></td></tr><tr><td>宿舍热水不稳定</td><td>投诉</td><td>李四</td><td>05-12</td><td><span class="badge badge-s">已完成</span></td><td>—</td><td><button class="btn btn-sm btn-outline">查看</button></td></tr><tr><td>APP闪退</td><td>BUG</td><td>王五</td><td>05-11</td><td><span class="badge badge-p0">超时</span></td><td>05-12</td><td><button class="btn btn-sm" style="background:var(--d);color:#fff" onclick="showToast('紧急处理')">紧急</button></td></tr></tbody></table></div>
+          <div class="card" style="padding:0;overflow:hidden"><table class="data-table"><thead><tr><th>主题</th><th>类型</th><th>提交人</th><th>时间</th><th>状态</th><th>处理时限</th><th>操作</th></tr></thead><tbody><tr><td>食堂菜价偏高</td><td>建议</td><td>张三</td><td>05-14</td><td><span class="badge badge-p1">处理中</span></td><td>05-15</td><td><button class="btn btn-sm btn-p" onclick="pcNav('pc-qt-yjfk-detail')">回复</button></td></tr><tr><td>宿舍热水不稳定</td><td>投诉</td><td>李四</td><td>05-12</td><td><span class="badge badge-s">已完成</span></td><td>—</td><td><button class="btn-act btn-act-p" onclick="pcNav('pc-qt-yjfk-detail')">查看</button></td></tr><tr><td>APP闪退</td><td>BUG</td><td>王五</td><td>05-11</td><td><span class="badge badge-p0">超时</span></td><td>05-12</td><td><button class="btn btn-sm" style="background:var(--d);color:#fff" onclick="pcNav('pc-qt-yjfk-detail')">紧急</button></td></tr></tbody></table></div>
+        </div>
+
+        <!-- PC: 其他·反馈详情 -->
+        <div class="pc-page" id="pc-qt-yjfk-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="pcNav('pc-qt-yjfk')"><i class="fas fa-arrow-left"></i> 返回列表</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card"><div class="card-title">反馈信息</div><div style="font-size:13px;line-height:2"><div><strong>主题：</strong>食堂菜价偏高</div><div><strong>类型：</strong>建议</div><div><strong>提交人：</strong>张三（138****5678）</div><div><strong>时间：</strong>2026-05-14 10:30</div><div><strong>状态：</strong><span class="badge badge-p1">处理中</span></div><div><strong>内容：</strong>最近食堂菜价上涨明显，建议恢复原价。</div></div></div>
+            <div class="card"><div class="card-title">处理</div><div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">处理时限</label><div style="font-size:13px;color:var(--t2);margin-bottom:12px">处理截止：05-15 10:30（剩余 1 天）</div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">回复内容</label><textarea class="form-control" rows="3" placeholder="请输入回复内容...">感谢您的反馈，已收到您的建议。我们将与食堂承包商沟通，5个工作日内给您答复。</textarea></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" onclick="showToast('已回复')">回复</button><button class="btn btn-sm" style="background:var(--d);color:#fff" onclick="showToast('已升级为紧急')">标记紧急</button></div></div>
+          </div>
         </div>
 
       </div>
@@ -702,51 +789,186 @@ table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:1
         <div class="portal-page active" id="portal-aq-xgdk">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px">巡更路线与点位配置</h2><button class="btn btn-p btn-sm" onclick="showToast('新增路线')"><i class="fas fa-plus"></i> 新增路线</button></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div class="card"><div class="card-title">巡查路线</div><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#F0F6FF;border-radius:6px;font-size:13px"><span><strong>A线</strong> - 3号厂房</span><span style="color:var(--p);font-size:12px;cursor:pointer">编辑</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fff;border-radius:6px;font-size:13px;border:1px solid var(--bd)"><span><strong>B线</strong> - 2号厂房</span><span style="color:var(--p);font-size:12px;cursor:pointer">编辑</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fff;border-radius:6px;font-size:13px;border:1px solid var(--bd)"><span><strong>C线</strong> - 生活区</span><span style="color:var(--p);font-size:12px;cursor:pointer">编辑</span></div></div><div style="margin-top:12px"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">安保员分配</label><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-info">A线 → 陈强</span><span class="badge badge-info">B线 → 刘明</span><span class="badge badge-info">C线 → 赵刚</span></div></div></div>
-            <div class="card"><div class="card-title">点位配置（A线）</div><table class="data-table"><thead><tr><th>排序</th><th>点位名称</th><th>GPS坐标</th><th>操作</th></tr></thead><tbody><tr><td>1</td><td>北门出入口</td><td style="font-size:11px">24.813,118.568</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>2</td><td>西侧围墙</td><td style="font-size:11px">24.812,118.565</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>3</td><td>消防栓 1F</td><td style="font-size:11px">24.811,118.570</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>4</td><td>东侧楼梯间1F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>5</td><td>东侧楼梯间2F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>6</td><td>东侧楼梯间3F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table><div style="margin-top:8px"><button class="btn btn-sm btn-outline" onclick="showToast('新增点位')"><i class="fas fa-plus"></i> 新增点位</button></div></div>
+            <div class="card"><div class="card-title">巡查路线</div><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#F0F6FF;border-radius:6px;font-size:13px"><span><strong>A线</strong> - 3号厂房</span><span style="color:var(--p);font-size:12px;cursor:pointer" onclick="portalNav('portal-aq-xgdk-route-edit')">编辑</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fff;border-radius:6px;font-size:13px;border:1px solid var(--bd)"><span><strong>B线</strong> - 2号厂房</span><span style="color:var(--p);font-size:12px;cursor:pointer" onclick="portalNav('portal-aq-xgdk-route-edit')">编辑</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fff;border-radius:6px;font-size:13px;border:1px solid var(--bd)"><span><strong>C线</strong> - 生活区</span><span style="color:var(--p);font-size:12px;cursor:pointer" onclick="portalNav('portal-aq-xgdk-route-edit')">编辑</span></div></div><div style="margin-top:12px"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">安保员分配</label><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-info">A线 → 陈强</span><span class="badge badge-info">B线 → 刘明</span><span class="badge badge-info">C线 → 赵刚</span></div></div></div>
+            <div class="card"><div class="card-title">点位配置（A线）</div><table class="data-table"><thead><tr><th>排序</th><th>点位名称</th><th>GPS坐标</th><th>操作</th></tr></thead><tbody><tr><td>1</td><td>北门出入口</td><td style="font-size:11px">24.813,118.568</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-xgdk-point-edit')">编辑</span></td></tr><tr><td>2</td><td>西侧围墙</td><td style="font-size:11px">24.812,118.565</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-xgdk-point-edit')">编辑</span></td></tr><tr><td>3</td><td>消防栓 1F</td><td style="font-size:11px">24.811,118.570</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-xgdk-point-edit')">编辑</span></td></tr><tr><td>4</td><td>东侧楼梯间1F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-xgdk-point-edit')">编辑</span></td></tr><tr><td>5</td><td>东侧楼梯间2F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-xgdk-point-edit')">编辑</span></td></tr><tr><td>6</td><td>东侧楼梯间3F</td><td style="font-size:11px">24.810,118.572</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-xgdk-point-edit')">编辑</span></td></tr></tbody></table><div style="margin-top:8px"><button class="btn-act btn-act-p" onclick="showToast('新增点位')"><i class="fas fa-plus"></i> 新增点位</button></div></div>
           </div>
         </div>
 
         <!-- Portal: 安全·随手拍配置 -->
         <div class="portal-page" id="portal-aq-sspt">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px">随手拍分类配置</h2><button class="btn btn-p btn-sm" onclick="showToast('新增分类')"><i class="fas fa-plus"></i> 新增分类</button></div>
-          <div class="card"><table class="data-table"><thead><tr><th>分类</th><th>图标</th><th>负责人/部门</th><th>处理时限</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>消防安全</td><td><i class="fas fa-fire"></i></td><td>安全管理部</td><td>24小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>用电安全</td><td><i class="fas fa-bolt"></i></td><td>工程部</td><td>48小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>设备安全</td><td><i class="fas fa-cog"></i></td><td>设备部</td><td>48小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>环境安全</td><td><i class="fas fa-leaf"></i></td><td>行政部</td><td>72小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table></div>
+          <div class="card"><table class="data-table"><thead><tr><th>分类</th><th>图标</th><th>负责人/部门</th><th>处理时限</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>消防安全</td><td><i class="fas fa-fire"></i></td><td>安全管理部</td><td>24小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-sspt-edit')">编辑</span></td></tr><tr><td>用电安全</td><td><i class="fas fa-bolt"></i></td><td>工程部</td><td>48小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-sspt-edit')">编辑</span></td></tr><tr><td>设备安全</td><td><i class="fas fa-cog"></i></td><td>设备部</td><td>48小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-sspt-edit')">编辑</span></td></tr><tr><td>环境安全</td><td><i class="fas fa-leaf"></i></td><td>行政部</td><td>72小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-aq-sspt-edit')">编辑</span></td></tr></tbody></table></div>
         </div>
 
         <!-- Portal: 生活·宿舍配置 -->
         <div class="portal-page" id="portal-sh-sz">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px">宿舍楼栋配置</h2><button class="btn btn-p btn-sm" onclick="showToast('新增楼栋')"><i class="fas fa-plus"></i> 新增楼栋</button></div>
-          <div class="card"><table class="data-table"><thead><tr><th>楼栋</th><th>楼层</th><th>房间数</th><th>标准人数</th><th>宿管员</th><th>操作</th></tr></thead><tbody><tr><td>A栋</td><td>1-6</td><td>72</td><td>4人/间</td><td>王阿姨</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>B栋</td><td>1-8</td><td>96</td><td>2人/间</td><td>刘阿姨</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>C栋</td><td>1-6</td><td>72</td><td>4人/间</td><td>陈阿姨</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table></div>
+          <div class="card"><table class="data-table"><thead><tr><th>楼栋</th><th>楼层</th><th>房间数</th><th>标准人数</th><th>宿管员</th><th>操作</th></tr></thead><tbody><tr><td>A栋</td><td>1-6</td><td>72</td><td>4人/间</td><td>王阿姨</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-sz-edit')">编辑</span></td></tr><tr><td>B栋</td><td>1-8</td><td>96</td><td>2人/间</td><td>刘阿姨</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-sz-edit')">编辑</span></td></tr><tr><td>C栋</td><td>1-6</td><td>72</td><td>4人/间</td><td>陈阿姨</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-sz-edit')">编辑</span></td></tr></tbody></table></div>
         </div>
 
         <!-- Portal: 生活·报修配置 -->
         <div class="portal-page" id="portal-sh-bx">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px">报修类型配置</h2><button class="btn btn-p btn-sm" onclick="showToast('新增类型')"><i class="fas fa-plus"></i> 新增</button></div>
-          <div class="card"><table class="data-table"><thead><tr><th>报修类型</th><th>负责部门</th><th>响应时限</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>水电</td><td>工程部</td><td>4小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>家具</td><td>工程部</td><td>24小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>电器</td><td>设备部</td><td>8小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>门窗</td><td>工程部</td><td>24小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table></div>
+          <div class="card"><table class="data-table"><thead><tr><th>报修类型</th><th>负责部门</th><th>响应时限</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>水电</td><td>工程部</td><td>4小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-bx-edit')">编辑</span></td></tr><tr><td>家具</td><td>工程部</td><td>24小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-bx-edit')">编辑</span></td></tr><tr><td>电器</td><td>设备部</td><td>8小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-bx-edit')">编辑</span></td></tr><tr><td>门窗</td><td>工程部</td><td>24小时</td><td><span class="badge badge-s">启用</span></td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-bx-edit')">编辑</span></td></tr></tbody></table></div>
         </div>
 
         <!-- Portal: 生活·报餐配置 -->
         <div class="portal-page" id="portal-sh-bc">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:18px">报餐时间窗口配置</h2><button class="btn btn-p btn-sm" onclick="showToast('新增配置')"><i class="fas fa-plus"></i> 新增</button></div>
-          <div class="card"><table class="data-table"><thead><tr><th>用餐月份</th><th>报餐开启</th><th>报餐截止</th><th>用餐地点</th><th>操作</th></tr></thead><tbody><tr><td>2026-06</td><td>05-20 00:00</td><td>05-31 23:59</td><td>园区食堂</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>2026-06</td><td>05-20 00:00</td><td>05-31 23:59</td><td>第二食堂</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table></div>
+          <div class="card"><table class="data-table"><thead><tr><th>用餐月份</th><th>报餐开启</th><th>报餐截止</th><th>用餐地点</th><th>操作</th></tr></thead><tbody><tr><td>2026-06</td><td>05-20 00:00</td><td>05-31 23:59</td><td>园区食堂</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-bc-edit')">编辑</span></td></tr><tr><td>2026-06</td><td>05-20 00:00</td><td>05-31 23:59</td><td>第二食堂</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-sh-bc-edit')">编辑</span></td></tr></tbody></table></div>
         </div>
 
         <!-- Portal: 福利·参数配置 -->
         <div class="portal-page" id="portal-fl-sz">
           <h2 style="font-size:18px;margin-bottom:16px">福利参数配置</h2>
-          <div class="card"><table class="data-table"><thead><tr><th>参数名称</th><th>当前值</th><th>说明</th><th>操作</th></tr></thead><tbody><tr><td>困难补助-大病人群上限</td><td>¥10,000</td><td>大病医疗类单次最高</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>幼儿园补贴-15号前</td><td>¥75</td><td>当月15号前申请</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>幼儿园补贴-次月起</td><td>¥150/月</td><td>次月起每月补贴</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>厂服库存-M码</td><td>56 件</td><td>当前库存</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table></div>
+          <div class="card"><table class="data-table"><thead><tr><th>参数名称</th><th>当前值</th><th>说明</th><th>操作</th></tr></thead><tbody><tr><td>困难补助-大病人群上限</td><td>¥10,000</td><td>大病医疗类单次最高</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-fl-sz-edit')">编辑</span></td></tr><tr><td>幼儿园补贴-15号前</td><td>¥75</td><td>当月15号前申请</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-fl-sz-edit')">编辑</span></td></tr><tr><td>幼儿园补贴-次月起</td><td>¥150/月</td><td>次月起每月补贴</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-fl-sz-edit')">编辑</span></td></tr><tr><td>厂服库存-M码</td><td>56 件</td><td>当前库存</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-fl-sz-edit')">编辑</span></td></tr></tbody></table></div>
         </div>
 
         <!-- Portal: 其他·问卷配置 -->
         <div class="portal-page" id="portal-qt-myd">
           <h2 style="font-size:18px;margin-bottom:16px">问卷模板管理</h2>
-          <div class="card"><table class="data-table"><thead><tr><th>模板名称</th><th>题目数</th><th>使用次数</th><th>操作</th></tr></thead><tbody><tr><td>食堂满意度模板</td><td>8</td><td>3</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>宿舍环境模板</td><td>6</td><td>2</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table></div>
+          <div class="card"><table class="data-table"><thead><tr><th>模板名称</th><th>题目数</th><th>使用次数</th><th>操作</th></tr></thead><tbody><tr><td>食堂满意度模板</td><td>8</td><td>3</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-qt-myd-edit')">编辑</span></td></tr><tr><td>宿舍环境模板</td><td>6</td><td>2</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-qt-myd-edit')">编辑</span></td></tr></tbody></table></div>
         </div>
 
         <!-- Portal: 其他·反馈配置 -->
         <div class="portal-page" id="portal-qt-yjfk">
           <h2 style="font-size:18px;margin-bottom:16px">反馈分类配置</h2>
-          <div class="card"><table class="data-table"><thead><tr><th>分类</th><th>处理部门</th><th>处理时限</th><th>超时通知</th><th>操作</th></tr></thead><tbody><tr><td>建议</td><td>行政部</td><td>3个工作日</td><td>行政经理</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>投诉</td><td>对应部门负责人</td><td>2个工作日</td><td>行政总监</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr><tr><td>系统BUG</td><td>IT部</td><td>1个工作日</td><td>IT主管</td><td><span style="font-size:12px;color:var(--p);cursor:pointer">编辑</span></td></tr></tbody></table></div>
+          <div class="card"><table class="data-table"><thead><tr><th>分类</th><th>处理部门</th><th>处理时限</th><th>超时通知</th><th>操作</th></tr></thead><tbody><tr><td>建议</td><td>行政部</td><td>3个工作日</td><td>行政经理</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-qt-yjfk-edit')">编辑</span></td></tr><tr><td>投诉</td><td>对应部门负责人</td><td>2个工作日</td><td>行政总监</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-qt-yjfk-edit')">编辑</span></td></tr><tr><td>系统BUG</td><td>IT部</td><td>1个工作日</td><td>IT主管</td><td><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="portalNav('portal-qt-yjfk-edit')">编辑</span></td></tr></tbody></table></div>
+        </div>
+
+        <!-- Portal Edit: 安全·巡更-路线编辑 -->
+        <div class="portal-page" id="portal-aq-xgdk-route-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-aq-xgdk')"><i class="fas fa-arrow-left"></i> 返回巡更配置</span></div>
+          <div class="card"><div class="card-title">编辑路线</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">路线名称</label><input class="form-control" value="A线" placeholder="路线名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">覆盖区域</label><input class="form-control" value="3号厂房" placeholder="覆盖区域">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">安保员</label><select class="form-control" style="appearance:none"><option>陈强</option><option>刘明</option><option>赵刚</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">巡查时段</label><input class="form-control" value="08:00 - 09:30" placeholder="巡查时段">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">备注</label><textarea class="form-control" rows="2" placeholder="备注信息">3号厂房重点巡查区域</textarea>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('路线已保存');portalNav('portal-aq-xgdk')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-aq-xgdk')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 安全·巡更-点位编辑 -->
+        <div class="portal-page" id="portal-aq-xgdk-point-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-aq-xgdk')"><i class="fas fa-arrow-left"></i> 返回巡更配置</span></div>
+          <div class="card"><div class="card-title">编辑点位</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">所属路线</label><select class="form-control" style="appearance:none"><option selected>A线</option><option>B线</option><option>C线</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">点位名称</label><input class="form-control" value="北门出入口" placeholder="点位名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">GPS坐标</label><input class="form-control" value="24.813,118.568" placeholder="纬度,经度">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">排序</label><input class="form-control" type="number" value="1" placeholder="排序序号">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">打卡有效范围(米)</label><input class="form-control" type="number" value="50" placeholder="允许偏差距离">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('点位已保存');portalNav('portal-aq-xgdk')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-aq-xgdk')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 安全·随手拍分类编辑 -->
+        <div class="portal-page" id="portal-aq-sspt-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-aq-sspt')"><i class="fas fa-arrow-left"></i> 返回随手拍配置</span></div>
+          <div class="card"><div class="card-title">编辑分类</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">分类名称</label><input class="form-control" value="消防安全" placeholder="分类名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">图标</label><select class="form-control" style="appearance:none"><option selected>fa-fire</option><option>fa-bolt</option><option>fa-cog</option><option>fa-leaf</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">负责人/部门</label><input class="form-control" value="安全管理部" placeholder="负责人/部门">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">处理时限</label><select class="form-control" style="appearance:none"><option selected>24小时</option><option>48小时</option><option>72小时</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">状态</label><select class="form-control" style="appearance:none"><option selected>启用</option><option>停用</option></select>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('分类已保存');portalNav('portal-aq-sspt')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-aq-sspt')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 生活·宿舍楼栋编辑 -->
+        <div class="portal-page" id="portal-sh-sz-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-sh-sz')"><i class="fas fa-arrow-left"></i> 返回宿舍配置</span></div>
+          <div class="card"><div class="card-title">编辑楼栋</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">楼栋名称</label><input class="form-control" value="A栋" placeholder="楼栋名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">楼层范围</label><input class="form-control" value="1-6" placeholder="如 1-6">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">每层房间数</label><input class="form-control" type="number" value="12" placeholder="房间数">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">标准人数</label><select class="form-control" style="appearance:none"><option selected>4人/间</option><option>2人/间</option><option>6人/间</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">宿管员</label><input class="form-control" value="王阿姨" placeholder="宿管员姓名">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">宿管电话</label><input class="form-control" value="138****1234" placeholder="联系电话">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('楼栋已保存');portalNav('portal-sh-sz')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-sh-sz')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 生活·报修类型编辑 -->
+        <div class="portal-page" id="portal-sh-bx-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-sh-bx')"><i class="fas fa-arrow-left"></i> 返回报修配置</span></div>
+          <div class="card"><div class="card-title">编辑报修类型</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">类型名称</label><input class="form-control" value="水电" placeholder="类型名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">负责部门</label><input class="form-control" value="工程部" placeholder="负责部门">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">响应时限</label><select class="form-control" style="appearance:none"><option selected>4小时</option><option>8小时</option><option>24小时</option><option>48小时</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">维修班组</label><input class="form-control" value="水电班组" placeholder="维修班组">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">状态</label><select class="form-control" style="appearance:none"><option selected>启用</option><option>停用</option></select>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('报修类型已保存');portalNav('portal-sh-bx')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-sh-bx')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 生活·报餐配置编辑 -->
+        <div class="portal-page" id="portal-sh-bc-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-sh-bc')"><i class="fas fa-arrow-left"></i> 返回报餐配置</span></div>
+          <div class="card"><div class="card-title">编辑报餐配置</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">用餐月份</label><input class="form-control" value="2026-06" placeholder="YYYY-MM">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">报餐开启时间</label><input class="form-control" value="2026-05-20 00:00" placeholder="YYYY-MM-DD HH:mm">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">报餐截止时间</label><input class="form-control" value="2026-05-31 23:59" placeholder="YYYY-MM-DD HH:mm">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">用餐地点</label><input class="form-control" value="园区食堂" placeholder="用餐地点">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">每餐标准价格(元)</label><input class="form-control" type="number" value="12" placeholder="价格">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('报餐配置已保存');portalNav('portal-sh-bc')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-sh-bc')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 福利·参数编辑 -->
+        <div class="portal-page" id="portal-fl-sz-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-fl-sz')"><i class="fas fa-arrow-left"></i> 返回福利参数</span></div>
+          <div class="card"><div class="card-title">编辑参数</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">参数名称</label><input class="form-control" value="困难补助-大病人群上限" placeholder="参数名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">当前值</label><input class="form-control" value="¥10,000" placeholder="参数值">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">说明</label><textarea class="form-control" rows="2" placeholder="参数说明">大病医疗类单次最高补助金额</textarea>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">生效日期</label><input class="form-control" value="2026-01-01" placeholder="YYYY-MM-DD">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('参数已保存');portalNav('portal-fl-sz')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-fl-sz')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 其他·问卷模板编辑 -->
+        <div class="portal-page" id="portal-qt-myd-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-qt-myd')"><i class="fas fa-arrow-left"></i> 返回问卷配置</span></div>
+          <div class="card"><div class="card-title">编辑模板</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">模板名称</label><input class="form-control" value="食堂满意度模板" placeholder="模板名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">题目数量</label><input class="form-control" type="number" value="8" placeholder="题目数">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">使用次数</label><input class="form-control" value="3" readonly>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">模板描述</label><textarea class="form-control" rows="2" placeholder="模板描述">食堂满意度调查模板，涵盖菜品质量、环境卫生、服务态度等维度</textarea>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">状态</label><select class="form-control" style="appearance:none"><option selected>启用</option><option>停用</option></select>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('模板已保存');portalNav('portal-qt-myd')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-qt-myd')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 其他·反馈分类编辑 -->
+        <div class="portal-page" id="portal-qt-yjfk-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-qt-yjfk')"><i class="fas fa-arrow-left"></i> 返回反馈配置</span></div>
+          <div class="card"><div class="card-title">编辑分类</div>
+            <div style="font-size:13px;line-height:2;max-width:500px">
+              <label style="font-weight:600;display:block;margin-bottom:4px">分类名称</label><input class="form-control" value="建议" placeholder="分类名称">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">处理部门</label><input class="form-control" value="行政部" placeholder="处理部门">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">处理时限</label><select class="form-control" style="appearance:none"><option selected>3个工作日</option><option>2个工作日</option><option>1个工作日</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">超时通知对象</label><input class="form-control" value="行政经理" placeholder="超时通知">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">状态</label><select class="form-control" style="appearance:none"><option selected>启用</option><option>停用</option></select>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('分类已保存');portalNav('portal-qt-yjfk')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-qt-yjfk')">取消</button></div>
+          </div>
         </div>
 
       </div>
@@ -842,7 +1064,8 @@ function pcNav(pageId) {
     'pc-aq-sspt':'安全隐患随手拍','pc-aq-sspt-detail':'随手拍详情','pc-aq-xgdk':'巡更管理',
     'pc-sh-zssq':'住宿管理','pc-sh-ssbx':'报修管理','pc-sh-bc':'报餐统计','pc-sh-cwsq':'车位管理',
     'pc-fl-knbz':'困难补助','pc-fl-hxdd':'党建管理','pc-fl-school':'学堂/补贴','pc-fl-cflq':'厂服管理',
-    'pc-qt-myd':'调研管理','pc-qt-yjfk':'反馈管理'
+    'pc-qt-myd':'调研管理','pc-qt-myd-stats':'统计详情','pc-qt-yjfk':'反馈管理','pc-qt-yjfk-detail':'反馈详情',
+	    'pc-sh-zssq-detail':'住宿申请详情','pc-sh-ssbx-detail':'报修工单详情','pc-sh-cwsq-detail':'车位申请详情','pc-fl-knbz-detail':'补助详情','pc-fl-school-detail':'申请详情'
   };
   document.getElementById('pcBreadcrumb').textContent = titles[pageId] || '';
 }
@@ -858,6 +1081,24 @@ function portalNav(pageId) {
   document.querySelectorAll('.portal-sidebar .nav-item').forEach(n => n.classList.remove('active'));
   const nav = document.querySelector(`.portal-sidebar .nav-item[data-portal="${pageId}"]`);
   if (nav) nav.classList.add('active');
+  // If navigating to an edit page, keep parent sidebar item highlighted
+  if (!nav) {
+    const parentMap = {
+      'portal-aq-xgdk-route-edit':'portal-aq-xgdk','portal-aq-xgdk-point-edit':'portal-aq-xgdk',
+      'portal-aq-sspt-edit':'portal-aq-sspt','portal-sh-sz-edit':'portal-sh-sz',
+      'portal-sh-bx-edit':'portal-sh-bx','portal-sh-bc-edit':'portal-sh-bc',
+      'portal-fl-sz-edit':'portal-fl-sz','portal-qt-myd-edit':'portal-qt-myd',
+      'portal-qt-yjfk-edit':'portal-qt-yjfk'
+    };
+    const parent = parentMap[pageId];
+    if (parent) {
+      const pNav = document.querySelector(`.portal-sidebar .nav-item[data-portal="${parent}"]`);
+      if (pNav) pNav.classList.add('active');
+    }
+  }
+  // Scroll content area to top
+  const pc = document.getElementById('portalContent');
+  if (pc) pc.scrollTop = 0;
 }
 document.querySelectorAll('.portal-sidebar .nav-item').forEach(item => {
   item.addEventListener('click', () => portalNav(item.dataset.portal));
