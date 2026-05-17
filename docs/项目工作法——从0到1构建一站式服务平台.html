@@ -511,7 +511,57 @@ h3 { font-size: clamp(17px, 1.8vw, 22px); font-weight: 600; margin-bottom: 6px; 
   </div>
 </div>
 
-<!-- ══════ SLIDE 8: SKILLS ══════ -->
+<!-- ══════ SLIDE 8: REQUIREMENT CONFIRMATION ══════ -->
+<div class="slide" data-title="需求前置">
+  <div class="slide-content">
+    <div class="anim-fade"><span class="badge" style="background:rgba(6,182,212,.15);color:#06B6D4;border:1px solid rgba(6,182,212,.25)">方法论</span></div>
+    <h2 class="anim-fade-1">需求确认前置 —— 脑子最清楚时做最重要的决策</h2>
+    <p class="subtitle anim-fade-2">会话初期原型往往只需微调；越到后面越不准。这不是AI变笨，是信息衰减</p>
+    <div class="grid-2 anim-fade-3" style="gap:16px">
+      <div>
+        <h4 style="font-size:15px;color:var(--r);margin-bottom:10px">❌ 常见反模式：边做边改</h4>
+        <div class="card" style="padding:12px;margin-bottom:8px">
+          <div style="font-size:12px;line-height:1.8">
+            <div>用户：帮我做个编辑页面</div>
+            <div style="color:var(--t2)">AI 直接生成 → 字段少了 → 补充 → 再加 → 样式不对 → 再改</div>
+            <div style="color:var(--r);margin-top:4px">→ 10+ 轮迭代 → 上下文膨胀 → 质量断崖</div>
+          </div>
+        </div>
+        <h4 style="font-size:15px;color:var(--s);margin-bottom:10px;margin-top:14px">✅ 正确做法：先确认，再生成</h4>
+        <div class="card" style="padding:12px">
+          <div style="font-size:12px;line-height:1.8">
+            <div>1. 用户提需求 → AI 反问确认（字段/类型/选项/跳转）</div>
+            <div>2. 用户逐项确认 → 形成"口头 PRD"</div>
+            <div>3. AI 一次性生成完整原型</div>
+            <div style="color:var(--s);margin-top:4px">→ 1-2轮微调即完成</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-size:15px;color:var(--p2);margin-bottom:10px">📋 问答式确认模板</h4>
+        <div class="card" style="padding:12px;margin-bottom:8px">
+          <div style="font-size:11px;line-height:2">
+            <div>🔹 <strong>需要哪些字段？</strong>名称、类型、默认值</div>
+            <div>🔹 <strong>每个字段的类型？</strong>文本/下拉/数字/日期</div>
+            <div>🔹 <strong>下拉选项有哪些？</strong>逐项列出</div>
+            <div>🔹 <strong>保存后跳转到哪？</strong>返回列表/留在当前</div>
+            <div>🔹 <strong>是否需要取消按钮？</strong>点击行为是什么</div>
+          </div>
+        </div>
+        <h4 style="font-size:15px;color:var(--w);margin-bottom:10px;margin-top:14px">🔗 与上下文管理的配合</h4>
+        <div class="card" style="padding:12px">
+          <div style="font-size:12px;line-height:1.8">
+            <div>• 确认在<strong>会话初期</strong>（上下文最干净时）完成</div>
+            <div>• 生成后立即 <strong>commit</strong>，复杂模块<strong>新开会话</strong></div>
+            <div style="margin-top:4px;color:var(--w)"><strong>把最需要脑子的活，放在脑子最清楚的时候干</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SLIDE 9: SKILLS ══════ -->
 <div class="slide" data-title="技能固化">
   <div class="slide-content">
     <div class="anim-fade"><span class="badge badge-purple">第3步</span></div>
@@ -594,10 +644,60 @@ h3 { font-size: clamp(17px, 1.8vw, 22px); font-weight: 600; margin-bottom: 6px; 
   </div>
 </div>
 
-<!-- ══════ SLIDE 10: VERSION CONTROL ══════ -->
+<!-- ══════ SLIDE 10: CONTEXT WINDOW ══════ -->
+<div class="slide" data-title="会话管理">
+  <div class="slide-content">
+    <div class="anim-fade"><span class="badge badge-blue">第5步</span></div>
+    <h2 class="anim-fade-1">上下文窗口管理 —— 别让 AI "偷偷失忆"</h2>
+    <p class="subtitle anim-fade-2">上下文满了会被自动压缩，AI 不告诉你"我忘了"——它只会悄悄出错</p>
+    <div class="grid-2 anim-fade-3" style="gap:16px">
+      <div>
+        <h4 style="font-size:15px;color:var(--r);margin-bottom:10px">⚠ 上下文满了会怎样</h4>
+        <div class="card" style="padding:12px;margin-bottom:8px">
+          <div style="font-size:12px;line-height:1.8">
+            <div>🔴 <strong>信息丢失</strong> — 压缩后的摘要丢失中间讨论细节</div>
+            <div>🟠 <strong>重复劳动</strong> — AI 重新读取读过的文件</div>
+            <div>🟡 <strong>简单操作出错</strong> — 正则混乱、改错位置</div>
+            <div>🔵 <strong>质量下降</strong> — 丢失约束，偏离规范</div>
+          </div>
+        </div>
+        <h4 style="font-size:15px;color:var(--s);margin-bottom:10px;margin-top:14px">✅ CLAUDE.md 减负效果</h4>
+        <div class="card" style="padding:12px">
+          <div style="font-size:12px;line-height:1.8">
+            <div><strong>砍掉三类：</strong>通用知识 / 空占位 / 冗余指令</div>
+            <div><strong>保留四类：</strong>项目定位 / 行为约束 / 文件索引 / 特殊约定</div>
+            <div style="margin-top:6px;color:var(--p)"><strong>本项目：30行 → 13行（-57%），每次会话省 ~200 token</strong></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-size:15px;color:var(--p2);margin-bottom:10px">🔄 会话拆分策略</h4>
+        <div class="card" style="padding:12px;margin-bottom:8px">
+          <div style="font-size:12px;line-height:1.8">
+            <div>📏 <strong>粒度：</strong>一个 commit = 一个会话</div>
+            <div>🚩 <strong>拆分信号：</strong></div>
+            <div style="padding-left:16px">• 同一文件被重复读取 3-4 次</div>
+            <div style="padding-left:16px">• 简单操作（正则/路径）连续出错</div>
+            <div style="padding-left:16px">• 对话 > 15-20 轮或变更 > 500 行</div>
+          </div>
+        </div>
+        <h4 style="font-size:15px;color:var(--w);margin-bottom:10px;margin-top:14px">📄 HTML/PPT 特别注意</h4>
+        <div class="card" style="padding:12px">
+          <div style="font-size:12px;line-height:1.8">
+            <div>• <strong>HTML 原型</strong>（1000+行三端合一）：编辑优先用 grep/sed，批量用脚本，验证独立会话</div>
+            <div>• <strong>PPT 文件</strong>：AI 不能直接编辑 .pptx，需人工同步；等 .md 稳定后统一导出</div>
+            <div style="margin-top:6px;color:var(--w)"><strong>核心：commit 即分界，memory 做桥梁</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ VERSION CONTROL ══════ -->
 <div class="slide" data-title="版本管理">
   <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-green">第5步</span></div>
+    <div class="anim-fade"><span class="badge badge-green">第6步</span></div>
     <h2 class="anim-fade-1">版本管理 —— 文档和代码一起版本化</h2>
     <p class="subtitle anim-fade-2">不只是代码需要 Git 管理，文档、原型、配置都纳入版本控制，形成完整的项目演进历史</p>
     <div class="grid-2 anim-fade-3" style="gap:16px">
@@ -761,23 +861,27 @@ h3 { font-size: clamp(17px, 1.8vw, 22px); font-weight: 600; margin-bottom: 6px; 
 <div class="slide" data-title="总结">
   <div class="slide-content">
     <div class="anim-fade"><span class="badge badge-green">总结</span></div>
-    <h2 class="anim-fade-1">核心就四句话</h2>
+    <h2 class="anim-fade-1">核心就六句话</h2>
     <p class="subtitle anim-fade-2">简单，但做到位了效果显著</p>
     <div class="anim-fade-3" style="margin-top:24px">
       <div class="quote-block">
         <div class="quote-mark">"</div>
         <div class="quote-text" style="color:var(--t)">
+          需求前置少返工，<br>
           先写文档立规矩，<br>
           再做原型快验证，<br>
           技能固化防走样，<br>
+          会话管理保质量，<br>
           渐进交付控范围。
         </div>
       </div>
     </div>
     <div class="anim-fade-4" style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <span class="tech-tag" style="background:rgba(30,109,242,.1);border-color:rgba(30,109,242,.2)">📋 文档驱动</span>
+      <span class="tech-tag" style="background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.2)">🔍 需求前置</span>
       <span class="tech-tag" style="background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)">🎨 原型验证</span>
       <span class="tech-tag" style="background:rgba(52,168,83,.1);border-color:rgba(52,168,83,.2)">⚙️ 技能固化</span>
+      <span class="tech-tag" style="background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.2)">🪟 会话管理</span>
       <span class="tech-tag" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.2)">📈 渐进交付</span>
       <span class="tech-tag" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">🔖 版本对应</span>
     </div>
