@@ -1,995 +1,907 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>从0到1 — 一站式服务平台项目工作法</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<title>项目工作法 — 从0到1构建一站式服务平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+  /* === SIGNAL — Design Tokens === */
+  :root {
+    --navy: #1c2644;
+    --navy-alt: #232f55;
+    --cream: #f0ece3;
+    --cream-alt: #e6e0d4;
+    --fg: #e2dcd0;
+    --fg2: #8a96a8;
+    --fg3: #4e5a6e;
+    --fg-light: #1a2030;
+    --fg-light2: #5a6270;
+    --fg-light3: #9aa0a8;
+    --gold: #c8a870;
+    --border-dark: #2e3d5c;
+    --border-light: #cac4b4;
 
-:root {
-  --p: #1E6DF2;
-  --p2: #2563EB;
-  --pd: #1557C4;
-  --pl: #E8F0FE;
-  --d: #1F2937;
-  --d2: #374151;
-  --t: #F9FAFB;
-  --t2: #9CA3AF;
-  --s: #34A853;
-  --w: #FBBC04;
-  --r: #EF4444;
-  --grad: linear-gradient(135deg, #1E6DF2, #7C3AED);
-  --grad2: linear-gradient(135deg, #1E6DF2, #06B6D4);
-  --grad3: linear-gradient(135deg, #7C3AED, #EC4899);
-  --font: 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-}
+    --serif: 'Source Serif 4', 'Noto Serif SC', Georgia, serif;
+    --sans: 'DM Sans', 'Noto Sans SC', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  }
 
-body { font-family: var(--font); background: #0F172A; color: var(--t); overflow: hidden; height: 100vh; width: 100vw; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--navy); }
 
-/* ─── Progress Bar ─── */
-#progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--grad); z-index: 1000; transition: width .6s cubic-bezier(.4,0,.2,1); }
+  .deck { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 
-/* ─── Slide Counter ─── */
-#counter { position: fixed; bottom: 32px; right: 32px; z-index: 999; font-size: 13px; color: var(--t2); letter-spacing: 1px; font-weight: 300; }
-#counter span { font-weight: 700; color: var(--t); font-size: 18px; }
+  /* === SLIDE BASE === */
+  .slide {
+    position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+    opacity: 0; pointer-events: none;
+    transform: translateX(50px);
+    transition: opacity 0.55s cubic-bezier(0.77,0,0.175,1),
+                transform 0.55s cubic-bezier(0.77,0,0.175,1);
+    overflow: hidden;
+    padding: clamp(24px, 4vh, 56px) clamp(28px, 6vw, 100px);
+    display: flex; flex-direction: column;
+  }
+  .slide.active { opacity: 1; pointer-events: all; transform: translateX(0); z-index: 10; }
+  .slide.dark  { background: var(--navy); color: var(--fg); }
+  .slide.light { background: var(--cream); color: var(--fg-light); }
+  .slide.accent-slide { background: var(--gold); color: var(--navy); }
 
-/* ─── Navigation ─── */
-#nav { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; gap: 10px; align-items: center; }
-#nav .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--d2); cursor: pointer; transition: all .4s ease; border: none; }
-#nav .dot.active { background: var(--p); width: 28px; border-radius: 5px; }
-#nav .dot:hover { background: var(--p); }
+  /* === TYPOGRAPHY === */
+  .display {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(42px, 7vw, 100px); line-height: 0.95; letter-spacing: -0.02em;
+  }
+  .h1 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(30px, 4.5vw, 68px); line-height: 1; letter-spacing: -0.015em;
+  }
+  .h2 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(24px, 3vw, 46px); line-height: 1.08; letter-spacing: -0.01em;
+  }
+  .h3 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(18px, 2.2vw, 32px); line-height: 1.15;
+  }
+  .lead {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(18px, 1.8vw, 28px); line-height: 1.4;
+  }
+  .body {
+    font-family: var(--sans);
+    font-size: clamp(17px, 1.6vw, 26px); line-height: 1.5; font-weight: 400;
+  }
+  .body-sm {
+    font-family: var(--sans);
+    font-size: clamp(15px, 1.3vw, 22px); line-height: 1.5; font-weight: 400;
+  }
+  .label {
+    font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em;
+    font-size: clamp(11px, 0.9vw, 15px); font-weight: 500;
+  }
+  .num-lg {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(56px, 10vw, 160px); line-height: 0.85; letter-spacing: -0.04em;
+  }
 
-/* ─── Arrow Nav ─── */
-.arrow { position: fixed; top: 50%; transform: translateY(-50%); z-index: 998; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); color: #fff; font-size: 20px; cursor: pointer; transition: all .3s ease; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); opacity: 0; pointer-events: none; }
-.arrow:hover { background: rgba(255,255,255,.12); transform: translateY(-50%) scale(1.08); }
-.arrow.show { opacity: 1; pointer-events: auto; }
-.arrow-left { left: 24px; }
-.arrow-right { right: 24px; }
+  /* Gold emphasis */
+  em, .gold { color: var(--gold); font-style: italic; }
+  .dark mark, .dark .mark { background: var(--gold); color: var(--navy); padding: 0 6px; font-style: normal; }
+  .light mark, .light .mark { background: var(--gold); color: var(--fg-light); padding: 0 6px; font-style: normal; }
 
-/* ─── Slides Container ─── */
-#slides { display: flex; height: 100vh; transition: transform .7s cubic-bezier(.65,0,.35,1); will-change: transform; }
-.slide { flex: 0 0 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 80px; position: relative; overflow: hidden; }
+  /* === RULE / DIVIDER === */
+  .rule {
+    width: clamp(40px, 5vw, 80px); height: 2px; background: var(--gold);
+    margin-bottom: clamp(12px, 2vh, 24px); flex-shrink: 0;
+  }
+  .rule.centered { margin-left: auto; margin-right: auto; }
 
-.slide::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; border-radius: 50%; opacity: .03; pointer-events: none; }
-.slide::after { content: ''; position: absolute; bottom: -30%; left: -10%; width: 400px; height: 400px; border-radius: 50%; opacity: .02; pointer-events: none; }
+  /* === GRID LAYOUTS === */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2.5vw, 36px); flex: 1; min-height: 0; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.8vw, 24px); flex: 1; min-height: 0; }
+  .grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: clamp(8px, 1.3vw, 18px); flex: 1; min-height: 0; }
+  .grid-23 { display: grid; grid-template-columns: 2fr 3fr; gap: clamp(16px, 2.5vw, 36px); flex: 1; min-height: 0; }
+  .grid-32 { display: grid; grid-template-columns: 3fr 2fr; gap: clamp(16px, 2.5vw, 36px); flex: 1; min-height: 0; }
 
-.bg-blue::before { background: var(--p); }
-.bg-purple::before { background: #7C3AED; }
-.bg-teal::before { background: #06B6D4; }
-.bg-amber::before { background: #F59E0B; }
+  /* === CARDS === */
+  .card {
+    padding: clamp(14px, 2vh, 28px) clamp(14px, 2vw, 28px);
+    border-radius: 6px; display: flex; flex-direction: column; gap: clamp(6px, 1vh, 14px);
+  }
+  .dark  .card { background: var(--navy-alt); border: 1px solid var(--border-dark); }
+  .light .card { background: var(--cream-alt); border: 1px solid var(--border-light); }
+  .card.gold { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+  .card.gold .label { color: var(--navy); opacity: 0.6; }
 
-.slide-content { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; width: 100%; }
+  /* === SLIDE HEADER === */
+  .slide-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: clamp(10px, 1.5vh, 20px); flex-shrink: 0; gap: 16px;
+  }
+  .slide-header .tag {
+    font-family: var(--mono); font-size: clamp(10px, 0.85vw, 14px);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 100px; flex-shrink: 0;
+  }
+  .dark  .slide-header .tag { color: var(--gold); border: 1px solid var(--border-dark); }
+  .light .slide-header .tag { color: var(--fg-light2); border: 1px solid var(--border-light); }
 
-h1 { font-size: clamp(36px, 5vw, 60px); font-weight: 900; line-height: 1.2; letter-spacing: -1px; }
-h2 { font-size: clamp(26px, 3.2vw, 40px); font-weight: 700; margin-bottom: 8px; letter-spacing: -.5px; }
-h3 { font-size: clamp(17px, 1.8vw, 22px); font-weight: 600; margin-bottom: 6px; }
-.subtitle { font-size: clamp(14px, 1.1vw, 17px); color: var(--t2); font-weight: 300; margin-bottom: 28px; line-height: 1.6; }
+  /* === PAGE NUMBER === */
+  .pagenum {
+    position: absolute; right: clamp(20px, 4vw, 48px); bottom: clamp(16px, 2.5vh, 32px);
+    font-family: var(--mono); font-size: clamp(12px, 1vw, 16px); letter-spacing: 0.08em;
+    z-index: 20;
+  }
+  .dark  .pagenum { color: var(--fg3); }
+  .light .pagenum { color: var(--fg-light3); }
 
-.gradient-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  /* === ANIMATIONS === */
+  .anim-up {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                transform 0.7s cubic-bezier(0.16,1,0.3,1);
+  }
+  .anim-left {
+    opacity: 0; transform: translateX(-50px);
+    transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1),
+                transform 0.65s cubic-bezier(0.16,1,0.3,1);
+  }
+  .anim-pop {
+    opacity: 0; transform: scale(0.7);
+    transition: opacity 0.55s cubic-bezier(0.34,1.56,0.64,1),
+                transform 0.55s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .slide.entered .anim-up,
+  .slide.entered .anim-left,
+  .slide.entered .anim-pop { opacity: 1; transform: translateY(0) translateX(0) scale(1); }
 
-.badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-bottom: 12px; }
-.badge-blue { background: rgba(30,109,242,.15); color: #60A5FA; }
-.badge-purple { background: rgba(124,58,237,.15); color: #A78BFA; }
-.badge-green { background: rgba(52,168,83,.15); color: #34D399; }
-.badge-amber { background: rgba(251,191,36,.15); color: #FBBF24; }
-.badge-red { background: rgba(239,68,68,.15); color: #F87171; }
+  .d0  { transition-delay: 0.00s; } .d1  { transition-delay: 0.06s; }
+  .d2  { transition-delay: 0.12s; } .d3  { transition-delay: 0.18s; }
+  .d4  { transition-delay: 0.24s; } .d5  { transition-delay: 0.30s; }
+  .d6  { transition-delay: 0.36s; } .d7  { transition-delay: 0.42s; }
+  .d8  { transition-delay: 0.48s; } .d9  { transition-delay: 0.54s; }
 
-/* ─── Animations ─── */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scaleIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
-@keyframes slideLeft { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  /* === BARS === */
+  .bar-row {
+    display: grid; grid-template-columns: 2fr 3fr auto; align-items: center;
+    gap: clamp(12px, 2vw, 28px); padding: 4px 0;
+  }
+  .bar-track {
+    height: clamp(22px, 3.5vh, 32px); background: var(--navy-alt);
+    border-radius: 4px; overflow: hidden;
+  }
+  .light .bar-track { background: var(--cream-alt); border: 1px solid var(--border-light); }
+  .bar-fill {
+    height: 100%; background: var(--gold); border-radius: 4px;
+    width: 0; transition: width 1s cubic-bezier(0.16,1,0.3,1);
+  }
+  .slide.entered .bar-fill { width: var(--w); }
+  .bar-val {
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(14px, 1.3vw, 20px); text-align: right;
+  }
 
-.slide.active .anim-fade { animation: fadeUp .7s ease both; }
-.slide.active .anim-fade-1 { animation: fadeUp .7s ease .1s both; }
-.slide.active .anim-fade-2 { animation: fadeUp .7s ease .2s both; }
-.slide.active .anim-fade-3 { animation: fadeUp .7s ease .3s both; }
-.slide.active .anim-fade-4 { animation: fadeUp .7s ease .4s both; }
-.slide.active .anim-fade-5 { animation: fadeUp .7s ease .5s both; }
-.slide.active .anim-fade-6 { animation: fadeUp .7s ease .6s both; }
-.slide.active .anim-fade-7 { animation: fadeUp .7s ease .7s both; }
-.slide.active .anim-scale { animation: scaleIn .6s ease both; }
-.slide.active .anim-slide { animation: slideLeft .6s ease .2s both; }
+  /* === TABLE === */
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl th, .tbl td {
+    padding: clamp(8px, 1.2vh, 16px) clamp(10px, 1.5vw, 20px);
+    text-align: left; font-size: clamp(14px, 1.3vw, 22px); line-height: 1.4;
+  }
+  .dark .tbl th, .dark .tbl td { border-bottom: 1px solid var(--border-dark); }
+  .light .tbl th, .light .tbl td { border-bottom: 1px solid var(--border-light); }
+  .tbl th {
+    font-family: var(--mono); font-size: clamp(10px, 0.9vw, 14px);
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+  }
+  .dark .tbl th { color: var(--gold); }
+  .light .tbl th { color: var(--fg-light2); }
+  .tbl td:first-child { font-weight: 600; }
 
-/* ─── Intro Slide ─── */
-.slide-intro { background: #0F172A; text-align: center; }
-.slide-intro .accent-line { width: 60px; height: 3px; background: var(--grad); margin: 0 auto 20px; border-radius: 2px; }
-.slide-intro .meta { font-size: 14px; color: var(--t2); margin-top: 32px; letter-spacing: 2px; }
-.slide-intro .version { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; background: rgba(255,255,255,.05); border-radius: 20px; font-size: 12px; color: var(--t2); margin-top: 16px; border: 1px solid rgba(255,255,255,.06); }
+  /* === PROCESS STEPS === */
+  .process-row {
+    display: flex; align-items: flex-start; gap: clamp(6px, 1vw, 14px); flex: 1; min-height: 0;
+  }
+  .p-step {
+    flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center;
+    gap: clamp(6px, 1vh, 12px);
+  }
+  .p-num {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(32px, 4.5vw, 64px); color: var(--gold); line-height: 1;
+  }
+  .p-arrow {
+    font-size: clamp(18px, 2.5vw, 36px); color: var(--gold);
+    display: flex; align-items: center; padding-top: clamp(10px, 2vh, 24px);
+  }
 
-/* ─── Grid / Card Layouts ─── */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-top: 12px; }
-.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-top: 12px; }
+  /* === COVER === */
+  .cover-content {
+    display: flex; flex-direction: column; justify-content: center; flex: 1;
+  }
+  .cover-content .rule { margin-bottom: clamp(16px, 3vh, 32px); }
 
-.card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 22px; transition: all .3s ease; }
-.card:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); transform: translateY(-2px); }
-.card .num { font-size: 32px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 6px; }
-.card .icon { font-size: 26px; margin-bottom: 10px; display: block; }
-.card h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-.card p { font-size: 13px; color: var(--t2); line-height: 1.6; }
-.card .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; margin-bottom: 8px; }
+  /* === SECTION DIVIDER === */
+  .sec-divider { justify-content: center; }
+  .sec-num { margin-bottom: clamp(12px, 2vh, 24px); }
 
-/* ─── Audience Cards ─── */
-.audience-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
-.audience-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 22px; display: flex; gap: 16px; align-items: flex-start; transition: all .3s ease; }
-.audience-card:hover { background: rgba(255,255,255,.06); border-color: var(--p); transform: translateY(-2px); }
-.audience-card .a-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-.audience-card .a-content h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
-.audience-card .a-content p { font-size: 13px; color: var(--t2); line-height: 1.5; }
+  /* === CLOSING === */
+  .closing-slide { justify-content: center; align-items: center; text-align: center; }
 
-/* ─── Pain Point Cards ─── */
-.pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
-.pain-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 20px; border-left: 3px solid var(--r); }
-.pain-card .p-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-.pain-card .p-title .p-emoji { font-size: 18px; }
-.pain-card p { font-size: 13px; color: var(--t2); line-height: 1.5; }
+  /* === NAV === */
+  .nav-controls {
+    position: fixed; bottom: clamp(12px, 2vh, 24px); right: clamp(16px, 3vw, 36px);
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .nav-btn {
+    width: clamp(36px, 3.5vw, 48px); height: clamp(36px, 3.5vw, 48px);
+    border-radius: 50%; border: 1.5px solid var(--gold); background: transparent;
+    color: var(--gold); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .nav-btn:hover { background: var(--gold); color: var(--navy); }
+  .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+  .slide-counter {
+    position: fixed; bottom: clamp(12px, 2vh, 24px); left: clamp(16px, 3vw, 36px);
+    font-family: var(--mono); font-size: clamp(12px, 1.1vw, 17px);
+    color: var(--fg2); letter-spacing: 0.08em; z-index: 100;
+  }
+  .progress-bar {
+    position: fixed; bottom: 0; left: 0; height: 3px;
+    background: var(--gold); transition: width 0.35s ease; z-index: 100;
+  }
+  .keyboard-hint {
+    position: fixed; bottom: clamp(14px, 2vh, 26px); left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: clamp(9px, 0.75vw, 12px);
+    color: var(--fg3); z-index: 100; letter-spacing: 0.06em;
+  }
 
-/* ─── Principle Cards ─── */
-.principle-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; justify-content: center; }
-.principle-card { flex: 1; min-width: 160px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 22px 18px; text-align: center; transition: all .4s ease; }
-.principle-card:hover { transform: translateY(-4px); border-color: var(--p); box-shadow: 0 20px 40px rgba(30,109,242,.1); }
-.principle-card .p-icon { font-size: 30px; margin-bottom: 10px; display: block; }
-.principle-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.principle-card p { font-size: 12px; color: var(--t2); line-height: 1.5; }
+  @media (max-height: 600px) {
+    .slide { padding: 12px 20px; }
+    .grid-2, .grid-3, .grid-23, .grid-32 { gap: 8px; }
+    .card { padding: 8px 12px; }
+  }
 
-/* ─── Flow Steps ─── */
-.flow-vertical { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-.flow-row-item { display: flex; align-items: center; gap: 14px; padding: 10px 18px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; transition: all .3s ease; }
-.flow-row-item:hover { background: rgba(30,109,242,.08); border-color: var(--p); }
-.flow-row-item .f-num { width: 28px; height: 28px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: #fff; }
-.flow-row-item .f-text { font-size: 14px; font-weight: 500; min-width: 80px; }
-.flow-row-item .f-desc { font-size: 12px; color: var(--t2); line-height: 1.4; }
-.flow-row-item .f-tag { font-size: 11px; padding: 2px 10px; border-radius: 10px; margin-left: auto; flex-shrink: 0; }
-
-/* ─── List Styles ─── */
-.list-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-.list-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,.03); border-radius: 10px; border: 1px solid rgba(255,255,255,.05); transition: all .3s ease; }
-.list-item:hover { background: rgba(255,255,255,.06); }
-.list-item .l-bullet { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-.list-item .l-content { flex: 1; }
-.list-item .l-label { font-size: 14px; font-weight: 600; }
-.list-item .l-desc { font-size: 12px; color: var(--t2); margin-top: 1px; line-height: 1.5; }
-.list-item .l-tag { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: 11px; margin-right: 6px; }
-
-/* ─── Comparison ─── */
-.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px; }
-.comp-box { border-radius: 14px; padding: 22px; }
-.comp-box.bad { background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.15); }
-.comp-box.good { background: rgba(52,168,83,.06); border: 1px solid rgba(52,168,83,.15); }
-.comp-box h4 { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.comp-box ul { list-style: none; }
-.comp-box li { padding: 5px 0; font-size: 13px; color: var(--t2); display: flex; align-items: center; gap: 8px; line-height: 1.5; }
-.comp-box li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
-.comp-box.bad li::before { background: #EF4444; }
-.comp-box.good li::before { background: var(--s); }
-
-/* ─── V-timeline (vertical) ─── */
-.v-timeline { position: relative; padding-left: 28px; margin-top: 8px; }
-.v-timeline::before { content: ''; position: absolute; left: 9px; top: 4px; bottom: 4px; width: 2px; background: rgba(255,255,255,.08); }
-.vt-item { position: relative; padding: 8px 0 8px 16px; }
-.vt-item::before { content: ''; position: absolute; left: -24px; top: 13px; width: 12px; height: 12px; border-radius: 50%; background: var(--d2); border: 2px solid #0F172A; }
-.vt-item.done::before { background: var(--p); }
-.vt-item .vt-title { font-size: 14px; font-weight: 600; }
-.vt-item .vt-desc { font-size: 12px; color: var(--t2); }
-
-/* ─── Results Wall ─── */
-.results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
-.result-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 16px; text-align: center; transition: all .3s ease; }
-.result-card:hover { background: rgba(30,109,242,.08); border-color: var(--p); transform: translateY(-2px); }
-.result-card .r-icon { font-size: 28px; margin-bottom: 6px; }
-.result-card .r-count { font-size: 28px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.result-card .r-label { font-size: 12px; color: var(--t2); margin-top: 2px; }
-
-/* ─── Get Started ─── */
-.step-card { display: flex; gap: 18px; padding: 18px 22px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; margin-bottom: 10px; align-items: flex-start; }
-.step-card .s-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.step-card .s-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-.step-card .s-content p { font-size: 13px; color: var(--t2); line-height: 1.5; }
-
-/* ─── Quote ─── */
-.quote-block { text-align: center; max-width: 720px; margin: 0 auto; }
-.quote-mark { font-size: 56px; line-height: .6; color: var(--p); opacity: .25; font-family: serif; }
-.quote-text { font-size: clamp(18px, 2.2vw, 26px); font-weight: 500; line-height: 1.6; margin: 12px 0 20px; }
-.quote-source { font-size: 14px; color: var(--t2); }
-
-/* ─── Tech Tag ─── */
-.tech-tag { display: inline-block; padding: 6px 16px; border-radius: 10px; font-size: 12px; font-weight: 500; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); transition: all .3s ease; margin: 3px; }
-.tech-tag:hover { background: rgba(30,109,242,.1); border-color: var(--p); transform: translateY(-2px); }
-
-/* ─── Divider ─── */
-.divider { width: 100%; height: 1px; background: rgba(255,255,255,.06); margin: 12px 0; }
-
-/* ─── Responsive ─── */
-@media (max-width: 768px) {
-  .slide { padding: 32px 20px; }
-  .grid-2, .grid-3, .grid-4, .audience-grid, .pain-grid, .results-grid { grid-template-columns: 1fr; }
-  .comp-grid { grid-template-columns: 1fr; }
-  .principle-row { flex-direction: column; }
-  .arrow { display: none; }
-  #counter { bottom: 12px; right: 12px; font-size: 11px; }
-  #nav { bottom: 12px; }
-  .slide-content { max-width: 100%; }
-}
+  @media (prefers-reduced-motion: reduce) {
+    .anim-up, .anim-left, .anim-pop { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .bar-fill { width: var(--w) !important; transition: none !important; }
+    .slide { transition: none !important; }
+  }
 </style>
 </head>
 <body>
 
-<div id="progress" style="width:0%"></div>
-<div id="counter"><span id="curSlide">1</span> / <span id="totalSlides">14</span></div>
+<div class="deck">
 
-<div id="nav"></div>
-<button class="arrow arrow-left" id="prevBtn">◀</button>
-<button class="arrow arrow-right" id="nextBtn">▶</button>
-
-<div id="slides">
-
-<!-- ══════ SLIDE 1: TITLE ══════ -->
-<div class="slide slide-intro" data-title="封面">
-  <div class="slide-content">
-    <div class="anim-scale"><span class="badge badge-blue" style="font-size:11px;letter-spacing:1px">制造与物流园区 · 一站式服务平台</span></div>
-    <div class="anim-fade"><div class="accent-line"></div></div>
-    <h1 class="anim-fade-1 gradient-text">从0到1</h1>
-    <h1 class="anim-fade-2" style="font-weight:300;font-size:clamp(22px,2.8vw,36px);color:var(--t);margin-top:6px">构建一站式服务平台</h1>
-    <p class="anim-fade-3" style="font-size:16px;color:var(--t2);margin-top:20px;font-weight:300">项目工作法 —— 让AI成为你的超级协作者</p>
-    <div style="max-width:600px;margin:20px auto 0;font-size:13px;color:var(--t2);line-height:1.6;background:rgba(255,255,255,.03);padding:14px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.05)" class="anim-fade-4">
-      📌 一套经过实战检验的方法论：从需求到交付，把AI的能力系统化地用在项目开发中
-    </div>
-    <div class="anim-fade-5 meta">特步 · XTEP ｜ v1.0</div>
+<!-- ====== SLIDE 1 · COVER ====== -->
+<div class="slide dark">
+  <div class="rule anim-left d0"></div>
+  <div class="cover-content">
+    <p class="label anim-up d1" style="color:var(--gold);margin-bottom:clamp(8px,1.5vh,16px);">方法论 · 知识沉淀</p>
+    <h1 class="display anim-up d2">项目工作法</h1>
+    <p class="lead anim-up d3" style="margin-top:clamp(12px,2vh,24px);max-width:50vw;">
+      从0到1构建一站式服务平台
+    </p>
+    <p class="body anim-up d4" style="margin-top:clamp(8px,1.5vh,16px);max-width:42vw;color:var(--fg2);">
+      文档驱动 → 原型验证 → 技能固化 → 渐进交付<br>
+      一套适用于制造/物流园区数字化项目的完整方法论
+    </p>
+    <p class="label anim-up d5" style="margin-top:clamp(24px,5vh,48px);color:var(--fg3);">
+      v1.2 &nbsp;·&nbsp; 2026-05-15 &nbsp;·&nbsp; Claude + 吴龙飞
+    </p>
   </div>
+  <div class="pagenum">01 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 2: AUDIENCE ══════ -->
-<div class="slide" data-title="适合谁看">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">读者指南</span></div>
-    <h2 class="anim-fade-1">这份方法论适合谁？</h2>
-    <p class="subtitle anim-fade-2">无论你在项目中扮演什么角色，都能从中找到可用的方法</p>
-    <div class="audience-grid anim-fade-3">
-      <div class="audience-card">
-        <div class="a-icon" style="background:rgba(30,109,242,.12)">📋</div>
-        <div class="a-content">
-          <h4>项目经理</h4>
-          <p>学会用"文档驱动+原型验证"来管理需求变更，减少返工，让团队始终朝着一个方向前进。</p>
-        </div>
-      </div>
-      <div class="audience-card">
-        <div class="a-icon" style="background:rgba(124,58,237,.12)">🎨</div>
-        <div class="a-content">
-          <h4>产品经理</h4>
-          <p>掌握"HTML可交互原型"方法，无需专业工具即可快速产出原型，还能做自动化检查。</p>
-        </div>
-      </div>
-      <div class="audience-card">
-        <div class="a-icon" style="background:rgba(52,168,83,.12)">⚙️</div>
-        <div class="a-content">
-          <h4>开发工程师</h4>
-          <p>了解如何将重复工作"固化"为AI可执行的技能，减少低效沟通，让AI真正理解项目上下文。</p>
-        </div>
-      </div>
-      <div class="audience-card">
-        <div class="a-icon" style="background:rgba(251,191,36,.12)">📈</div>
-        <div class="a-content">
-          <h4>团队负责人</h4>
-          <p>获得一套可落地的项目标准化流程，从项目初始化到交付每个环节都有产出物和检查机制。</p>
-        </div>
-      </div>
+<!-- ====== SLIDE 2 · 目录 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">目录</h2>
+    <span class="tag">总览 · 六大板块</span>
+  </div>
+  <div class="rule anim-left d0"></div>
+  <div class="grid-6">
+    <div class="card anim-up d1">
+      <span class="label" style="color:var(--gold);">01</span>
+      <h3 class="h3">项目初始化<br>+ 需求架构</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">标准化骨架 → 需求总纲 → 架构设计</p>
+    </div>
+    <div class="card gold anim-up d2">
+      <span class="label">02</span>
+      <h3 class="h3">文档归类<br>+ 原型验证</h3>
+      <p class="body-sm" style="color:var(--navy);opacity:0.65;">按模块归类 → HTML原型 → 断链检查</p>
+    </div>
+    <div class="card anim-up d3">
+      <span class="label" style="color:var(--gold);">03</span>
+      <h3 class="h3">Skills 固化<br>+ 需求前置</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">流程编码 → 可复用技能 → 防返工</p>
+    </div>
+    <div class="card anim-up d4">
+      <span class="label" style="color:var(--gold);">04</span>
+      <h3 class="h3">记忆系统<br>+ 会话拆分</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">四类记忆 → CLAUDE.md减负 → commit为界</p>
+    </div>
+    <div class="card gold anim-up d5">
+      <span class="label">05</span>
+      <h3 class="h3">Git 提交<br>+ 版本管理</h3>
+      <p class="body-sm" style="color:var(--navy);opacity:0.65;">中文提交 → 演进日志 → 追溯</p>
+    </div>
+    <div class="card anim-up d6">
+      <span class="label" style="color:var(--gold);">06</span>
+      <h3 class="h3">总结<br>方法论地图</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">核心原则 → 工具链 → 一句话</p>
     </div>
   </div>
+  <div class="pagenum">02 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 3: PAIN POINTS ══════ -->
-<div class="slide" data-title="痛点">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-red">为什么需要这套方法论</span></div>
-    <h2 class="anim-fade-1">传统做法，哪里不够？</h2>
-    <p class="subtitle anim-fade-2">这些问题你是否也遇到过？</p>
-    <div class="pain-grid anim-fade-3">
-      <div class="pain-card" style="border-left-color:#EF4444">
-        <div class="p-title"><span class="p-emoji">💬</span> 需求"说着说着就变了"</div>
-        <p>口头沟通的需求没有统一记录，开发到一半才发现理解不一致。文档和代码各写各的，没人知道哪个是准的。</p>
-      </div>
-      <div class="pain-card" style="border-left-color:#F59E0B">
-        <div class="p-title"><span class="p-emoji">🎨</span> 原型做好了，没法自动检查</div>
-        <p>用 Axure/Figma 画的原型是图片，没法做自动化校验。有没有页面断链、跳转对不对，全靠肉眼过。</p>
-      </div>
-      <div class="pain-card" style="border-left-color:#8B5CF6">
-        <div class="p-title"><span class="p-emoji">🔄</span> 重复工作每次都重来</div>
-        <p>项目结构搭建、文档分类、原型验证……这些工作每个项目都要做一遍，没人沉淀成可复用的工具。</p>
-      </div>
-      <div class="pain-card" style="border-left-color:#06B6D4">
-        <div class="p-title"><span class="p-emoji">🧠</span> AI 聊完就忘</div>
-        <p>和AI协作时，会话一压缩或一关，之前的约定和上下文全丢了。每次都要重新交代一遍背景。</p>
-      </div>
+<!-- ====== SLIDE 3 · 核心理念 ====== -->
+<div class="slide dark">
+  <div class="rule anim-left d0"></div>
+  <div style="display:flex;align-items:center;flex:1;gap:clamp(20px,4vw,60px);">
+    <div style="flex:0 0 auto;" class="anim-pop d1">
+      <span class="num-lg" style="color:var(--gold);">&ldquo;</span>
+    </div>
+    <div style="flex:1;">
+      <p class="lead anim-up d2" style="font-size:clamp(22px,2.5vw,38px);font-style:normal;font-weight:600;line-height:1.3;">
+        需求前置少返工，先写文档立规矩，<br>再做原型快验证，技能固化防走样，<br>会话管理保质量，渐进交付控范围。
+      </p>
     </div>
   </div>
+  <p class="label anim-up d4" style="color:var(--fg3);margin-top:clamp(12px,2vh,24px);">
+    六大原则驱动一站式平台建设
+  </p>
+  <div class="pagenum">03 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 4: PRINCIPLES ══════ -->
-<div class="slide" data-title="核心原则">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">方法论基石</span></div>
-    <h2 class="anim-fade-1">五个核心原则</h2>
-    <p class="subtitle anim-fade-2">这五个原则贯穿项目始终，是后面所有方法的基石</p>
-    <div class="principle-row anim-fade-3">
-      <div class="principle-card">
-        <span class="p-icon">📋</span>
-        <h4>文档驱动</h4>
-        <p>先写文档，再写代码。文档不是"写完就扔"的产物，而是开发过程中持续依赖的"唯一事实来源"。</p>
-      </div>
-      <div class="principle-card">
-        <span class="p-icon">🎨</span>
-        <h4>原型验证</h4>
-        <p>写代码之前先用可交互HTML原型跑通流程。发现问题在原型阶段改，比改代码成本低10倍。</p>
-      </div>
-      <div class="principle-card">
-        <span class="p-icon">⚙️</span>
-        <h4>技能固化</h4>
-        <p>重复性工作（搭建项目、归类文档、检查原型）写成AI Skill。下次再做，一键执行，不出错。</p>
-      </div>
-      <div class="principle-card">
-        <span class="p-icon">📈</span>
-        <h4>渐进交付</h4>
-        <p>不追求一步到位。分模块、分阶段推进：先试点一个模块，验证可行再推广，逐步覆盖全部功能。</p>
-      </div>
-      <div class="principle-card">
-        <span class="p-icon">🔖</span>
-        <h4>版本对应</h4>
-        <p>文档、原型、代码全部纳入Git管理。每次变更提交一个记录，整个项目的历史一目了然。</p>
-      </div>
+<!-- ====== SLIDE 4 · SECTION — 基础搭建 ====== -->
+<div class="slide dark sec-divider">
+  <p class="label anim-up d0" style="color:var(--gold);">Part 01</p>
+  <div class="sec-num">
+    <span class="num-lg anim-up d1" style="color:var(--gold);">01</span>
+  </div>
+  <h2 class="h1 anim-up d2">项目初始化<br><mark>+</mark> 需求架构设计</h2>
+  <p class="lead anim-up d3" style="margin-top:clamp(12px,2vh,24px);color:var(--fg2);max-width:44vw;">
+    标准化骨架搭建 → 需求总纲 → 架构设计<br>奠定项目一切后续工作的基础
+  </p>
+  <div class="pagenum">04 / 20</div>
+</div>
+
+<!-- ====== SLIDE 5 · 第一步 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第一步：项目初始化</h2>
+    <span class="tag">init-project</span>
+  </div>
+  <div class="grid-2">
+    <div class="card anim-left d1">
+      <p class="label" style="color:var(--gold);">产物目录结构</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(4px,0.8vh,10px);">
+        <li class="body-sm"><strong>CLAUDE.md</strong> — 项目"宪法"，定义规范与工作流</li>
+        <li class="body-sm"><strong>.gitignore</strong> — 忽略规则（node_modules / .env / dist）</li>
+        <li class="body-sm"><strong>.github/workflows/</strong> — CI/CD 流水线配置</li>
+        <li class="body-sm"><strong>.vscode/</strong> — 编辑器统一配置</li>
+        <li class="body-sm"><strong>docs/</strong> — 文档目录（初始为空，逐步填充）</li>
+        <li class="body-sm"><strong>src/ · tests/ · scripts/</strong> — 源码/测试/脚本</li>
+      </ul>
+    </div>
+    <div class="card gold anim-left d3">
+      <p class="label">为什么这样做</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(4px,0.8vh,10px);">
+        <li class="body-sm"><strong>问题：</strong>每个新项目从零搭目录 → <strong>标准化模板一键生成</strong></li>
+        <li class="body-sm"><strong>问题：</strong>团队/AI不知道规范 → <strong>CLAUDE.md就是"宪法"</strong></li>
+        <li class="body-sm"><strong>问题：</strong>不同项目风格各异 → <strong>.vscode/ + .github/ 统一</strong></li>
+        <li class="body-sm" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.15);">
+          核心价值：消除重复劳动，确保所有项目一致性
+        </li>
+      </ul>
     </div>
   </div>
+  <div class="pagenum">05 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 5: WORKFLOW ══════ -->
-<div class="slide" data-title="全流程">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-purple">工作流程</span></div>
-    <h2 class="anim-fade-1">八步工作流</h2>
-    <p class="subtitle anim-fade-2">每一步都产出明确的交付物，每一步都是下一步的输入</p>
-    <div class="flow-vertical anim-fade-3">
-      <div class="flow-row-item">
-        <span class="f-num">1</span>
-        <span class="f-text">需求文档</span>
-        <span class="f-desc">把业务想法写成结构化文档，明确功能范围和优先级</span>
-        <span class="f-tag" style="background:rgba(30,109,242,.12);color:#60A5FA">📄 requirements.md</span>
-      </div>
-      <div class="flow-row-item">
-        <span class="f-num">2</span>
-        <span class="f-text">架构设计</span>
-        <span class="f-desc">确定技术选型、模块划分和系统分层</span>
-        <span class="f-tag" style="background:rgba(124,58,237,.12);color:#A78BFA">🏗️ architecture.md</span>
-      </div>
-      <div class="flow-row-item">
-        <span class="f-num">3</span>
-        <span class="f-text">文档归类</span>
-        <span class="f-desc">按业务模块建立清晰的目录结构</span>
-        <span class="f-tag" style="background:rgba(52,168,83,.12);color:#34D399">📂 docs/ 结构化</span>
-      </div>
-      <div class="flow-row-item">
-        <span class="f-num">4</span>
-        <span class="f-text">原型设计</span>
-        <span class="f-desc">制作三端（手机/PC/门户）可交互HTML原型</span>
-        <span class="f-tag" style="background:rgba(251,191,36,.12);color:#FBBF24">🎨 原型.html</span>
-      </div>
-      <div class="flow-row-item">
-        <span class="f-num">5</span>
-        <span class="f-text">原型验证</span>
-        <span class="f-desc">自动化检查所有页面跳转和交互，零断链</span>
-        <span class="f-tag" style="background:rgba(239,68,68,.12);color:#F87171">🔍 validate-prototype</span>
-      </div>
-      <div class="flow-row-item">
-        <span class="f-num">6</span>
-        <span class="f-text">技能固化</span>
-        <span class="f-desc">把可重复的流程编码为 AI Skill</span>
-        <span class="f-tag" style="background:rgba(30,109,242,.12);color:#60A5FA">⚙️ .claude/skills/</span>
-      </div>
-      <div class="flow-row-item">
-        <span class="f-num">7</span>
-        <span class="f-text">代码开发</span>
-        <span class="f-desc">在有文档、有原型、有验证机制的基础上写代码</span>
-        <span class="f-tag" style="background:rgba(52,168,83,.12);color:#34D399">💻 实现</span>
-      </div>
-      <div class="flow-row-item">
-        <span class="f-num">8</span>
-        <span class="f-text">Git 提交</span>
-        <span class="f-desc">每次变更对应一个提交，演进历史可追溯</span>
-        <span class="f-tag" style="background:rgba(124,58,237,.12);color:#A78BFA">🔖 git commit</span>
-      </div>
+<!-- ====== SLIDE 6 · 第二步 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第二步：需求总纲与架构设计</h2>
+    <span class="tag">requirements + architecture</span>
+  </div>
+  <div class="grid-2">
+    <div class="card anim-left d1">
+      <p class="label" style="color:var(--gold);">requirements.md — 需求总纲</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(3px,0.6vh,8px);">
+        <li class="body-sm"><strong>项目简介</strong> — 一句话说清做什么</li>
+        <li class="body-sm"><strong>项目背景</strong> — 为什么要做，现状痛点</li>
+        <li class="body-sm"><strong>项目目标</strong> — 可衡量（覆盖7000人、90%线上化）</li>
+        <li class="body-sm"><strong>分阶段目标</strong> — 试点→推广→全覆盖三步走</li>
+        <li class="body-sm"><strong>功能模块</strong> — 按优先级列出功能清单</li>
+        <li class="body-sm"><strong>系统集成关系</strong> — 对接哪些外部系统</li>
+        <li class="body-sm"><strong>非功能需求</strong> — 性能/安全/兼容性/可用性</li>
+        <li class="body-sm"><strong>变更记录</strong> — 版本+日期+变更内容</li>
+      </ul>
+    </div>
+    <div class="card anim-left d3">
+      <p class="label" style="color:var(--gold);">architecture.md — 架构设计</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(3px,0.6vh,8px);">
+        <li class="body-sm"><strong>技术选型</strong> — 前端/后端/数据库/部署</li>
+        <li class="body-sm"><strong>分层架构</strong> — 接入层→应用层→流程层→集成层</li>
+        <li class="body-sm"><strong>模块划分</strong> — 各模块职责与交互关系</li>
+        <li class="body-sm"><strong>设计原则</strong> — 架构决策的判断依据</li>
+        <li class="body-sm"><strong>主数据管理</strong> — 数据来源和同步方式</li>
+        <li class="body-sm"><strong>ADR决策记录</strong> — 重大决策背景与权衡</li>
+        <li class="body-sm"><strong>实施路线</strong> — 时间线规划与里程碑</li>
+      </ul>
     </div>
   </div>
+  <div class="pagenum">06 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 6: DOCUMENT-DRIVEN ══════ -->
-<div class="slide" data-title="文档驱动">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">第1步</span></div>
-    <h2 class="anim-fade-1">文档驱动 —— 先写文档，再写代码</h2>
-    <p class="subtitle anim-fade-2">文档不是"写完了就归档"的产物，而是整个项目开发过程中持续依赖的"可执行需求"</p>
-    <div class="grid-2 anim-fade-3" style="gap:16px">
-      <div>
-        <div class="card" style="padding:18px;margin-bottom:10px">
-          <div class="tag" style="background:rgba(30,109,242,.12);color:#60A5FA">📄 requirements.md</div>
-          <h4>需求总纲</h4>
-          <p>项目背景、痛点、目标、功能模块清单（含优先级 P0/P1/P2）、系统集成关系、非功能需求。</p>
-        </div>
-        <div class="card" style="padding:18px;margin-bottom:10px">
-          <div class="tag" style="background:rgba(124,58,237,.12);color:#A78BFA">🏗️ architecture.md</div>
-          <h4>架构设计</h4>
-          <p>技术选型、分层架构图、模块划分、接口协议、主数据管理。确保团队对系统结构有一致的理解。</p>
-        </div>
-        <div class="card" style="padding:18px">
-          <div class="tag" style="background:rgba(52,168,83,.12);color:#34D399">📜 CLAUDE.md</div>
-          <h4>项目规范（AI"宪法"）</h4>
-          <p>定义代码规范、工作流、目录结构、约束条件。让AI在协助开发时始终遵循统一规则。</p>
-        </div>
-      </div>
-      <div>
-        <div class="comp-grid" style="grid-template-columns:1fr;gap:12px;margin-top:0">
-          <div class="comp-box bad">
-            <h4><span class="icon-bad">✗</span> 没有文档驱动的问题</h4>
-            <ul>
-              <li>需求在微信/邮件里，找起来非常困难</li>
-              <li>开发做着做着发现方向偏了</li>
-              <li>新成员加入要口述一遍所有背景</li>
-              <li>同一个功能不同人的理解不一样</li>
-            </ul>
-          </div>
-          <div class="comp-box good">
-            <h4><span class="icon-good">✓</span> 文档驱动的好处</h4>
-            <ul>
-              <li>团队所有人对需求的理解一致</li>
-              <li>每次变更都在文档上先改，再讨论</li>
-              <li>新成员自己看文档就能上手</li>
-              <li>需求、架构、代码三者版本对应</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+<!-- ====== SLIDE 7 · SECTION — 文档与原型 ====== -->
+<div class="slide dark sec-divider">
+  <p class="label anim-up d0" style="color:var(--gold);">Part 02</p>
+  <div class="sec-num"><span class="num-lg anim-up d1" style="color:var(--gold);">02</span></div>
+  <h2 class="h1 anim-up d2">文档归类<br><mark>+</mark> 原型验证</h2>
+  <p class="lead anim-up d3" style="margin-top:clamp(12px,2vh,24px);color:var(--fg2);max-width:44vw;">
+    按模块归类文档 → HTML 三端合一可交互原型<br>→ 自动化断链检查 → 质量门禁
+  </p>
+  <div class="pagenum">07 / 20</div>
+</div>
+
+<!-- ====== SLIDE 8 · 第三步 文档归类 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第三步：文档归类管理</h2>
+    <span class="tag">organize-docs</span>
+  </div>
+  <div class="grid-2">
+    <div class="card anim-left d1">
+      <p class="label" style="color:var(--gold);">四层目录结构</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(6px,1vh,14px);">
+        <li class="body-sm"><strong>01-蓝图方案/</strong> — 原始蓝图、规划文档（只读归档）</li>
+        <li class="body-sm"><strong>02-业务需求/</strong> — 按模块：HR人事 / 行政 / 生产 / 通用<br><span style="font-size:0.85em;opacity:0.55;">每个模块目录放 README.md 作为导航入口</span></li>
+        <li class="body-sm"><strong>03-原型方案/</strong> — HTML 可交互原型 + 原型方案文档</li>
+        <li class="body-sm"><strong>04-PRD/</strong> — 待产出的产品需求文档</li>
+      </ul>
+    </div>
+    <div class="card gold anim-left d3">
+      <p class="label">归类核心原则</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(6px,1vh,14px);">
+        <li class="body-sm"><strong>按模块不按类型</strong> — 按HR/行政/生产分类而非文件格式</li>
+        <li class="body-sm"><strong>README 导航</strong> — 每个模块目录放README.md入口</li>
+        <li class="body-sm"><strong>归类即整理</strong> — 新文件立刻归类，不堆积在根目录</li>
+        <li class="body-sm"><strong>可自动化</strong> — organize-docs skill 扫描并建议归类</li>
+      </ul>
     </div>
   </div>
+  <div class="pagenum">08 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 7: PROTOTYPE ══════ -->
-<div class="slide" data-title="原型先行">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-amber">第2步</span></div>
-    <h2 class="anim-fade-1">原型先行 —— 写代码前先验证方案</h2>
-    <p class="subtitle anim-fade-2">用 HTML 制作可交互原型，三端合一（手机端 + PC 端 + 管理门户），浏览器直接运行</p>
-    <div class="grid-2 anim-fade-3" style="gap:16px">
-      <div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-          <div style="flex:1;background:rgba(30,109,242,.08);border:1px solid rgba(30,109,242,.15);border-radius:10px;padding:14px;text-align:center;min-width:100px">
-            <div style="font-size:22px;margin-bottom:4px">📱</div>
-            <div style="font-size:13px;font-weight:600">手机端</div>
-            <div style="font-size:11px;color:var(--t2)">m-page · mNav()</div>
-          </div>
-          <div style="flex:1;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);border-radius:10px;padding:14px;text-align:center;min-width:100px">
-            <div style="font-size:22px;margin-bottom:4px">💻</div>
-            <div style="font-size:13px;font-weight:600">PC 端</div>
-            <div style="font-size:11px;color:var(--t2)">pc-page · data-pc</div>
-          </div>
-          <div style="flex:1;background:rgba(52,168,83,.08);border:1px solid rgba(52,168,83,.15);border-radius:10px;padding:14px;text-align:center;min-width:100px">
-            <div style="font-size:22px;margin-bottom:4px">🔐</div>
-            <div style="font-size:13px;font-weight:600">管理门户</div>
-            <div style="font-size:11px;color:var(--t2)">portal-page · data-portal</div>
-          </div>
-        </div>
-        <div class="card" style="padding:16px">
-          <h4 style="margin-bottom:4px">🔄 原型做完了，还能自动检查</h4>
-          <p style="font-size:13px">validate-prototype 会自动扫描整个原型文件，检查所有页面跳转是否有对应的目标页面、所有被调用的函数是否正确定义、是否有重复的页面 ID。结果立即可见。</p>
-        </div>
-      </div>
-      <div>
-        <div class="comp-grid" style="grid-template-columns:1fr;gap:12px;margin-top:0">
-          <div class="comp-box bad">
-            <h4><span class="icon-bad">✗</span> 传统工具（Axure / Figma）</h4>
-            <ul>
-              <li>需要安装专门软件</li>
-              <li>原型是"图片"，无法做自动化检查</li>
-              <li>不能放进 Git 做版本对比</li>
-              <li>分享需要部署或导出</li>
-              <li>断链只能人工逐个点</li>
-            </ul>
-          </div>
-          <div class="comp-box good">
-            <h4><span class="icon-good">✓</span> HTML 原型</h4>
-            <ul>
-              <li>浏览器直接打开即可运行</li>
-              <li>可做自动化断链、函数、ID检查</li>
-              <li>Git 管理可 diff 可追溯</li>
-              <li>分享一个文件或链接即可</li>
-              <li>20个页面断链检查只需几秒</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+<!-- ====== SLIDE 9 · 第四步 原型设计 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第四步：原型设计与验证</h2>
+    <span class="tag">prototype-designer</span>
+  </div>
+  <div class="grid-2">
+    <div class="card anim-left d1">
+      <p class="label" style="color:var(--gold);">三端合一 HTML 架构</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(3px,0.6vh,8px);">
+        <li class="body-sm"><strong>手机端</strong> — 底部导航 + mNav() 页面切换</li>
+        <li class="body-sm"><strong>PC端</strong> — 左侧导航 + 面包屑 + data-pc 绑定</li>
+        <li class="body-sm"><strong>管理门户</strong> — 左侧导航 + data-portal 绑定</li>
+        <li class="body-sm"><strong>ID规范</strong> — mp-{模块} / pc-{模块} / portal-{模块}</li>
+        <li class="body-sm"><strong>视图切换器</strong> — 一键切换手机/电脑/门户</li>
+      </ul>
+    </div>
+    <div class="card anim-left d3">
+      <p class="label" style="color:var(--gold);">为什么用 HTML 原型</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(3px,0.6vh,8px);">
+        <li class="body-sm"><strong>零依赖</strong> — 浏览器直接运行，无需装软件</li>
+        <li class="body-sm"><strong>可自动化验证</strong> — validate-prototype 做断链检查</li>
+        <li class="body-sm"><strong>可Git追溯</strong> — 提交版本控制，每次修改可diff</li>
+        <li class="body-sm"><strong>可分享</strong> — 一个链接远程团队即可预览</li>
+        <li class="body-sm" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light);">
+          <strong>核心差异：</strong>自动化质量门禁 — Axure/Figma做不到
+        </li>
+      </ul>
     </div>
   </div>
+  <div class="pagenum">09 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 8: REQUIREMENT CONFIRMATION ══════ -->
-<div class="slide" data-title="需求前置">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge" style="background:rgba(6,182,212,.15);color:#06B6D4;border:1px solid rgba(6,182,212,.25)">方法论</span></div>
-    <h2 class="anim-fade-1">需求确认前置 —— 脑子最清楚时做最重要的决策</h2>
-    <p class="subtitle anim-fade-2">会话初期原型往往只需微调；越到后面越不准。这不是AI变笨，是信息衰减</p>
-    <div class="grid-2 anim-fade-3" style="gap:16px">
-      <div>
-        <h4 style="font-size:15px;color:var(--r);margin-bottom:10px">❌ 常见反模式：边做边改</h4>
-        <div class="card" style="padding:12px;margin-bottom:8px">
-          <div style="font-size:12px;line-height:1.8">
-            <div>用户：帮我做个编辑页面</div>
-            <div style="color:var(--t2)">AI 直接生成 → 字段少了 → 补充 → 再加 → 样式不对 → 再改</div>
-            <div style="color:var(--r);margin-top:4px">→ 10+ 轮迭代 → 上下文膨胀 → 质量断崖</div>
-          </div>
-        </div>
-        <h4 style="font-size:15px;color:var(--s);margin-bottom:10px;margin-top:14px">✅ 正确做法：先确认，再生成</h4>
-        <div class="card" style="padding:12px">
-          <div style="font-size:12px;line-height:1.8">
-            <div>1. 用户提需求 → AI 反问确认（字段/类型/选项/跳转）</div>
-            <div>2. 用户逐项确认 → 形成"口头 PRD"</div>
-            <div>3. AI 一次性生成完整原型</div>
-            <div style="color:var(--s);margin-top:4px">→ 1-2轮微调即完成</div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <h4 style="font-size:15px;color:var(--p2);margin-bottom:10px">📋 问答式确认模板</h4>
-        <div class="card" style="padding:12px;margin-bottom:8px">
-          <div style="font-size:11px;line-height:2">
-            <div>🔹 <strong>需要哪些字段？</strong>名称、类型、默认值</div>
-            <div>🔹 <strong>每个字段的类型？</strong>文本/下拉/数字/日期</div>
-            <div>🔹 <strong>下拉选项有哪些？</strong>逐项列出</div>
-            <div>🔹 <strong>保存后跳转到哪？</strong>返回列表/留在当前</div>
-            <div>🔹 <strong>是否需要取消按钮？</strong>点击行为是什么</div>
-          </div>
-        </div>
-        <h4 style="font-size:15px;color:var(--w);margin-bottom:10px;margin-top:14px">🔗 与上下文管理的配合</h4>
-        <div class="card" style="padding:12px">
-          <div style="font-size:12px;line-height:1.8">
-            <div>• 确认在<strong>会话初期</strong>（上下文最干净时）完成</div>
-            <div>• 生成后立即 <strong>commit</strong>，复杂模块<strong>新开会话</strong></div>
-            <div style="margin-top:4px;color:var(--w)"><strong>把最需要脑子的活，放在脑子最清楚的时候干</strong></div>
-          </div>
-        </div>
-      </div>
+<!-- ====== SLIDE 10 · 原型验证流程 ====== -->
+<div class="slide dark">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">原型验证流程</h2>
+    <span class="tag" style="color:var(--gold);border-color:var(--gold);">validate-prototype</span>
+  </div>
+  <div class="process-row">
+    <div class="p-step anim-up d1"><div class="p-num">1</div><p class="body" style="font-weight:600;">读取HTML</p><p class="body-sm" style="color:var(--fg2);">加载原型文件</p></div>
+    <div class="p-arrow anim-up d2">→</div>
+    <div class="p-step anim-up d2"><div class="p-num">2</div><p class="body" style="font-weight:600;">提取页面</p><p class="body-sm" style="color:var(--fg2);">m-page / pc-page / portal-page</p></div>
+    <div class="p-arrow anim-up d3">→</div>
+    <div class="p-step anim-up d3"><div class="p-num">3</div><p class="body" style="font-weight:600;">提取引用</p><p class="body-sm" style="color:var(--fg2);">mNav / data-pc / data-portal / onclick</p></div>
+    <div class="p-arrow anim-up d4">→</div>
+    <div class="p-step anim-up d4"><div class="p-num">4</div><p class="body" style="font-weight:600;">逐项校验</p><p class="body-sm" style="color:var(--fg2);">目标存在? 函数定义? ID重复?</p></div>
+    <div class="p-arrow anim-up d5">→</div>
+    <div class="p-step anim-up d5"><div class="p-num">5</div><p class="body" style="font-weight:600;">输出报告</p><p class="body-sm" style="color:var(--fg2);">断链清单 + 修复建议</p></div>
+  </div>
+  <div class="pagenum">10 / 20</div>
+</div>
+
+<!-- ====== SLIDE 11 · SECTION — 技能固化 ====== -->
+<div class="slide dark sec-divider">
+  <p class="label anim-up d0" style="color:var(--gold);">Part 03</p>
+  <div class="sec-num"><span class="num-lg anim-up d1" style="color:var(--gold);">03</span></div>
+  <h2 class="h1 anim-up d2">Skills <mark>技能固化</mark><br>+ 需求确认前置</h2>
+  <p class="lead anim-up d3" style="margin-top:clamp(12px,2vh,24px);color:var(--fg2);max-width:44vw;">
+    4 个可复用 Skills → 将流程编码化<br>需求确认前置 → 上下文最干净时锁定需求
+  </p>
+  <div class="pagenum">11 / 20</div>
+</div>
+
+<!-- ====== SLIDE 12 · 四大 Skills ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第五步：四大项目 Skills</h2>
+    <span class="tag">可复用技能</span>
+  </div>
+  <div class="grid-3">
+    <div class="card anim-up d1">
+      <p class="label" style="color:var(--gold);">01</p>
+      <h3 class="h3">init-project</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">标准化项目脚手架一键生成</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:2px;margin-top:auto;">
+        <li class="body-sm">自动创建完整目录结构</li>
+        <li class="body-sm">CLAUDE.md + .gitignore + CI</li>
+        <li class="body-sm">消除项目初始化重复劳动</li>
+      </ul>
+    </div>
+    <div class="card gold anim-up d2">
+      <p class="label">02</p>
+      <h3 class="h3">organize-docs</h3>
+      <p class="body-sm" style="color:var(--navy);opacity:0.65;">自动扫描 docs/ 并建议归类</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:2px;margin-top:auto;">
+        <li class="body-sm">按特征匹配目标目录</li>
+        <li class="body-sm">四层归类体系</li>
+        <li class="body-sm">新文件进入后立刻整理</li>
+      </ul>
+    </div>
+    <div class="card anim-up d3">
+      <p class="label" style="color:var(--gold);">03</p>
+      <h3 class="h3">prototype-designer</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">从需求文档生成原型方案+PRD</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:2px;margin-top:auto;">
+        <li class="body-sm">逐模块确认→方案→PRD</li>
+        <li class="body-sm">三端合一HTML原型</li>
+        <li class="body-sm">需求确认前置防返工</li>
+      </ul>
     </div>
   </div>
+  <div class="pagenum">12 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 9: SKILLS ══════ -->
-<div class="slide" data-title="技能固化">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-purple">第3步</span></div>
-    <h2 class="anim-fade-1">技能固化 —— 把重复工作变成"一键执行"</h2>
-    <p class="subtitle anim-fade-2">Skill 是把一个完整的工作流程（步骤+规范+产出物）编码为 AI 可以严格遵循的指令集</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px" class="anim-fade-3">
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
-          <span style="font-size:24px;flex-shrink:0">🚀</span>
-          <div><h4 style="font-size:14px">init-project</h4><p style="font-size:12px">一键生成标准化项目骨架：目录结构、CLAUDE.md、配置文件</p></div>
-        </div>
-        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
-          <span style="font-size:24px;flex-shrink:0">📂</span>
-          <div><h4 style="font-size:14px">organize-docs</h4><p style="font-size:12px">自动扫描 docs/ 目录，把新文件按模块归类到正确位置</p></div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
-          <span style="font-size:24px;flex-shrink:0">🎨</span>
-          <div><h4 style="font-size:14px">prototype-designer</h4><p style="font-size:12px">从需求文档自动生成原型方案和 PRD，按步骤确认</p></div>
-        </div>
-        <div class="card" style="padding:16px;display:flex;gap:14px;align-items:flex-start">
-          <span style="font-size:24px;flex-shrink:0">🔍</span>
-          <div><h4 style="font-size:14px">validate-prototype</h4><p style="font-size:12px">检查 HTML 原型的所有导航跳转、函数定义、ID 重复</p></div>
-        </div>
-      </div>
+<!-- ====== SLIDE 13 · 需求确认前置 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">需求确认前置法</h2>
+    <span class="tag">关键方法</span>
+  </div>
+  <div class="grid-6">
+    <div class="card anim-up d1">
+      <p class="label" style="color:var(--gold);">现象</p>
+      <p class="h3">越到后面<br>原型越不准</p>
+      <p class="body-sm" style="color:var(--fg-light2);">会话初期上下文干净→原型准确；后期信息压缩→越改越歪</p>
     </div>
-    <div class="anim-fade-4" style="margin-top:12px;padding:14px 20px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.06)">
-      <div style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="color:var(--t);font-weight:600">💡 Skill 的核心价值：</span>
-        <span>先做一次确认流程是对的 → 做第二次时把它写成 Skill → 以后每次都一键执行</span>
-      </div>
+    <div class="card gold anim-up d2">
+      <p class="label">方法</p>
+      <p class="h3">AI 先反问<br>再一次性生成</p>
+      <p class="body-sm" style="color:var(--navy);opacity:0.65;">用户提需求 → AI反问5个问题（字段/类型/选项/跳转/取消）→ 用户确认 → 一次性生成完整原型</p>
+    </div>
+    <div class="card anim-up d3">
+      <p class="label" style="color:var(--gold);">效果</p>
+      <p class="h3">10轮迭代<br>→ 1-2轮微调</p>
+      <p class="body-sm" style="color:var(--fg-light2);">确认清单="口头PRD"，后续可追溯，大幅降低上下文消耗</p>
+    </div>
+    <div class="card anim-up d4">
+      <p class="label" style="color:var(--gold);">Skill 设计规范</p>
+      <p class="body-sm" style="color:var(--fg-light2);">触发关键词 → 流程步骤（不要跳过）→ 输出格式模板。先有流程，后有Skill：做一次→沉淀→编码固化。Skill纳入Git管理。</p>
+    </div>
+    <div class="card gold anim-up d5">
+      <p class="label">配合上下文管理</p>
+      <p class="body-sm" style="color:var(--navy);opacity:0.65;">需求确认前置+会话拆分：确认→生成→commit，新开会话做下一个模块。把最需要脑子的活放在脑子最清楚的时候干。</p>
+    </div>
+    <div class="card anim-up d6">
+      <p class="label" style="color:var(--gold);">04</p>
+      <p class="h3">validate-prototype</p>
+      <p class="body-sm" style="color:var(--fg-light2);">自动化断链检查与验证报告。建议独立会话执行（遍历大文件消耗大）。</p>
     </div>
   </div>
+  <div class="pagenum">13 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 9: MEMORY ══════ -->
-<div class="slide" data-title="记忆系统">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">第4步</span></div>
-    <h2 class="anim-fade-1">记忆系统 —— 让 AI 拥有长期记忆</h2>
-    <p class="subtitle anim-fade-2">AI 会话压缩后，关键上下文不会丢失。这是"AI 越用越懂你"的核心</p>
-    <div class="grid-2 anim-fade-3" style="gap:16px">
-      <div>
-        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
-          <div style="font-size:22px;flex-shrink:0">👤</div>
-          <div><h4 style="font-size:14px">user 用户信息</h4><p style="font-size:12px">你的角色、技术背景、偏好。比如：你是后端转前端，不懂 React hooks —— AI 就不会用高级 React 概念解释问题</p></div>
-        </div>
-        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
-          <div style="font-size:22px;flex-shrink:0">💡</div>
-          <div><h4 style="font-size:14px">feedback 反馈</h4><p style="font-size:12px">你纠正过 AI 什么、肯定了 AI 什么。比如："不要每次问我权限了" → 自动生成权限配置</p></div>
-        </div>
-        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
-          <div style="font-size:22px;flex-shrink:0">📌</div>
-          <div><h4 style="font-size:14px">project 项目</h4><p style="font-size:12px">项目目标、当前状态、关键决策、截止时间。AI 知道项目进行到哪一步了</p></div>
-        </div>
-        <div class="card" style="padding:16px;display:flex;align-items:flex-start;gap:14px">
-          <div style="font-size:22px;flex-shrink:0">🔗</div>
-          <div><h4 style="font-size:14px">reference 参考</h4><p style="font-size:12px">外部系统位置、文档索引、工具地址。比如：Bug 在 Linear 的 INGEST 项目里跟踪</p></div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;justify-content:center">
-        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
-          <h4 style="font-size:14px;margin-bottom:10px">📂 记忆文件结构</h4>
-          <div style="font-family:monospace;font-size:12px;line-height:2.2">
-            <div style="color:var(--t2)">.claude/projects/{hash}/memory/</div>
-            <div style="color:var(--t)">├── <span style="color:var(--p)">MEMORY.md</span> <span style="color:var(--t2)">← 索引（始终加载）</span></div>
-            <div style="color:var(--t)">├── about-user.md</div>
-            <div style="color:var(--t)">├── project-overview.md</div>
-            <div style="color:var(--t)">├── feedback-*.md</div>
-            <div style="color:var(--t)">└── reference-*.md</div>
-          </div>
-          <div class="divider"></div>
-          <p style="font-size:12px;color:var(--t2);line-height:1.6">
-            <strong style="color:var(--t)">效果：</strong>AI 不再是"每次都从零认识你"。重启对话后，它还记得你的偏好、项目进展、之前踩过的坑。这就相当于每个项目都有一个"了解全部上下文"的 AI 助手。
-          </p>
-        </div>
-      </div>
+<!-- ====== SLIDE 14 · SECTION — 记忆与上下文 ====== -->
+<div class="slide dark sec-divider">
+  <p class="label anim-up d0" style="color:var(--gold);">Part 04</p>
+  <div class="sec-num"><span class="num-lg anim-up d1" style="color:var(--gold);">04</span></div>
+  <h2 class="h1 anim-up d2">记忆系统<br><mark>+</mark> 上下文管理</h2>
+  <p class="lead anim-up d3" style="margin-top:clamp(12px,2vh,24px);color:var(--fg2);max-width:44vw;">
+    四类记忆 → 跨会话持久化<br>CLAUDE.md 减负 → 会话拆分 → memory 做桥梁
+  </p>
+  <div class="pagenum">14 / 20</div>
+</div>
+
+<!-- ====== SLIDE 15 · 第六步 记忆系统 ====== -->
+<div class="slide dark">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第六步：记忆系统</h2>
+    <span class="tag" style="color:var(--gold);border-color:var(--gold);">四类记忆</span>
+  </div>
+  <div class="grid-6">
+    <div class="card anim-up d1">
+      <p class="body" style="font-weight:700;color:var(--gold);">user</p>
+      <p class="body-sm" style="font-weight:600;">用户角色与偏好</p>
+      <p class="body-sm" style="color:var(--fg2);">保存用户角色、知识水平、协作偏好。确保AI用正确的方式与正确的人沟通。</p>
+    </div>
+    <div class="card anim-up d2">
+      <p class="body" style="font-weight:700;color:var(--gold);">feedback</p>
+      <p class="body-sm" style="font-weight:600;">反馈纠正记录</p>
+      <p class="body-sm" style="color:var(--fg2);">记录"不要这样""对就是这样"，保存原因。避免AI重复犯错，也避免忘记已确认的好做法。</p>
+    </div>
+    <div class="card anim-up d3">
+      <p class="body" style="font-weight:700;color:var(--gold);">project</p>
+      <p class="body-sm" style="font-weight:600;">项目上下文</p>
+      <p class="body-sm" style="color:var(--fg2);">项目目标、当前任务、架构决策。拆分会话后新会话能自动继承进度。</p>
+    </div>
+    <div class="card anim-up d4">
+      <p class="body" style="font-weight:700;color:var(--gold);">reference</p>
+      <p class="body-sm" style="font-weight:600;">外部资源索引</p>
+      <p class="body-sm" style="color:var(--fg2);">外部系统位置、文档链接等。记住"去哪找"而非内容本身。</p>
+    </div>
+    <div class="card gold anim-up d5">
+      <p class="body" style="font-weight:700;color:var(--navy);">原则</p>
+      <p class="body-sm" style="font-weight:600;color:var(--navy);">只记机器无法推断的</p>
+      <p class="body-sm" style="color:var(--navy);opacity:0.65;">代码规范、文件路径等项目本身可读取的不需要存。feedback要记"为什么"。</p>
+    </div>
+    <div class="card anim-up d6">
+      <p class="body" style="font-weight:700;color:var(--gold);">维护</p>
+      <p class="body-sm" style="font-weight:600;">信息变化时及时更新</p>
+      <p class="body-sm" style="color:var(--fg2);">MEMORY.md索引超200行被截断，保持条目简洁。过时记忆及时删除。</p>
     </div>
   </div>
+  <div class="pagenum">15 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 10: CONTEXT WINDOW ══════ -->
-<div class="slide" data-title="会话管理">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">第5步</span></div>
-    <h2 class="anim-fade-1">上下文窗口管理 —— 别让 AI "偷偷失忆"</h2>
-    <p class="subtitle anim-fade-2">上下文满了会被自动压缩，AI 不告诉你"我忘了"——它只会悄悄出错</p>
-    <div class="grid-2 anim-fade-3" style="gap:16px">
-      <div>
-        <h4 style="font-size:15px;color:var(--r);margin-bottom:10px">⚠ 上下文满了会怎样</h4>
-        <div class="card" style="padding:12px;margin-bottom:8px">
-          <div style="font-size:12px;line-height:1.8">
-            <div>🔴 <strong>信息丢失</strong> — 压缩后的摘要丢失中间讨论细节</div>
-            <div>🟠 <strong>重复劳动</strong> — AI 重新读取读过的文件</div>
-            <div>🟡 <strong>简单操作出错</strong> — 正则混乱、改错位置</div>
-            <div>🔵 <strong>质量下降</strong> — 丢失约束，偏离规范</div>
-          </div>
-        </div>
-        <h4 style="font-size:15px;color:var(--s);margin-bottom:10px;margin-top:14px">✅ CLAUDE.md 减负效果</h4>
-        <div class="card" style="padding:12px">
-          <div style="font-size:12px;line-height:1.8">
-            <div><strong>砍掉三类：</strong>通用知识 / 空占位 / 冗余指令</div>
-            <div><strong>保留四类：</strong>项目定位 / 行为约束 / 文件索引 / 特殊约定</div>
-            <div style="margin-top:6px;color:var(--p)"><strong>本项目：30行 → 13行（-57%），每次会话省 ~200 token</strong></div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <h4 style="font-size:15px;color:var(--p2);margin-bottom:10px">🔄 会话拆分策略</h4>
-        <div class="card" style="padding:12px;margin-bottom:8px">
-          <div style="font-size:12px;line-height:1.8">
-            <div>📏 <strong>粒度：</strong>一个 commit = 一个会话</div>
-            <div>🚩 <strong>拆分信号：</strong></div>
-            <div style="padding-left:16px">• 同一文件被重复读取 3-4 次</div>
-            <div style="padding-left:16px">• 简单操作（正则/路径）连续出错</div>
-            <div style="padding-left:16px">• 对话 > 15-20 轮或变更 > 500 行</div>
-          </div>
-        </div>
-        <h4 style="font-size:15px;color:var(--w);margin-bottom:10px;margin-top:14px">📄 HTML/PPT 特别注意</h4>
-        <div class="card" style="padding:12px">
-          <div style="font-size:12px;line-height:1.8">
-            <div>• <strong>HTML 原型</strong>（1000+行三端合一）：编辑优先用 grep/sed，批量用脚本，验证独立会话</div>
-            <div>• <strong>PPT 文件</strong>：AI 不能直接编辑 .pptx，需人工同步；等 .md 稳定后统一导出</div>
-            <div style="margin-top:6px;color:var(--w)"><strong>核心：commit 即分界，memory 做桥梁</strong></div>
-          </div>
-        </div>
-      </div>
+<!-- ====== SLIDE 16 · 第七步 CLAUDE.md减负 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第七步：CLAUDE.md 减负策略</h2>
+    <span class="tag">常驻上下文精炼</span>
+  </div>
+  <div class="grid-2">
+    <div class="card anim-left d1">
+      <p class="label" style="color:var(--gold);">砍掉三类冗余</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(6px,1vh,14px);">
+        <li class="body-sm"><strong>通用知识：</strong>工作流图表、开发流程 — AI训练数据已包含，不需每次重申</li>
+        <li class="body-sm"><strong>空占位：</strong>&lt;!-- TODO: 补充 --&gt; — 零信息量，纯占token</li>
+        <li class="body-sm"><strong>冗余指令：</strong>"遵循架构约束"+"阅读架构文档" → 前者已被后者隐含</li>
+      </ul>
+    </div>
+    <div class="card gold anim-left d3">
+      <p class="label">保留四类必须</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:clamp(6px,1vh,14px);">
+        <li class="body-sm"><strong>项目定位</strong> — 一句话说清项目是什么</li>
+        <li class="body-sm"><strong>行为约束</strong> — "提交信息使用中文"</li>
+        <li class="body-sm"><strong>文件索引</strong> — "功能实现前阅读 docs/xxx.md"</li>
+        <li class="body-sm"><strong>特殊约定</strong> — "新增方法时同步更新项目工作法"</li>
+        <li class="body-sm" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.15);">
+          <strong>效果：</strong>本项目 CLAUDE.md 从 <strong>30行 → 13行</strong>（-57%），每次新会话节省约 200 token
+        </li>
+      </ul>
     </div>
   </div>
+  <div class="pagenum">16 / 20</div>
 </div>
 
-<!-- ══════ VERSION CONTROL ══════ -->
-<div class="slide" data-title="版本管理">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-green">第6步</span></div>
-    <h2 class="anim-fade-1">版本管理 —— 文档和代码一起版本化</h2>
-    <p class="subtitle anim-fade-2">不只是代码需要 Git 管理，文档、原型、配置都纳入版本控制，形成完整的项目演进历史</p>
-    <div class="grid-2 anim-fade-3" style="gap:16px">
-      <div>
-        <div class="card" style="padding:18px">
-          <h4 style="margin-bottom:6px">📝 一条好的提交信息</h4>
-          <p style="font-size:13px;margin-bottom:10px">使用中文，格式：「做什么事 — 补充说明」</p>
-          <div style="font-family:monospace;font-size:13px;line-height:2.2;background:rgba(0,0,0,.2);padding:10px 14px;border-radius:8px">
-            <div style="color:var(--s)">✓ 新增人事通原型 V1.0 — 三端完整交互原型</div>
-            <div style="color:var(--s)">✓ 初始化项目结构 — 骨架目录 + .gitignore</div>
-            <div style="color:var(--s)">✓ 存档项目工作法 HTML 演示文稿及相关产物</div>
-            <div style="color:var(--r);opacity:.5">✗ feat: update prototype</div>
-            <div style="color:var(--r);opacity:.5">✗ fix bug</div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="card" style="padding:18px">
-          <h4 style="margin-bottom:6px">🔖 什么东西要提交？</h4>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
-            <span class="tech-tag" style="font-size:12px">📄 requirements.md</span>
-            <span class="tech-tag" style="font-size:12px">🏗️ architecture.md</span>
-            <span class="tech-tag" style="font-size:12px">📂 docs/ 目录结构</span>
-            <span class="tech-tag" style="font-size:12px">🎨 原型文件 .html</span>
-            <span class="tech-tag" style="font-size:12px">⚙️ Skills/</span>
-            <span class="tech-tag" style="font-size:12px">🧠 memory/ 记忆</span>
-            <span class="tech-tag" style="font-size:12px">📜 CLAUDE.md</span>
-            <span class="tech-tag" style="font-size:12px">💻 源代码</span>
-            <span class="tech-tag" style="font-size:12px">🧪 测试用例</span>
-            <span class="tech-tag" style="font-size:12px">🔧 配置文件</span>
-          </div>
-        </div>
-        <div class="card" style="padding:16px;margin-top:8px">
-          <h4 style="font-size:13px;margin-bottom:2px">💡 为什么文档也要版本化管理？</h4>
-          <p style="font-size:12px;color:var(--t2);line-height:1.5">因为文档和代码是"同步演进"的。需求变了 → 先改文档 → 再改代码 → 一起提交。这样任何时候回头看，都知道"当时为什么要这么改"。</p>
-        </div>
-      </div>
+<!-- ====== SLIDE 17 · 会话拆分预警 ====== -->
+<div class="slide dark">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">四个预警信号</h2>
+    <span class="tag" style="color:var(--gold);border-color:var(--gold);">出现任一就该收手</span>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.5vh,16px);">
+    <div class="bar-row anim-left d1">
+      <p class="body-sm">同一大文件被AI重复读取 3-4 次</p>
+      <div class="bar-track"><div class="bar-fill" style="--w:95%"></div></div>
+      <p class="bar-val" style="color:var(--gold);">严重</p>
+    </div>
+    <div class="bar-row anim-left d2">
+      <p class="body-sm">简单操作连续出错（正则、路径拼接）</p>
+      <div class="bar-track"><div class="bar-fill" style="--w:88%"></div></div>
+      <p class="bar-val" style="color:var(--gold);">严重</p>
+    </div>
+    <div class="bar-row anim-left d3">
+      <p class="body-sm">系统出现上下文压缩提示</p>
+      <div class="bar-track"><div class="bar-fill" style="--w:82%"></div></div>
+      <p class="bar-val" style="color:var(--gold);">严重</p>
+    </div>
+    <div class="bar-row anim-left d4">
+      <p class="body-sm">对话超 15-20 轮或变更超 500 行</p>
+      <div class="bar-track"><div class="bar-fill" style="--w:75%"></div></div>
+      <p class="bar-val" style="color:var(--gold);">重要</p>
     </div>
   </div>
+  <p class="body-sm anim-up d6" style="color:var(--fg2);margin-top:clamp(8px,1.5vh,16px);">
+    <strong style="color:var(--gold);">核心策略：</strong>commit 即分界 — 每次 commit 后评估是否新开会话。memory 做桥梁，新会话自动继承进度。
+  </p>
+  <div class="pagenum">17 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 11: ACHIEVEMENTS ══════ -->
-<div class="slide" data-title="成果">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-green">实战验证</span></div>
-    <h2 class="anim-fade-1">这套方法论产出了什么？</h2>
-    <p class="subtitle anim-fade-2">这不仅仅是理论 —— 以下是实际项目（人事通模块）中应用这套方法后的产出物</p>
-    <div class="results-grid anim-fade-3">
-      <div class="result-card">
-        <div class="r-icon">📄</div>
-        <div class="r-count">2</div>
-        <div class="r-label">核心文档<br><span style="font-size:11px">需求总纲 + 架构设计</span></div>
-      </div>
-      <div class="result-card">
-        <div class="r-icon">📂</div>
-        <div class="r-count">4</div>
-        <div class="r-label">业务模块<br><span style="font-size:11px">HR/行政/生产/通用</span></div>
-      </div>
-      <div class="result-card">
-        <div class="r-icon">🎨</div>
-        <div class="r-count">47</div>
-        <div class="r-label">原型页面<br><span style="font-size:11px">22手机+16PC+9门户</span></div>
-      </div>
-      <div class="result-card">
-        <div class="r-icon">⚙️</div>
-        <div class="r-count">4</div>
-        <div class="r-label">AI Skills<br><span style="font-size:11px">可重复使用的工作流</span></div>
-      </div>
-      <div class="result-card">
-        <div class="r-icon">🧠</div>
-        <div class="r-count">5</div>
-        <div class="r-label">记忆条目<br><span style="font-size:11px">上下文持久化</span></div>
-      </div>
-      <div class="result-card">
-        <div class="r-icon">🔖</div>
-        <div class="r-count">10</div>
-        <div class="r-label">Git 提交<br><span style="font-size:11px">完整演进历史</span></div>
-      </div>
+<!-- ====== SLIDE 18 · 上下文压缩后果 ====== -->
+<div class="slide dark">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">上下文压缩：不是优雅降级，是静默破坏</h2>
+    <span class="tag" style="color:var(--gold);border-color:var(--gold);">警醒</span>
+  </div>
+  <div class="card anim-up d2" style="flex:1;">
+    <table class="tbl">
+      <thead><tr><th>后果</th><th>具体表现</th><th>真实案例</th></tr></thead>
+      <tbody>
+        <tr class="anim-up d2"><td>信息丢失</td><td>压缩后摘要丢失中间讨论细节，AI "忘记"已确认方案</td><td>—</td></tr>
+        <tr class="anim-up d3"><td>重复劳动</td><td>AI 重新读取已读过的文件，浪费 token 和时间</td><td>同一HTML被反复Read 4-5次</td></tr>
+        <tr class="anim-up d4"><td>简单操作出错</td><td>正则转义混乱、改错文件位置、变量名混用</td><td>门户端编辑时Node正则连续报错</td></tr>
+        <tr class="anim-up d5"><td>产出质量下降</td><td>丢失约束条件，生成代码偏离已确认规范</td><td>编辑表单字段与弹窗不一致</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="body-sm anim-up d6" style="color:var(--fg2);margin-top:clamp(6px,1vh,12px);">
+    <strong style="color:var(--gold);">根因：</strong>AI不"知道"自己丢掉了什么信息。它看到的是压缩后的残缺上下文，但不会主动告诉你"我忘了"。
+  </p>
+  <div class="pagenum">18 / 20</div>
+</div>
+
+<!-- ====== SLIDE 19 · Git 提交规范 ====== -->
+<div class="slide light">
+  <div class="slide-header anim-up d0">
+    <h2 class="h2">第八步：Git 提交规范与版本管理</h2>
+    <span class="tag">版本管理</span>
+  </div>
+  <div class="grid-3">
+    <div class="card anim-up d1">
+      <p class="label" style="color:var(--gold);">格式</p>
+      <h3 class="h3">中文提交</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">{动词}{名词} — {补充说明}</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:3px;margin-top:auto;">
+        <li class="body-sm">"初始化项目结构"</li>
+        <li class="body-sm">"整理 docs/ 目录，按功能模块拆分"</li>
+        <li class="body-sm">"新增 organize-docs skill"</li>
+        <li class="body-sm">"人事通原型 V1.0 — 三端完整交互原型"</li>
+      </ul>
     </div>
-    <div class="anim-fade-4" style="margin-top:14px;padding:12px 18px;background:rgba(52,168,83,.06);border:1px solid rgba(52,168,83,.12);border-radius:10px;text-align:center">
-      <span style="font-size:13px;color:var(--s)">✅ 人事通原型验证：全部通过 · 零断链 · 零错误</span>
+    <div class="card gold anim-up d2">
+      <p class="label">时机</p>
+      <h3 class="h3">6 类提交时机</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:3px;margin-top:auto;">
+        <li class="body-sm">项目初始化 → 骨架 + CLAUDE.md</li>
+        <li class="body-sm">文档更新 → 需求/架构文档变更</li>
+        <li class="body-sm">文档归类 → 移动文件后目录调整</li>
+        <li class="body-sm">新增 Skill → skill 目录和 skill.md</li>
+        <li class="body-sm">原型产出 → HTML + .md 方案</li>
+        <li class="body-sm">代码实现 → 功能代码 + 测试</li>
+      </ul>
+    </div>
+    <div class="card anim-up d3">
+      <p class="label" style="color:var(--gold);">演进</p>
+      <h3 class="h3">10+ 条记录</h3>
+      <p class="body-sm" style="color:var(--fg-light2);">从初始化到 v1.2 的演进日志</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:3px;margin-top:auto;">
+        <li class="body-sm">28c26d5 初始化项目结构</li>
+        <li class="body-sm">8aab796 补充背景、目标及功能</li>
+        <li class="body-sm">c0ccd6e 人事通原型 V1.0</li>
+        <li class="body-sm">be8674f 门户端编辑改造（31处）</li>
+        <li class="body-sm">f272181 需求确认前置 → v1.2</li>
+      </ul>
     </div>
   </div>
+  <div class="pagenum">19 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 12: COMPARISON ══════ -->
-<div class="slide" data-title="对比">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-amber">价值对比</span></div>
-    <h2 class="anim-fade-1">用了这套方法，有什么区别？</h2>
-    <p class="subtitle anim-fade-2">不是颠覆性的改变，而是每个环节都"多做了一点点"，但合起来效果显著</p>
-    <div class="comp-grid anim-fade-3" style="gap:16px">
-      <div class="comp-box bad">
-        <h4><span class="icon-bad">✗</span> 传统方式</h4>
-        <ul>
-          <li>需求在口头/微信里，找起来靠问</li>
-          <li>文档写一次就归档，开发和需求脱节</li>
-          <li>原型用 Axure/图片，没法自动化检查</li>
-          <li>重复工作每次重新做一遍</li>
-          <li>AI 聊完就忘，每次重新交代</li>
-          <li>Git 只有代码，看不出为什么改</li>
-          <li>项目交接要花大量时间讲上下文</li>
-        </ul>
-      </div>
-      <div class="comp-box good">
-        <h4><span class="icon-good">✓</span> 这套方法</h4>
-        <ul>
-          <li>需求在文档里，所有人看到的一致</li>
-          <li>文档是开发依据，随需求持续更新</li>
-          <li>HTML 原型可交互、可自动校验</li>
-          <li>重复工作写成 Skill，一键执行</li>
-          <li>记忆系统让 AI 记住项目上下文</li>
-          <li>Git 包含文档+原型+代码，历史完整</li>
-          <li>新成员看文档+记忆系统就了解全局</li>
-        </ul>
-      </div>
-    </div>
-  </div>
+<!-- ====== SLIDE 20 · CLOSING ====== -->
+<div class="slide dark closing-slide">
+  <div class="rule centered anim-left d0"></div>
+  <h1 class="display anim-up d1" style="color:var(--gold);">谢谢</h1>
+  <p class="lead anim-up d3" style="font-style:normal;color:var(--fg2);margin-top:clamp(16px,3vh,40px);max-width:50vw;">
+    文档驱动 → 原型验证 → 技能固化 → 渐进交付<br>
+    让每一次项目实践都能沉淀为可复用的方法论
+  </p>
+  <p class="label anim-up d5" style="color:var(--fg3);margin-top:clamp(24px,5vh,56px);">
+    v1.2 &nbsp;·&nbsp; 2026-05-15 &nbsp;·&nbsp; Claude + 吴龙飞
+  </p>
+  <div class="pagenum">20 / 20</div>
 </div>
 
-<!-- ══════ SLIDE 13: GET STARTED ══════ -->
-<div class="slide" data-title="开始使用">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-blue">行动指南</span></div>
-    <h2 class="anim-fade-1">如何开始使用这套方法？</h2>
-    <p class="subtitle anim-fade-2">不用一步到位，从最简单的入手，逐步建立习惯</p>
-    <div class="anim-fade-3" style="margin-top:16px">
-      <div class="step-card">
-        <span class="s-badge">1</span>
-        <div class="s-content">
-          <h4>先写一份 CLAUDE.md</h4>
-          <p>这是投入最小的第一步。只需要记录项目名称、技术栈、基本规范。下次 AI 辅助时就会自动遵守这些规则。</p>
-        </div>
-      </div>
-      <div class="step-card">
-        <span class="s-badge">2</span>
-        <div class="s-content">
-          <h4>下一个需求，先写文档再做原型</h4>
-          <p>不要急着写代码。先花 30 分钟写个简单的需求文档，再做一份 HTML 原型。你会发现在这个阶段改方案的成本几乎为零。</p>
-        </div>
-      </div>
-      <div class="step-card">
-        <span class="s-badge">3</span>
-        <div class="s-content">
-          <h4>遇到重复工作，就沉淀一个 Skill</h4>
-          <p>当 AI 帮你做完某件事两次时，就把它写成 Skill。下次再说"用 xxx skill 做"就全自动完成了。积累越多，效率越高。</p>
-        </div>
-      </div>
-      <div class="step-card">
-        <span class="s-badge">4</span>
-        <div class="s-content">
-          <h4>把重要的上下文写进记忆系统</h4>
-          <p>当 AI 问过你某个问题两次以上，或者你纠正过 AI 同一个错误两次，就把它记下来。Session 压缩后，记忆还在。</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+</div><!-- /deck -->
 
-<!-- ══════ SLIDE 14: SUMMARY ══════ -->
-<div class="slide" data-title="总结">
-  <div class="slide-content">
-    <div class="anim-fade"><span class="badge badge-green">总结</span></div>
-    <h2 class="anim-fade-1">核心就六句话</h2>
-    <p class="subtitle anim-fade-2">简单，但做到位了效果显著</p>
-    <div class="anim-fade-3" style="margin-top:24px">
-      <div class="quote-block">
-        <div class="quote-mark">"</div>
-        <div class="quote-text" style="color:var(--t)">
-          需求前置少返工，<br>
-          先写文档立规矩，<br>
-          再做原型快验证，<br>
-          技能固化防走样，<br>
-          会话管理保质量，<br>
-          渐进交付控范围。
-        </div>
-      </div>
-    </div>
-    <div class="anim-fade-4" style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <span class="tech-tag" style="background:rgba(30,109,242,.1);border-color:rgba(30,109,242,.2)">📋 文档驱动</span>
-      <span class="tech-tag" style="background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.2)">🔍 需求前置</span>
-      <span class="tech-tag" style="background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)">🎨 原型验证</span>
-      <span class="tech-tag" style="background:rgba(52,168,83,.1);border-color:rgba(52,168,83,.2)">⚙️ 技能固化</span>
-      <span class="tech-tag" style="background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.2)">🪟 会话管理</span>
-      <span class="tech-tag" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.2)">📈 渐进交付</span>
-      <span class="tech-tag" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">🔖 版本对应</span>
-    </div>
-    <div class="anim-fade-5" style="margin-top:28px;text-align:center;font-size:13px;color:var(--t2)">
-      完整文档：<span style="background:rgba(255,255,255,.05);padding:4px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.06)">docs/项目工作法.md</span>
-    </div>
-  </div>
+<!-- NAVIGATION -->
+<div class="slide-counter"><span id="current">1</span> / <span id="total">20</span></div>
+<div class="keyboard-hint">← → 翻页 &nbsp;|&nbsp; Home/End 首尾 &nbsp;|&nbsp; 触屏滑动</div>
+<div class="progress-bar" id="progress"></div>
+<div class="nav-controls">
+  <button class="nav-btn" id="prevBtn" onclick="go(-1)" aria-label="上一页">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)" aria-label="下一页">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
 </div>
-
-<!-- ══════ SLIDE 15: END ══════ -->
-<div class="slide slide-intro" style="background:#0F172A">
-  <div class="slide-content">
-    <div class="anim-scale" style="font-size:46px;margin-bottom:16px">🚀</div>
-    <h1 class="anim-fade" style="font-weight:700">感谢阅读</h1>
-    <p class="anim-fade-1" style="font-size:16px;color:var(--t2);margin-top:14px;font-weight:300;max-width:560px;margin-left:auto;margin-right:auto">这份文档会随着项目推进持续更新<br>每次新需求的沉淀，都会让它更完善</p>
-    <div class="anim-fade-2" style="margin-top:32px;font-size:13px;color:var(--t2)">
-      <span style="background:rgba(255,255,255,.05);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.06)">特步 · XTEP ｜ 一站式服务平台</span>
-    </div>
-  </div>
-</div>
-
-</div><!-- /slides -->
 
 <script>
-const slides = document.querySelectorAll('.slide');
-const total = slides.length;
-let current = 0;
-let isAnimating = false;
+  const slides = document.querySelectorAll('.slide');
+  const currentEl = document.getElementById('current');
+  const totalEl = document.getElementById('total');
+  const progressEl = document.getElementById('progress');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
 
-document.getElementById('totalSlides').textContent = total;
+  let current = 0;
+  const total = slides.length;
+  totalEl.textContent = total;
 
-function updateSlide() {
-  const container = document.getElementById('slides');
-  container.style.transform = `translateX(-${current * 100}vw)`;
+  function triggerAnim(slide) {
+    // Force browser reflow so CSS transitions replay from zero
+    slide.classList.remove('entered');
+    void slide.offsetWidth; // force reflow — breaks browser batching
+    slide.classList.add('entered');
+  }
 
-  document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
-  document.getElementById('curSlide').textContent = current + 1;
+  function update() {
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'entered');
+    });
+    const active = slides[current];
+    active.classList.add('active');
+    // Small delay so slide fade-in begins before content animates
+    setTimeout(() => triggerAnim(active), 80);
 
-  document.querySelectorAll('#nav .dot').forEach((d, i) => {
-    d.classList.toggle('active', i === current);
+    currentEl.textContent = current + 1;
+    progressEl.style.width = ((current + 1) / total * 100) + '%';
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function go(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < total) { current = next; update(); }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault(); go(1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault(); go(-1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; update();
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = total - 1; update();
+    }
   });
 
-  slides.forEach((s, i) => s.classList.toggle('active', i === current));
+  let tsx = 0;
+  document.addEventListener('touchstart', (e) => { tsx = e.changedTouches[0].screenX; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const d = tsx - e.changedTouches[0].screenX;
+    if (Math.abs(d) > 50) go(d > 0 ? 1 : -1);
+  }, { passive: true });
 
-  document.getElementById('prevBtn').classList.toggle('show', current > 0);
-  document.getElementById('nextBtn').classList.toggle('show', current < total - 1);
-
-  isAnimating = false;
-}
-
-const navContainer = document.getElementById('nav');
-slides.forEach((_, i) => {
-  const dot = document.createElement('button');
-  dot.className = 'dot' + (i === 0 ? ' active' : '');
-  dot.addEventListener('click', () => { if (!isAnimating) { isAnimating = true; current = i; updateSlide(); } });
-  navContainer.appendChild(dot);
-});
-
-function goNext() {
-  if (isAnimating || current >= total - 1) return;
-  isAnimating = true;
-  current++;
-  updateSlide();
-}
-
-function goPrev() {
-  if (isAnimating || current <= 0) return;
-  isAnimating = true;
-  current--;
-  updateSlide();
-}
-
-document.getElementById('nextBtn').addEventListener('click', goNext);
-document.getElementById('prevBtn').addEventListener('click', goPrev);
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
-    e.preventDefault(); goNext();
-  }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
-    e.preventDefault(); goPrev();
-  }
-  if (e.key === 'Home') { e.preventDefault(); current = 0; updateSlide(); }
-  if (e.key === 'End') { e.preventDefault(); current = total - 1; updateSlide(); }
-});
-
-let touchStartX = 0, touchEndX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
-document.addEventListener('touchend', e => {
-  touchEndX = e.changedTouches[0].screenX;
-  const diff = touchStartX - touchEndX;
-  if (Math.abs(diff) > 50) {
-    if (diff > 0) goNext();
-    else goPrev();
-  }
-});
-
-let wheelTimeout = false;
-document.addEventListener('wheel', e => {
-  if (wheelTimeout || isAnimating) return;
-  if (Math.abs(e.deltaY) < 30) return;
-  wheelTimeout = true;
-  if (e.deltaY > 0) goNext();
-  else goPrev();
-  setTimeout(() => wheelTimeout = false, 600);
-}, { passive: true });
-
-updateSlide();
+  // First slide: animate in after a visible delay
+  slides[0].classList.add('active');
+  setTimeout(() => triggerAnim(slides[0]), 200);
+  update();
 </script>
+
 </body>
 </html>

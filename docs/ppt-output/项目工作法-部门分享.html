@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目工作法 — AI驱动的软件项目交付方法论</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e4; --bg-alt: #ede6d8; --fg: #2d2d2d; --fg2: #6b5e4e; --fg3: #9a8b7a;
+    --accent: #c76f51; --accent-dim: rgba(199,111,81,0.1); --accent-mid: rgba(199,111,81,0.25);
+    --border: rgba(45,45,45,0.1); --display: 'Playfair Display','Noto Serif SC',serif;
+    --serif: 'Source Serif 4','Noto Serif SC',serif; --sans: 'Noto Sans SC',sans-serif;
+    --mono: 'JetBrains Mono',monospace;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--serif)}
+  .stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg)}
+  .deck{width:1920px;height:1080px;position:relative;overflow:hidden;transform-origin:0 0;flex-shrink:0;will-change:transform}
+  .slide{position:absolute;inset:0;background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-direction:column;justify-content:center;opacity:0;pointer-events:none;transform:scale(0.97);transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1)}
+  .slide.active{opacity:1;pointer-events:all;transform:scale(1);z-index:10}
+  .slide.exit{opacity:0;transform:scale(1.03);z-index:5}
+  .anim{opacity:0;transform:translateY(32px);transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1)}
+  .slide.active .anim{opacity:1;transform:translateY(0)}
+  .d0{transition-delay:0s}.d1{transition-delay:.06s}.d2{transition-delay:.12s}.d3{transition-delay:.18s}.d4{transition-delay:.24s}.d5{transition-delay:.3s}.d6{transition-delay:.36s}.d7{transition-delay:.42s}.d8{transition-delay:.48s}
+  @media(prefers-reduced-motion:reduce){.slide,.anim{transition:none!important}.slide:not(.active){display:none!important}.slide.active{display:flex!important;opacity:1!important;transform:none!important}.anim{opacity:1!important;transform:none!important}}
+
+  h1{font-family:var(--display);font-weight:900;font-size:120px;line-height:.95;letter-spacing:-.015em}
+  h2{font-family:var(--display);font-weight:900;font-size:68px;line-height:1.05;letter-spacing:-.01em}
+  h3{font-weight:700;font-size:30px;line-height:1.25;font-family:var(--display)}
+  .body{font-size:24px;line-height:1.6;color:var(--fg2)}
+  .body-sm{font-size:20px;line-height:1.55;color:var(--fg2)}
+  .body-xs{font-size:18px;line-height:1.5;color:var(--fg2)}
+  .label{font-family:var(--mono);font-size:18px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase}
+  .label-sm{font-family:var(--mono);font-size:15px;letter-spacing:.1em;color:var(--fg3);text-transform:uppercase}
+  .accent{color:var(--accent)}
+  .rule-accent{width:80px;height:2px;background:var(--accent);margin-bottom:20px;flex-shrink:0}
+  .tag{display:inline-block;font-family:var(--mono);font-size:16px;letter-spacing:.1em;color:var(--accent);padding:6px 16px;border:1px solid var(--accent-mid);border-radius:100px}
+  .ornament{display:flex;align-items:center;gap:36px;justify-content:center;width:100%;max-width:1200px}
+  .ornament .r{flex:1;height:22px;position:relative}
+  .ornament .r::before,.ornament .r::after{content:'';position:absolute;left:0;right:0;height:3px;background:var(--fg)}
+  .ornament .r::before{top:2px}.ornament .r::after{bottom:2px}
+  .ornament .w{font-family:var(--display);font-weight:800;font-size:56px;line-height:1}
+  .page-footer{position:absolute;bottom:0;left:0;right:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 60px;font-family:var(--mono);font-size:16px;color:var(--fg3);letter-spacing:.08em}
+  .slide{padding-bottom:52px}
+
+  /* === LAYOUT: COVER === */
+  .s-cover{padding:100px 200px;justify-content:center;align-items:center;text-align:center}
+  .s-cover .subtitle{font-family:'Lora',var(--serif);font-size:28px;color:var(--fg2);font-style:italic;margin:36px 0 60px;max-width:800px}
+
+  /* === LAYOUT: AGENDA === */
+  .s-agenda{padding:90px 160px;align-items:center;text-align:center}
+  .s-agenda .ah{display:flex;align-items:baseline;gap:30px;margin-bottom:50px;width:100%;justify-content:center}
+  .s-agenda .ah .r{flex:1;height:1px;background:var(--accent);max-width:200px}
+  .s-agenda .ag{text-align:left}
+  .s-agenda .ag{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr 1fr;gap:0}
+  .ai{display:flex;gap:20px;align-items:flex-start;padding:18px 0;border-bottom:1px solid var(--border)}
+  .ai .n{font-family:var(--display);font-size:36px;font-weight:800;color:var(--accent);min-width:48px;line-height:1.2}
+  .ai h3{font-size:28px;margin-bottom:4px}
+  .ai p{font-size:18px;color:var(--fg2);font-family:'Lora',var(--serif)}
+
+  /* === LAYOUT: SECTION DIVIDER === */
+  .s-section{padding:100px 160px;justify-content:center;background:var(--fg);color:var(--bg)}
+  .s-section .label{color:rgba(245,240,228,.4);font-size:20px;margin-bottom:20px}
+  .s-section h2{color:var(--bg);font-size:84px;font-family:var(--display)}
+  .s-section .sub{font-family:'Lora',var(--serif);font-size:26px;color:rgba(245,240,228,.45);margin-top:30px;line-height:1.5;max-width:750px;font-style:italic}
+  .s-section .page-footer{color:rgba(245,240,228,.25)}
+
+  /* === LAYOUT: CONTENT (h2 + body columns) === */
+  .s-content{padding:90px 160px;align-items:center;text-align:center}
+  .s-content .ch{margin-bottom:40px;display:flex;align-items:center;justify-content:center;width:100%;text-align:center;gap:20px}
+  .s-content .ch .tag{flex-shrink:0}
+  .s-content .cb{min-height:0;overflow:hidden;width:100%}
+  .s-content .col2,.s-content .col3,.s-content .pillars,.s-content .flow,.s-content .nlist{text-align:left}
+  .s-content .col2l,.s-content .col2r{text-align:left}
+  .s-content .hbox{text-align:left}
+  .s-content .ctbl{text-align:left}
+
+  /* === LAYOUT: TWO COLUMN === */
+  .col2{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start}
+  .col2l,.col2r{display:flex;flex-direction:column;gap:20px}
+  .col2r{padding-left:44px;border-left:1px solid var(--border)}
+
+  /* === LAYOUT: THREE COLUMN === */
+  .col3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .c3c{background:var(--bg-alt);border-radius:4px;padding:32px 28px;display:flex;flex-direction:column;gap:14px}
+  .c3c .cn{font-family:var(--display);font-size:44px;font-weight:800;color:var(--accent);line-height:1}
+  .c3c .ct{font-size:22px;font-weight:700}
+  .c3c .cd{font-size:18px;color:var(--fg2);line-height:1.5}
+
+  /* === LAYOUT: COMPARISON TABLE === */
+  .ctbl{width:100%;border-collapse:collapse;margin-top:10px}
+  .ctbl th{font-family:var(--mono);font-size:17px;letter-spacing:.08em;color:var(--accent);text-align:left;padding:14px 18px;border-bottom:2px solid var(--accent-mid);text-transform:uppercase}
+  .ctbl td{padding:14px 18px;border-bottom:1px solid var(--border);font-size:21px;line-height:1.5}
+  .ctbl tr:nth-child(even) td{background:var(--bg-alt)}
+  .ctbl td:first-child{font-weight:700;white-space:nowrap}
+
+  /* === LAYOUT: FOUR PILLARS === */
+  .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .pillar{background:var(--bg-alt);border-radius:4px;padding:40px 28px;display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
+  .pillar .pi{font-family:var(--display);font-size:64px;font-weight:900;color:var(--accent);line-height:1}
+  .pillar .pt{font-size:24px;font-weight:700}
+  .pillar .pd{font-size:17px;color:var(--fg2);line-height:1.5}
+
+  /* === LAYOUT: NUMBERED LIST === */
+  .nlist{display:flex;flex-direction:column;gap:18px}
+  .nlist .ni{display:flex;gap:20px;align-items:flex-start}
+  .nlist .ni .nn{font-family:var(--display);font-size:40px;font-weight:800;color:var(--accent);min-width:52px;line-height:1.1}
+  .nlist .ni h3{font-size:26px;margin-bottom:4px}
+  .nlist .ni p{font-size:19px;color:var(--fg2);line-height:1.55}
+
+  /* === LAYOUT: HIGHLIGHT BOX === */
+  .hbox{padding:32px 36px;background:var(--accent-dim);border-left:4px solid var(--accent);border-radius:4px;font-family:'Lora',var(--serif);font-size:26px;font-weight:500;line-height:1.5;font-style:italic}
+
+  /* === LAYOUT: FLOW DIAGRAM === */
+  .flow{display:flex;gap:0;align-items:stretch}
+  .fstep{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px 18px;background:var(--bg-alt);border-radius:4px;gap:14px;position:relative}
+  .fstep.alt{background:var(--fg);color:var(--bg)}
+  .fstep .fs{width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:26px;font-weight:800;flex-shrink:0}
+  .fstep:nth-child(2) .fs{background:var(--accent-mid);color:var(--accent)}
+  .fstep:nth-child(3) .fs{background:rgba(199,111,81,.18);color:var(--accent)}
+  .fstep .ft{font-size:22px;font-weight:700}
+  .fstep .fd{font-size:16px;color:var(--fg2);line-height:1.45}
+  .fstep.alt .fd{color:rgba(245,240,228,.5)}
+  .fstep.alt .fs{background:#fff;color:var(--accent)}
+  .farrow{display:flex;align-items:center;font-size:28px;color:var(--accent);padding:0 6px;flex-shrink:0}
+
+  /* === LAYOUT: CLOSING === */
+  .s-closing{justify-content:center;align-items:center;text-align:center;padding:100px 200px;background:var(--fg);color:var(--bg)}
+  .s-closing h1{color:var(--accent);font-size:130px;margin-bottom:30px}
+  .s-closing .cs{font-family:'Lora',var(--serif);font-size:32px;color:rgba(245,240,228,.5);line-height:1.5;margin-bottom:50px;max-width:800px;font-style:italic}
+  .s-closing .page-footer{color:rgba(245,240,228,.25)}
+
+  /* === NAV === */
+  .nav{position:fixed;bottom:24px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:16px;z-index:100}
+  .nav button{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);background:transparent;color:#999;cursor:pointer;font-size:18px;transition:all .2s;display:flex;align-items:center;justify-content:center}
+  .nav button:hover{color:#fff;border-color:var(--accent)}
+  .nav .cnt{font-family:var(--mono);font-size:14px;color:#777;min-width:80px;text-align:center;letter-spacing:.06em}
+  .nav .pbar{position:fixed;bottom:0;left:0;height:3px;background:var(--accent);transition:width .3s}
+</style>
+</head>
+<body><div class="stage"><div class="deck">
+
+  <!-- ====== 1. COVER ====== -->
+  <div class="slide s-cover active">
+    <p class="label anim d0">方法论 · 知识沉淀 · 部门分享</p>
+    <h1 class="anim d1">项目工作法</h1>
+    <div class="ornament anim d2" style="margin:6px 0;"><div class="r"></div><span class="w">AI 驱动</span><div class="r"></div></div>
+    <h1 class="anim d3">软件项目交付</h1>
+    <p class="subtitle anim d4">从 Agent 选择 → 框架搭建 → 需求定义 → 技能沉淀<br>文档归类 → 记忆系统 → 版本管理 → 上下文策略 → 经验输出</p>
+    <p class="label-sm anim d5">一站式服务平台团队 · 2026年5月</p>
+    <div class="page-footer"><span>01</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 2. AGENDA ====== -->
+  <div class="slide s-agenda">
+    <div class="ah"><h2 class="anim d0">目 录</h2><div class="r anim d1"></div><span class="tag anim d1">八大模块</span></div>
+    <div class="ag">
+      <div class="ai anim d2"><span class="n">01</span><div><h3>Agent 选择：为什么是 Claude Code</h3><p>对比 Trae，理解 AI 编程工具的底层差异</p></div></div>
+      <div class="ai anim d3"><span class="n">02</span><div><h3>统一项目框架：模板化与跨项目复用</h3><p>init-project skill → 一键生成标准化骨架</p></div></div>
+      <div class="ai anim d4"><span class="n">03</span><div><h3>需求：一切产出的根基</h3><p>需求完整性 = 问答助手的知识库，不可妥协</p></div></div>
+      <div class="ai anim d5"><span class="n">04</span><div><h3>项目框架四大支柱</h3><p>Skill 沉淀 · 文档归类 · 记忆系统 · 版本仓库</p></div></div>
+      <div class="ai anim d6"><span class="n">05</span><div><h3>上下文窗口机制与会话管理</h3><p>为什么上下文满了会跑偏？怎么拆分会话？</p></div></div>
+      <div class="ai anim d7"><span class="n">06</span><div><h3>Commit 节奏与版本策略</h3><p>什么节点 commit？什么时候推送到 GitHub？</p></div></div>
+      <div class="ai anim d8"><span class="n">07</span><div><h3>经验沉淀与持续输出</h3><p>从一次实践 → 可复用方法论 → 团队知识资产</p></div></div>
+    </div>
+    <div class="page-footer"><span>02</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 3. AGENT SELECTION ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">第一步：Agent 选择</h2><span class="tag anim d1">为什么是 Claude Code？</span></div>
+    <div class="cb col2">
+      <div class="col2l">
+        <h3 class="anim d2">Claude Code 的核心优势</h3>
+        <p class="body anim d2">Claude Code 不是一个"代码补全工具"，它是一个<strong>完整的软件开发 Agent</strong>——能够理解整个项目上下文、自主规划多步骤任务、直接操作文件系统、执行 shell 命令。</p>
+        <div class="hbox anim d3" style="font-size:22px;">"能读懂整个项目，不是只补一行代码"——这是 Agent 和 Copilot 的本质区别。</div>
+        <p class="body anim d4"><strong class="accent">关键差异：</strong>Claude Code 拥有 200K token 上下文窗口，能够一次性加载项目文档、架构设计、需求总纲，在"理解全局"的基础上做决策。它不是补全，是<strong>推理 + 执行</strong>。</p>
+      </div>
+      <div class="col2r">
+        <h3 class="anim d2">Claude Code vs Trae 对比</h3>
+        <table class="ctbl anim d3">
+          <thead><tr><th>维度</th><th>Claude Code</th><th>Trae</th></tr></thead>
+          <tbody>
+            <tr><td>定位</td><td>全栈 Agent，自主规划+执行</td><td>IDE 内置 AI 助手，侧重补全</td></tr>
+            <tr><td>上下文</td><td>200K token，全项目感知</td><td>受限于 IDE 上下文窗口</td></tr>
+            <tr><td>工具调用</td><td>文件读写、shell、Git 全能力</td><td>以代码建议和补全为主</td></tr>
+            <tr><td>CLAUDE.md</td><td>项目级"宪法"，定义规范与工作流</td><td>无对等项目规范机制</td></tr>
+            <tr><td>记忆系统</td><td>四类持久化记忆，跨会话继承</td><td>无持久化记忆能力</td></tr>
+            <tr><td>Skill 机制</td><td>可打包复用技能，流程编码化</td><td>无 Skill 机制</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="page-footer"><span>03</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 4. PROJECT FRAMEWORK ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">第二步：统一项目框架</h2><span class="tag anim d1">init-project · 一键生成</span></div>
+    <div class="cb col2">
+      <div class="col2l">
+        <h3 class="anim d2">为什么需要统一框架？</h3>
+        <p class="body anim d2">每个新项目从零搭建目录结构、手动写 CLAUDE.md、配置 CI/CD——这是<strong>重复劳动</strong>。更严重的是，不同项目的目录风格不一致，团队成员切换项目时需要重新适应。</p>
+        <div class="hbox anim d3" style="font-size:22px;">统一框架 = 消除重复劳动 + 确保项目一致性 + 降低认知切换成本</div>
+        <p class="body anim d4">标准化项目骨架包含：<strong>CLAUDE.md</strong>（项目宪法）、<strong>目录结构</strong>（docs/src/tests/scripts）、<strong>.gitignore</strong>、<strong>CI/CD 配置</strong>、<strong>编辑器配置</strong>。</p>
+      </div>
+      <div class="col2r">
+        <h3 class="anim d2">跨项目复用方式</h3>
+        <div class="nlist">
+          <div class="ni anim d3"><span class="nn">1</span><div><h3>Skill 封装</h3><p>将 init-project 封装为可复用 Skill，调用即生成</p></div></div>
+          <div class="ni anim d4"><span class="nn">2</span><div><h3>模板仓库</h3><p>GitHub 维护模板仓库，新项目 clone → 替换项目名 → 开始开发</p></div></div>
+          <div class="ni anim d5"><span class="nn">3</span><div><h3>CLAUDE.md 作为契约</h3><p>定义规范、索引文件、行为约束，AI 和人类共用同一份"宪法"</p></div></div>
+          <div class="ni anim d6"><span class="nn">4</span><div><h3>渐进增强</h3><p>从最小骨架开始，随着项目推进逐步补充 docs/ 和 skills/</p></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>04</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 5. REQUIREMENTS ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">第三步：需求的根基地位</h2><span class="tag anim d1">一切产出的前提</span></div>
+    <div class="cb">
+      <div class="hbox anim d2" style="font-size:28px;margin-bottom:36px;">需求文档 = 问答助手的知识库。知识库不完整 → 答案必然偏。需求不完整 → 所有后续产出都会偏离。</div>
+      <div class="col3">
+        <div class="c3c anim d3"><div class="cn">01</div><div class="ct">为什么需求必须完整？</div><div class="cd">AI 的推理基于你给的信息。需求缺失 = AI 自己脑补 = 产出偏离预期。你在需求阶段省的时间，会在返工阶段十倍偿还。</div></div>
+        <div class="c3c anim d4"><div class="cn">02</div><div class="ct">需求包含什么？</div><div class="cd">项目简介（一句话说清做什么）、背景与痛点、可衡量目标、分阶段计划、功能模块清单、系统集成关系、非功能需求（性能/安全/兼容性）、变更记录。</div></div>
+        <div class="c3c anim d5"><div class="cn">03</div><div class="ct">需求确认前置法</div><div class="cd">用户提需求 → AI 反问 5 个关键问题（字段、类型、选项、跳转、取消）→ 用户确认 → 一次性生成。确认清单 = "口头 PRD"，后续可追溯。把最需要脑子的活放在脑子最清楚的时候干。</div></div>
+      </div>
+      <p class="body anim d6" style="margin-top:28px;text-align:center;"><strong class="accent">核心原则：</strong>需求文档不是"写一次就扔"的过场。它是项目的<strong>源头真相</strong>——架构设计基于它，原型方案基于它，测试用例基于它。</p>
+    </div>
+    <div class="page-footer"><span>05</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 6. FEATURE-LEVEL CONFIRMATION ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">延伸：功能级需求确认</h2><span class="tag anim d1">有了需求文档还不够</span></div>
+    <div class="cb">
+      <div class="col2">
+        <div class="col2l">
+          <h3 class="anim d2">为什么每个小功能还要确认？</h3>
+          <p class="body anim d2">项目需求文档定义了<strong>大方向</strong>——但具体到"一个编辑表单有哪些字段""下拉选项的数据来源""取消按钮跳转到哪"，这些细节文档覆盖不到。每个功能模块开始前，AI 必须先反问、确认细节、再一次性输出原型。</p>
+          <div class="hbox anim d3" style="font-size:22px;">需求文档 = 地图。功能确认 = 每一步落脚前再看一眼路面。</div>
+        </div>
+        <div class="col2r">
+          <h3 class="anim d2">先确认再输出 vs 先生成再修改</h3>
+          <table class="ctbl anim d3">
+            <thead><tr><th>维度</th><th>先确认再输出</th><th>先生成再反复修改</th></tr></thead>
+            <tbody>
+              <tr><td>准确性</td><td>一次性命中，偏离小</td><td>第一版大概率跑偏</td></tr>
+              <tr><td>Token 消耗</td><td>确认对话 2-3 轮 + 生成 1 轮</td><td>反复修改 5-10 轮，每轮重读文件</td></tr>
+              <tr><td>上下文健康</td><td>干净上下文完成核心工作</td><td>修改过程填满上下文 → 越改越歪</td></tr>
+              <tr><td>返工成本</td><td>微调即可</td><td>推倒重来的风险高</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <h3 class="anim d4" style="margin-top:28px;">先生成再反复修改的恶性循环</h3>
+      <div class="col3" style="margin-top:16px;">
+        <div class="c3c anim d5"><div class="cn">1</div><div class="ct">上下文爆炸</div><div class="cd">每轮修改都产生新的对话历史 → 窗口快速填满 → AI 开始"忘记"前面的约束 → 后续修改越来越偏</div></div>
+        <div class="c3c anim d6"><div class="cn">2</div><div class="ct">方向漂移</div><div class="cd">AI 在第 5 轮修改时已丢失第 1 轮的需求细节 → 改 A 修好 B 又坏 C →"怎么越改问题越多"</div></div>
+        <div class="c3c anim d7"><div class="cn">3</div><div class="ct">Token 黑洞</div><div class="cd">10 轮修改 × 每轮重读整个 HTML 文件 → 几百 KB 上下文消耗 → 还没开始下一个模块，窗口已经紧张</div></div>
+      </div>
+    </div>
+    <div class="page-footer"><span>06</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 7. SMALL FEATURES → BIG MODULE ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">为什么先做小功能，再组合为大功能？</h2><span class="tag anim d1">积木策略</span></div>
+    <div class="cb">
+      <div class="col2">
+        <div class="col2l">
+          <div class="nlist">
+            <div class="ni anim d2"><span class="nn">1</span><div><h3>上下文可控，不互相污染</h3><p class="body">小模块 = 需求少 = 确认快 = 会话短。每个小功能在一个干净上下文中完成，修改模块 A 不会影响模块 B 的上下文。</p></div></div>
+            <div class="ni anim d3"><span class="nn">2</span><div><h3>质量可验证，问题可隔离</h3><p class="body">小功能产出小，validate-prototype 快速校验。问题在小范围内发现和修复，不影响其他模块。不用"大海捞针"式排查。</p></div></div>
+          </div>
+        </div>
+        <div class="col2r">
+          <div class="nlist">
+            <div class="ni anim d4"><span class="nn">3</span><div><h3>commit 粒度合理，回退精准</h3><p class="body">每个小功能一个 commit。出问题 git revert 只回退一个小模块，不会牵连一片。Git log 本身就是模块化的演进叙事。</p></div></div>
+            <div class="ni anim d5"><span class="nn">4</span><div><h3>组合即交付，积木成厦</h3><p class="body">3 个小功能各自完成并通过验证 → 组合为一个完整模块 → push 到 GitHub。积木搭好了，拼起来就是大厦。不是"一步到位"，是"步步为营"。</p></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col3" style="margin-top:28px;">
+        <div class="c3c anim d6"><div class="cn">←</div><div class="ct">反模式：大而全</div><div class="cd">一口气生成整个模块 → 需求不明确 → 上下文爆炸 → 反复修改 → 越改越偏 → 推倒重来</div></div>
+        <div class="c3c anim d7"><div class="cn">→</div><div class="ct">正模式：小而精</div><div class="cd">逐个确认 → 逐个生成 → 逐个验证 → 逐个 commit → 组合交付。每一步都在干净上下文中。</div></div>
+        <div class="c3c anim d8"><div class="cn">★</div><div class="ct">Token 效率对比</div><div class="cd">大而全：10+ 轮修改 × 重读文件 → 几百 KB 浪费。小而精：3 轮确认 + 1 轮生成 → 总共不到 50KB。</div></div>
+      </div>
+    </div>
+    <div class="page-footer"><span>07</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 8. FOUR PILLARS ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">项目框架四大支柱</h2><span class="tag anim d1">全景概览</span></div>
+    <div class="cb pillars">
+      <div class="pillar anim d2"><div class="pi">⚙</div><div class="pt">Skill 沉淀</div><div class="pd">将重复流程编码为可复用技能。一次实践 → 沉淀为 Skill → 下次调用即用。可打包、可共享、可版本管理。</div></div>
+      <div class="pillar anim d3"><div class="pi">📁</div><div class="pt">文档归类</div><div class="pd">按业务模块自动归类，不按文件格式堆放。四层目录体系：蓝图→需求→原型→PRD。每个模块 README 导航。</div></div>
+      <div class="pillar anim d4"><div class="pi">🧠</div><div class="pt">记忆系统</div><div class="pd">四类持久化记忆跨会话继承。记录用户偏好、反馈纠正、项目上下文、外部资源索引。只记机器无法推断的。</div></div>
+      <div class="pillar anim d5"><div class="pi">🔄</div><div class="pt">版本仓库</div><div class="pd">Git + GitHub 双保险。本地存档 + 远程推送。中文提交信息、可回溯演进日志。每次 commit = 一个可恢复的检查点。</div></div>
+    </div>
+    <div class="page-footer"><span>08</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 9. SKILL ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">支柱一：Skill 沉淀机制</h2><span class="tag anim d1">流程编码 · 可打包复用</span></div>
+    <div class="cb col2">
+      <div class="col2l">
+        <h3 class="anim d2">什么是 Skill？</h3>
+        <p class="body anim d2">Skill 是<strong>把一套完整工作流程编码为可复用的指令文件</strong>。它包含：触发关键词、执行步骤、输入/输出格式、约束条件。调用一个 Skill = 让 AI 按照你定义好的流程执行任务。</p>
+        <div class="hbox anim d3" style="font-size:22px;">核心逻辑：做一次 → 发现规律 → 沉淀为 Skill → 下次调用即用 → 持续优化迭代。Skill 是"流程的代码化"。</div>
+      </div>
+      <div class="col2r">
+        <h3 class="anim d2">已有 Skills 示例</h3>
+        <div class="nlist">
+          <div class="ni anim d3"><span class="nn">1</span><div><h3>init-project</h3><p>标准化项目脚手架一键生成</p></div></div>
+          <div class="ni anim d4"><span class="nn">2</span><div><h3>organize-docs</h3><p>自动扫描 docs/ 并按四层体系归类</p></div></div>
+          <div class="ni anim d5"><span class="nn">3</span><div><h3>prototype-designer</h3><p>需求→原型方案确认→PRD 文档输出</p></div></div>
+          <div class="ni anim d6"><span class="nn">4</span><div><h3>validate-prototype</h3><p>自动化断链检查与验证报告</p></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>09</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 10. DOC ORGANIZATION ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">支柱二：文档自动归类</h2><span class="tag anim d1">按模块不按类型</span></div>
+    <div class="cb">
+      <div class="col2">
+        <div class="col2l">
+          <h3 class="anim d2">四层目录体系</h3>
+          <div class="nlist">
+            <div class="ni anim d3"><span class="nn">01</span><div><h3>蓝图方案/</h3><p>原始蓝图、规划文档（只读归档，不修改）</p></div></div>
+            <div class="ni anim d4"><span class="nn">02</span><div><h3>业务需求/</h3><p>按模块：HR人事 / 行政 / 生产 / 通用。每模块 README 导航</p></div></div>
+            <div class="ni anim d5"><span class="nn">03</span><div><h3>原型方案/</h3><p>HTML 可交互原型 + 原型方案文档</p></div></div>
+            <div class="ni anim d6"><span class="nn">04</span><div><h3>PRD/</h3><p>产品需求文档，经原型验证后产出</p></div></div>
+          </div>
+        </div>
+        <div class="col2r">
+          <h3 class="anim d2">归类核心原则</h3>
+          <p class="body anim d3"><strong class="accent">按模块不按类型：</strong>HR 相关的需求、原型、PRD 放在一起，而不是所有需求文档堆在一起。这样查一个模块的所有产出在一个目录里就能看完。</p>
+          <div class="hbox anim d4" style="font-size:20px;">不要把输出都堆在一起。新文件即刻归类，不堆积在根目录。organize-docs skill 可自动扫描并建议归类。</div>
+          <p class="body anim d5"><strong class="accent">README 导航：</strong>每个模块目录放 README.md 作为导航入口，列出该模块的所有文档和它们之间的关系。</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>10</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 11. MEMORY SYSTEM ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">支柱三：记忆系统</h2><span class="tag anim d1">跨会话持久化 · 四类记忆</span></div>
+    <div class="cb">
+      <p class="body anim d2" style="margin-bottom:24px;"><strong>核心问题：</strong>Claude Code 的每次会话是独立的。新会话 = AI 对你的项目、你的偏好、你之前的决策<strong>一无所知</strong>。记忆系统解决的就是"跨会话信息传递"。</p>
+      <div class="col3">
+        <div class="c3c anim d3"><div class="cn">user</div><div class="ct">用户角色与偏好</div><div class="cd">记录用户的角色、知识水平、协作偏好。让 AI 在新会话中直接用正确的方式与正确的人沟通，不需要每次重新自我介绍。</div></div>
+        <div class="c3c anim d4"><div class="cn">feedback</div><div class="ct">反馈纠正记录</div><div class="cd">记录"不要这样做""对就是这样"以及<strong>为什么</strong>。避免 AI 在后续会话中重复犯错，也避免忘记已验证有效的做法。</div></div>
+        <div class="c3c anim d5"><div class="cn">project</div><div class="ct">项目上下文</div><div class="cd">记录项目目标、当前任务、架构决策、Skill 使用情况。拆分会话后新会话能自动继承进度，不需要重新解释项目。</div></div>
+      </div>
+      <p class="body anim d6" style="margin-top:20px;"><strong class="accent">关键原则：</strong>只记<strong>机器无法推断的</strong>。代码规范、文件路径等项目本身可读取的内容不需要存入记忆。记忆要记的是<strong>人的决策、偏好、反馈和原因</strong>。MemORY.md 索引保持简洁（超 200 行会被截断），过时记忆及时更新或删除。</p>
+    </div>
+    <div class="page-footer"><span>11</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 12. VERSION CONTROL ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">支柱四：版本仓库</h2><span class="tag anim d1">Git + GitHub · 可回溯存档</span></div>
+    <div class="cb">
+      <div class="col2">
+        <div class="col2l">
+          <h3 class="anim d2">为什么需要版本管理？</h3>
+          <div class="nlist">
+            <div class="ni anim d3"><span class="nn">1</span><div><h3>可回溯</h3><p>任何时间点的代码状态都可以恢复。改错了 → git revert 找回。不需要靠"我记得之前是那样写的"。</p></div></div>
+            <div class="ni anim d4"><span class="nn">2</span><div><h3>双保险</h3><p>本地 Git 存档 + GitHub 远程推送。电脑坏了、文件误删、目录搞乱了——远程仓库是最安全的备份。</p></div></div>
+            <div class="ni anim d5"><span class="nn">3</span><div><h3>演进日志</h3><p>commit log = 项目的"航海日志"。什么时候做了什么、为什么做，一目了然。新人接手也能快速理解项目脉络。</p></div></div>
+          </div>
+        </div>
+        <div class="col2r">
+          <h3 class="anim d2">GitHub 存档策略</h3>
+          <div class="nlist">
+            <div class="ni anim d3"><span class="nn">本地</span><div><h3>高频 commit</h3><p>完成一个原子操作 → commit。不攒一堆改动一起提交。</p></div></div>
+            <div class="ni anim d4"><span class="nn">远程</span><div><h3>关键节点 push</h3><p>每个模块完成、每个里程碑达成 → push 到 GitHub。不是每个 commit 都 push，但每次 push 都代表一个可交付状态。</p></div></div>
+            <div class="ni anim d5"><span class="nn">规范</span><div><h3>中文提交信息</h3><p>"{动词}{名词} — {补充说明}"。提交信息本身就是项目文档。git log 就是项目的时间线叙事。</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>12</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 13. CONTEXT WINDOW ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">上下文窗口机制</h2><span class="tag anim d1">满了会怎样？怎么破？</span></div>
+    <div class="cb">
+      <div class="col2">
+        <div class="col2l">
+          <h3 class="anim d2">上下文窗口是什么？</h3>
+          <p class="body anim d2">每次对话中，AI 能"看到"的信息量是有上限的（Claude Code 为 200K token）。这包括：系统提示、CLAUDE.md、对话历史、文件读取结果、工具调用结果。<strong>所有内容都在一个窗口里。</strong></p>
+          <div class="hbox anim d3" style="font-size:22px;">200K token ≈ 一本《三体》的篇幅。单次会话里读太多文件、对话轮次太多、输出内容太长 → 窗口被填满。</div>
+          <h3 class="anim d4" style="margin-top:16px;">窗口满了会发生什么？</h3>
+          <table class="ctbl anim d4">
+            <thead><tr><th>后果</th><th>具体表现</th></tr></thead>
+            <tbody>
+              <tr><td>上下文压缩</td><td>系统自动压缩早期对话 → 关键决策细节被"概括"丢失</td></tr>
+              <tr><td>内容跑偏</td><td>AI 基于残缺上下文推理 → 输出偏离原定方向</td></tr>
+              <tr><td>重复劳动</td><td>AI "忘记"已读过的文件，重新读取 → 浪费 token</td></tr>
+              <tr><td>质量下降</td><td>简单操作出错（正则转义混乱、路径拼错、变量名混用）</td></tr>
+              <tr><td>输出崩溃</td><td>极端情况下丢失核心约束，生成完全偏离规范的代码</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col2r">
+          <h3 class="anim d2">根本问题</h3>
+          <p class="body anim d3">AI <strong>不"知道"自己丢掉了什么信息</strong>。它看到的是压缩后的残缺上下文，但不会主动告诉你"前面的内容我已经忘了"。你看不出来它忘了，它自己也不知道自己忘了——这是最危险的。</p>
+          <div class="hbox anim d4" style="font-size:20px;">上下文压缩不是"优雅降级"，是"静默破坏"。信息不是在最后一刻丢失的——是在你不知不觉中一点一点丢掉的。</div>
+          <h3 class="anim d5" style="margin-top:16px;">四个预警信号</h3>
+          <div class="nlist">
+            <div class="ni anim d5"><span class="nn">1</span><div><p>同一大文件被 AI 重复读取 3-4 次</p></div></div>
+            <div class="ni anim d6"><span class="nn">2</span><div><p>简单操作连续出错（正则、路径拼接）</p></div></div>
+            <div class="ni anim d6"><span class="nn">3</span><div><p>系统出现上下文压缩提示</p></div></div>
+            <div class="ni anim d7"><span class="nn">4</span><div><p>对话超 15-20 轮或变更超 500 行</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>13</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 14. SESSION MANAGEMENT ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">会话管理策略</h2><span class="tag anim d1">commit 为界 · 记忆做桥</span></div>
+    <div class="cb">
+      <div class="flow">
+        <div class="fstep anim d2"><div class="fs">1</div><div class="ft">识别信号</div><div class="fd">出现任一预警信号：重复读取、连续出错、压缩提示、超 15 轮</div></div>
+        <div class="farrow anim d2">→</div>
+        <div class="fstep anim d3"><div class="fs">2</div><div class="ft">立即 Commit</div><div class="fd">把所有当前变更提交为一个有意义的 commit</div></div>
+        <div class="farrow anim d3">→</div>
+        <div class="fstep anim d4"><div class="fs">3</div><div class="ft">写入记忆</div><div class="fd">把当前进度、决策、待办写入 memory 系统</div></div>
+        <div class="farrow anim d4">→</div>
+        <div class="fstep anim d5"><div class="fs">4</div><div class="ft">新开会话</div><div class="fd">开启全新会话，memory 自动加载上下文继承</div></div>
+        <div class="farrow anim d5">→</div>
+        <div class="fstep alt anim d6"><div class="fs">5</div><div class="ft">继续推进</div><div class="fd">干净上下文 + 清晰目标 = 高效推进</div></div>
+      </div>
+      <p class="body anim d7" style="margin-top:32px;text-align:center;"><strong class="accent">核心策略：</strong>commit 即分界。每次 commit 后评估是否需要新开会话。memory 做桥梁，新会话自动继承进度。<strong>不要在同一个会话里硬撑——上下文不会自己恢复。</strong></p>
+    </div>
+    <div class="page-footer"><span>14</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 15. COMMIT RHYTHM ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">Commit 的节奏与版本策略</h2><span class="tag anim d1">什么时候 commit？什么时候 push？</span></div>
+    <div class="cb">
+      <div class="col2">
+        <div class="col2l">
+          <h3 class="anim d2">6 个必须 Commit 的节点</h3>
+          <div class="nlist">
+            <div class="ni anim d3"><span class="nn">1</span><div><h3>项目初始化完成</h3><p>init-project 生成骨架 + CLAUDE.md → 第一个 commit，项目诞生</p></div></div>
+            <div class="ni anim d4"><span class="nn">2</span><div><h3>需求/架构文档确定</h3><p>requirements.md + architecture.md 完成 → 锁定"源头真相"</p></div></div>
+            <div class="ni anim d5"><span class="nn">3</span><div><h3>文档归类完成</h3><p>docs/ 目录结构调整 → commit 记录目录变化</p></div></div>
+            <div class="ni anim d6"><span class="nn">4</span><div><h3>新增或更新 Skill</h3><p>skill 目录和 skill.md → 技能沉淀落库</p></div></div>
+            <div class="ni anim d7"><span class="nn">5</span><div><h3>原型方案产出</h3><p>HTML 原型 + .md 方案文档 → 交付物落库</p></div></div>
+            <div class="ni anim d8"><span class="nn">6</span><div><h3>功能代码实现</h3><p>功能代码 + 测试 → 可运行状态落库</p></div></div>
+          </div>
+        </div>
+        <div class="col2r">
+          <h3 class="anim d2">Push 到 GitHub 的时机</h3>
+          <p class="body anim d3">不是每个 commit 都 push。Push = <strong>"这个状态值得在远程留底"</strong>。</p>
+          <div class="nlist">
+            <div class="ni anim d4"><span class="nn">模</span><div><h3>模块完成时 push</h3><p>一个功能模块开发完成且自测通过 → push。代表一个可追溯的交付节点。</p></div></div>
+            <div class="ni anim d5"><span class="nn">碑</span><div><h3>里程碑达成时 push</h3><p>版本号升级（v1.0 → v1.2）、重大架构调整完成 → push + tag 标记。</p></div></div>
+            <div class="ni anim d6"><span class="nn">险</span><div><h3>风险操作前 push</h3><p>大规模重构、删除文件、实验性改动之前 → 先 push 当前状态。万一搞砸了，远程有安全基线。</p></div></div>
+            <div class="ni anim d7"><span class="nn">日</span><div><h3>每日收工时 push</h3><p>一天工作结束，代码处于可编译/可运行状态 → push。第二天换个电脑也能继续。</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>15</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 16. EXPERIENCE ====== -->
+  <div class="slide s-content">
+    <div class="ch"><h2 class="anim d0">经验沉淀与持续输出</h2><span class="tag anim d1">从实践到方法论</span></div>
+    <div class="cb">
+      <div class="col3">
+        <div class="c3c anim d2"><div class="cn">写</div><div class="ct">文档化每一次实践</div><div class="cd">每完成一个模块，写一份简短的复盘文档：做了什么、遇到了什么问题、怎么解决的、有什么可复用的。这些文档是团队最宝贵的资产——比代码本身更有长期价值。</div></div>
+        <div class="c3c anim d3"><div class="cn">编</div><div class="ct">编码化为 Skill</div><div class="cd">发现一个可复用的流程 → 写成 Skill。触发关键词 → 执行步骤 → 输出格式。一次实践 → 永久复用。Skill 是"流程的代码化"，是经验的硬载体。</div></div>
+        <div class="c3c anim d4"><div class="cn">讲</div><div class="ct">部门分享与培训</div><div class="cd">定期做内部分享（就像今天这样）。把你学到的东西讲给别人听——教学是最高效的学习方式。幻灯片、演示文稿本身就是输出产物。</div></div>
+      </div>
+      <div class="hbox anim d5" style="margin-top:28px;font-size:22px;">"一个项目做完了，留下的不应该只有代码。应该留下：可复用的 Skill、可参考的文档、可追溯的 Git 记录、可继承的记忆。这些才是团队的复利资产。"</div>
+      <div class="col2" style="margin-top:24px;">
+        <div class="col2l">
+          <h3 class="anim d5">输出的形态</h3>
+          <div class="nlist">
+            <div class="ni anim d6"><span class="nn">1</span><div><p>项目文档（需求/架构/PRD）</p></div></div>
+            <div class="ni anim d6"><span class="nn">2</span><div><p>可复用 Skill（.md 指令文件）</p></div></div>
+            <div class="ni anim d7"><span class="nn">3</span><div><p>演示文稿（内部培训用）</p></div></div>
+          </div>
+        </div>
+        <div class="col2r">
+          <h3 class="anim d5">沉淀的载体</h3>
+          <div class="nlist">
+            <div class="ni anim d6"><span class="nn">4</span><div><p>Git commit log（演进叙事）</p></div></div>
+            <div class="ni anim d7"><span class="nn">5</span><div><p>Memory 记忆系统（跨会话上下文）</p></div></div>
+            <div class="ni anim d8"><span class="nn">6</span><div><p>CLAUDE.md（项目宪法，持续迭代）</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>16</span><span>17</span></div>
+  </div>
+
+  <!-- ====== 17. CLOSING ====== -->
+  <div class="slide s-closing">
+    <div class="rule-accent anim d0" style="margin:0 auto 24px;"></div>
+    <h1 class="anim d1">谢 谢</h1>
+    <p class="cs anim d3">Agent 选择 → 框架搭建 → 需求定义 → 技能沉淀<br>文档归类 → 记忆系统 → 版本管理 → 上下文策略 → 经验输出<br><br>让每一次项目实践都沉淀为团队的复利资产</p>
+    <p class="label-sm anim d4" style="color:rgba(245,240,228,.3);">一站式服务平台团队 · 2026年5月</p>
+    <div class="page-footer"><span>17</span><span>17</span></div>
+  </div>
+
+</div></div>
+
+<div class="nav">
+  <button onclick="go(-1)" id="prevBtn">&larr;</button>
+  <span class="cnt"><span id="cur">1</span> / 15</span>
+  <button onclick="go(1)" id="nextBtn">&rarr;</button>
+</div>
+<div class="nav pbar" id="progress"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0, transitioning = false;
+
+  function update() {
+    document.getElementById('cur').textContent = current + 1;
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === total - 1;
+  }
+
+  function go(dir) {
+    if (transitioning) return;
+    const next = current + dir;
+    if (next < 0 || next >= total) return;
+    transitioning = true;
+    const old = slides[current], nu = slides[next];
+    old.classList.add('exit'); old.classList.remove('active');
+    nu.classList.remove('exit'); nu.classList.add('active');
+    current = next; update();
+    localStorage.setItem('slide-method-v2', current);
+    setTimeout(() => { old.classList.remove('exit'); transitioning = false; }, 550);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { e.preventDefault(); if(transitioning)return;
+      slides[current].classList.add('exit');slides[current].classList.remove('active');
+      current=0;slides[0].classList.remove('exit');slides[0].classList.add('active');
+      setTimeout(()=>{slides.forEach(s=>s.classList.remove('exit'));transitioning=false;},550);
+      update();localStorage.setItem('slide-method-v2',0); }
+    else if (e.key === 'End') { e.preventDefault(); if(transitioning)return;
+      slides[current].classList.add('exit');slides[current].classList.remove('active');
+      current=total-1;slides[total-1].classList.remove('exit');slides[total-1].classList.add('active');
+      setTimeout(()=>{slides.forEach(s=>s.classList.remove('exit'));transitioning=false;},550);
+      update();localStorage.setItem('slide-method-v2',total-1); }
+  });
+
+  let tx=0,ty=0;
+  document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;ty=e.changedTouches[0].screenY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=tx-e.changedTouches[0].screenX,dy=ty-e.changedTouches[0].screenY;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50) go(dx>0?1:-1);
+  },{passive:true});
+
+  let rt; function fit() {
+    const deck=document.querySelector('.deck');
+    const w=window.innerWidth,h=window.innerHeight;
+    const s=Math.min(w/1920,h/1080);
+    const tx=(w-1920*s)/2, ty=(h-1080*s)/2;
+    deck.style.transform=`translate(${tx}px,${ty}px) scale(${s})`;
+  }
+  window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fit,100);});
+
+  const saved=parseInt(localStorage.getItem('slide-method-v2'));
+  if(saved>=0&&saved<total) current=saved;
+  fit();slides[current].classList.add('active');update();
+</script>
+</body>
+</html>
