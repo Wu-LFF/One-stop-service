@@ -1196,5 +1196,45 @@ console.log('📱 移动端页面: 首页 + 4个板块 × 全部页面');
 console.log('💻 PC端页面: 安全×2 + 生活×4 + 福利×4 + 其他×2 = 13 页面');
 console.log('🔐 门户页面: 安全×2 + 生活×3 + 福利×1 + 其他×2 = 8 页面');
 </script>
+<script>
+(function() {
+  if (window.self === window.top) return;
+  // Inject CSS to hide own phone frame when embedded
+  var style = document.createElement('style');
+  style.textContent = '.phone>.status-bar,.phone>.app-header{display:none!important}.phone{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;margin:0!important;padding:0!important}.phone>.page-content{padding:0!important;margin:0!important}.phone>.bottom-nav{flex-shrink:0}';
+  document.head.appendChild(style);
+  // Hide own view switcher
+  var vsBar = document.querySelector('.vs');
+  if (vsBar) vsBar.style.display = 'none';
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.style.height = '100vh';
+    v.style.marginTop = '0';
+  });
+  function applyView(view) {
+    var mv = document.getElementById('mobileView');
+    var pv = document.getElementById('pcView');
+    var pv2 = document.getElementById('portalView');
+    if (mv) mv.style.display = 'none';
+    if (pv) pv.style.display = 'none';
+    if (pv2) pv2.style.display = 'none';
+    if (view === 'mobile' && mv) { mv.style.display = 'flex'; }
+    else if (view === 'pc' && pv) pv.style.display = 'block';
+    else if (view === 'portal' && pv2) pv2.style.display = 'block';
+  }
+  var hash = window.location.hash.replace('#', '');
+  if (hash && ['mobile','pc','portal'].indexOf(hash) >= 0) applyView(hash);
+  window.addEventListener('message', function(e) {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === 'switchView' && e.data.view) applyView(e.data.view);
+    if (e.data.type === 'goBack') {
+      if (typeof mStack !== 'undefined' && mStack.length > 1) {
+        if (typeof mGoBack === 'function') mGoBack();
+      } else {
+        window.parent.postMessage({ type: 'closeModule' }, '*');
+      }
+    }
+  });
+})();
+</script>
 </body>
 </html>

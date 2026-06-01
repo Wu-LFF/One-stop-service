@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>制造资讯 — 原型方案</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--p:#6366F1;--pd:#4F46E5;--pl:#EEF2FF;--xp:#E60012;--xpd:#CC0010;--xpl:#FFE8EA;--s:#34A853;--w:#FBBC04;--d:#EA4335;--di:#FEE8E8;--bg:#F5F7FA;--cd:#FFF;--t1:#1F2937;--t2:#6B7280;--bd:#E5E7EB;--sd:0 2px 12px rgba(0,0,0,.08);--r:12px;--r-sm:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;--trans:all .3s cubic-bezier(.4,0,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#E8ECF1;color:var(--t1);overflow:hidden;height:100vh}
+.vs{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;align-items:center;justify-content:center;gap:4px;background:#1F2937;padding:8px 16px;height:48px}
+.vs button{padding:6px 16px;border:none;background:transparent;color:#9CA3AF;font-size:13px;cursor:pointer;border-radius:6px;font-family:var(--font);transition:var(--trans)}
+.vs button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.vs button.active{color:#fff;background:var(--p)}
+.vs .vs-title{color:#fff;font-size:14px;font-weight:600;margin-right:auto}
+.vs .vs-share{background:var(--s);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;border:none;cursor:pointer;font-family:var(--font);margin-left:auto;transition:var(--trans)}
+.vs .vs-share:hover{opacity:.85}
+.view{display:none;width:100%;height:calc(100vh - 48px);margin-top:48px;position:relative}
+#mobileView{display:none;justify-content:center;align-items:center;background:#E8ECF1;padding:20px}
+#mobileView .phone{width:380px;height:780px;background:var(--bg);border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.phone .status-bar{height:44px;background:var(--p);display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#fff;font-size:12px;font-weight:600;flex-shrink:0}
+.phone .app-header{height:48px;background:var(--p);display:flex;align-items:center;padding:0 16px;color:#fff;flex-shrink:0;position:relative}
+.phone .app-header .back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;transition:var(--trans);font-size:18px;border:none;color:#fff;background:transparent}
+.phone .app-header .back:hover{background:rgba(255,255,255,.15)}
+.phone .app-header .title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.phone .app-header .right{width:36px}
+.phone .page-content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.phone .page-content::-webkit-scrollbar{width:0}
+.m-page{display:none;padding:16px;animation:mFadeIn .35s ease}
+.m-page.active{display:block}
+@keyframes mFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.phone .bottom-nav{height:56px;background:#fff;border-top:1px solid var(--bd);display:flex;flex-shrink:0;width:100%}
+.phone .bottom-nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--t2);cursor:pointer;transition:var(--trans);gap:2px;border:none;background:none;font-family:var(--font)}
+.phone .bottom-nav .tab i{font-size:20px;transition:var(--trans)}
+.phone .bottom-nav .tab.active{color:var(--p)}
+.phone .bottom-nav .tab:hover{color:var(--p)}
+#pcView{display:none}
+.pc-layout{display:flex;height:100%;background:var(--bg)}
+.pc-sidebar{width:240px;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;min-width:160px}
+.pc-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.pc-resizer:hover,.pc-resizer.active{background:var(--p)}
+.pc-resizer::after{content:"";position:absolute;inset:0 -4px}
+.pc-sidebar .logo{padding:20px 20px 16px;font-size:18px;font-weight:700;color:var(--p);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)}
+.pc-sidebar .logo i{font-size:24px}
+.pc-sidebar .nav-group{padding:12px 0}
+.pc-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.pc-sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--t1);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.pc-sidebar .nav-item i{width:20px;text-align:center;color:var(--t2);font-size:16px;transition:var(--trans)}
+.pc-sidebar .nav-item:hover{background:var(--pl);color:var(--p)}
+.pc-sidebar .nav-item:hover i{color:var(--p)}
+.pc-sidebar .nav-item.active{background:var(--pl);color:var(--p);font-weight:600}
+.pc-sidebar .nav-item.active i{color:var(--p)}
+.pc-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.pc-header{height:60px;background:#fff;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.pc-header .bc{font-size:14px;color:var(--t2)}
+.pc-header .bc span{color:var(--t1);font-weight:500}
+.pc-header .user{display:flex;align-items:center;gap:12px;font-size:14px}
+.pc-header .user .avatar{width:32px;height:32px;border-radius:50%;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.pc-content{flex:1;overflow-y:auto;padding:24px;position:relative}
+.pc-content::-webkit-scrollbar{width:6px}
+.pc-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+#portalView{display:none}
+.portal-layout{display:flex;height:100%}
+.portal-sidebar{width:260px;background:linear-gradient(180deg,#1F2937 0%,#111827 100%);display:flex;flex-direction:column;flex-shrink:0;min-width:180px}
+.portal-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.portal-resizer:hover,.portal-resizer.active{background:#60A5FA}
+.portal-resizer::after{content:"";position:absolute;inset:0 -4px}
+.portal-sidebar .logo{padding:20px 20px 16px;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.portal-sidebar .logo i{font-size:22px;color:#60A5FA}
+.portal-sidebar .nav-group{padding:16px 0}
+.portal-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.portal-sidebar .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.7);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.portal-sidebar .nav-item i{width:20px;text-align:center;font-size:16px}
+.portal-sidebar .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.portal-sidebar .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-right:3px solid #60A5FA;font-weight:500}
+.portal-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F0F2F5;min-width:400px}
+.portal-header{height:60px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;z-index:10}
+.portal-header .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);padding:8px 16px;border-radius:8px;width:320px}
+.portal-header .search-box i{color:var(--t2)}
+.portal-header .search-box input{border:none;background:none;outline:none;font-size:14px;width:100%;font-family:var(--font)}
+.portal-header .user{display:flex;align-items:center;gap:16px}
+.portal-header .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.portal-content{flex:1;overflow-y:auto;padding:24px}
+.portal-content::-webkit-scrollbar{width:6px}
+.portal-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.card{background:var(--cd);border-radius:var(--r);padding:20px;box-shadow:var(--sd);transition:var(--trans)}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.badge-p0{background:var(--di);color:var(--d)}
+.badge-p1{background:#FEF3C7;color:#D97706}
+.badge-s{background:#DCFCE7;color:#16A34A}
+.badge-info{background:var(--pl);color:var(--p)}
+.btn{padding:10px 24px;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:500;cursor:pointer;transition:var(--trans);font-family:var(--font)}
+.btn-p{background:var(--p);color:#fff}
+.btn-p:hover{background:var(--pd);transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.3)}
+.btn-s{background:var(--s);color:#fff}
+.btn-s:hover{opacity:.9;transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--bd);color:var(--t1)}
+.btn-outline:hover{border-color:var(--p);color:var(--p)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-block{width:100%}
+.btn-danger{background:var(--d);color:#fff}
+.btn-danger:hover{opacity:.9}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:var(--t2);margin-bottom:6px;font-weight:500}
+.form-group .required::after{content:' *';color:var(--d)}
+.form-control{width:100%;padding:10px 14px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:14px;outline:none;transition:var(--trans);font-family:var(--font);background:#FFF}
+.form-control:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.stat-card{text-align:center;padding:16px}
+.stat-card .num{font-size:28px;font-weight:700;color:var(--t1)}
+.stat-card .label{font-size:13px;color:var(--t2);margin-top:4px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.db-card{background:#fff;border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:var(--trans)}
+.db-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.db-card .db-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.db-card .db-header h3{font-size:16px;font-weight:600}
+.db-card .db-header a{font-size:13px;color:var(--p);text-decoration:none;cursor:pointer}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+table th{text-align:left;padding:10px 12px;font-weight:600;color:var(--t2);font-size:12px;border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.3px}
+table td{padding:12px 12px;border-bottom:1px solid var(--bd)}
+table tr:hover td{background:#FAFBFC}
+table .actions{display:flex;gap:6px}
+table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:12px;cursor:pointer;transition:var(--trans);font-family:var(--font)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-overlay.show{display:flex}
+.modal-content{background:#fff;border-radius:16px;width:560px;max-width:90vw;max-height:80vh;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;display:flex;flex-direction:column}
+.modal-content .modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--bd)}
+.modal-content .modal-header h3{font-size:17px;font-weight:600}
+.modal-content .modal-header button{width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;cursor:pointer;font-size:18px;transition:var(--trans);display:flex;align-items:center;justify-content:center;color:var(--t2)}
+.modal-content .modal-header button:hover{background:var(--di);color:var(--d)}
+.modal-content .modal-body{padding:24px;overflow-y:auto}
+.modal-content .modal-footer{padding:16px 24px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:8px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.detail-grid .field label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px}
+.detail-grid .field .value{font-size:15px;font-weight:500}
+.detail-grid .field.full{grid-column:1/-1}
+.pc-page{display:none;animation:pcIn .4s ease}
+.pc-page.active{display:block}
+@keyframes pcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.portal-page{display:none;animation:portalIn .4s ease}
+.portal-page.active{display:block}
+@keyframes portalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu-card{background:var(--cd);border-radius:var(--r);padding:20px 12px;text-align:center;box-shadow:var(--sd);cursor:pointer;transition:var(--trans);border:2px solid transparent}
+.menu-card:hover{border-color:var(--p);transform:translateY(-2px)}
+.menu-card .icon{font-size:32px;margin-bottom:8px;display:block}
+.menu-card .name{font-size:14px;font-weight:600}
+.menu-card .desc{font-size:11px;color:var(--t2);margin-top:2px}
+.m-tabs{display:flex;gap:0;margin-bottom:12px;background:#F3F4F6;border-radius:8px;padding:3px}
+.m-tab{flex:1;padding:6px 0;text-align:center;font-size:13px;border-radius:6px;cursor:pointer;transition:var(--trans);color:var(--t2)}
+.m-tab.active{background:#fff;color:var(--t1);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.jump-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px}
+.jump-page .j-icon{font-size:56px;margin-bottom:16px}
+.jump-page h2{font-size:20px;margin-bottom:8px}
+.jump-page p{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:24px;max-width:300px}
+.progress-steps{display:flex;align-items:flex-start;gap:0;margin:16px 0}
+.progress-step{flex:1;text-align:center;position:relative}
+.progress-step .dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:12px;font-weight:600}
+.progress-step .dot.done{background:var(--s);color:#fff}
+.progress-step .dot.active{background:var(--p);color:#fff}
+.progress-step .dot.pending{background:#E5E7EB;color:var(--t2)}
+.progress-step .label{font-size:11px;color:var(--t2)}
+.progress-step::after{content:'';position:absolute;top:14px;right:-50%;width:100%;height:2px;background:#E5E7EB;z-index:0}
+.progress-step:last-child::after{display:none}
+.progress-step.done::after{background:var(--s)}
+.scene-card{display:flex;align-items:center;gap:16px;padding:16px;background:var(--cd);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sd);cursor:pointer;border:2px solid transparent;transition:var(--trans)}
+.scene-card:hover{border-color:var(--p)}
+.scene-card .s-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.stat-row{display:flex;gap:8px;margin-bottom:12px}
+.stat-box{flex:1;text-align:center;padding:12px 6px;background:var(--cd);border-radius:8px;box-shadow:var(--sd)}
+.stat-box .num{font-size:20px;font-weight:700}
+.stat-box .lbl{font-size:11px;color:var(--t2);margin-top:2px}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{background:#F8FAFC;padding:10px 12px;text-align:left;font-weight:600;color:var(--t2);border-bottom:2px solid var(--bd)}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--bd)}
+.data-table tr:hover td{background:#F8FAFC}
+.radio-group{display:flex;gap:16px;flex-wrap:wrap}
+.radio-group label{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:400;color:var(--t1);cursor:pointer}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.status-dot.green{background:var(--s)}
+.status-dot.red{background:var(--d)}
+.status-dot.amber{background:var(--w)}
+.m-tab-content{display:none}
+.m-tab-content.active{display:block}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:#1F2937;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;opacity:0;transition:all .5s ease;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.approve-chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.approve-chain .node{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);min-width:56px}
+.approve-chain .node .label{font-size:11px;color:var(--t2)}
+.approve-chain .node .name{font-size:13px;font-weight:500}
+.approve-chain .node.active{background:var(--pl)}
+.approve-chain .node.active .label{color:var(--p)}
+.approve-chain .node.active .name{color:var(--p)}
+.approve-chain .arrow{color:var(--t2);font-size:14px}
+.btn-act{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:none;border-radius:4px;font-size:12px;cursor:pointer;transition:var(--trans);font-family:var(--font);font-weight:500}
+.btn-act-p{background:var(--pl);color:var(--p)}
+.btn-act-p:hover{background:#E0E7FF}
+.btn-act-s{background:#DCFCE7;color:#16A34A}
+.btn-act-s:hover{background:#BBF7D0}
+.btn-act-d{background:var(--di);color:var(--d)}
+.btn-act-d:hover{background:#FECACA}
+.news-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd);cursor:pointer;transition:var(--trans)}
+.news-item:hover{background:#FAFBFC;margin:0 -16px;padding-left:16px;padding-right:16px}
+.news-item .unread-dot{width:8px;height:8px;border-radius:50%;background:var(--d);flex-shrink:0;margin-top:6px}
+.news-item .news-info{flex:1;min-width:0}
+.news-item .news-info .news-title{font-size:14px;font-weight:500;margin-bottom:2px}
+.news-item .news-info .news-meta{font-size:12px;color:var(--t2)}
+.cat-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.cat-tag{padding:4px 12px;border-radius:20px;font-size:12px;background:#F3F4F6;color:var(--t2);cursor:pointer;transition:var(--trans);border:none;font-family:var(--font)}
+.cat-tag.active{background:var(--p);color:#fff}
+.search-bar{display:flex;align-items:center;gap:8px;background:#F3F4F6;padding:8px 14px;border-radius:8px;margin-bottom:16px}
+.search-bar i{color:var(--t2)}
+.search-bar input{border:none;background:none;outline:none;font-size:14px;width:100%;font-family:var(--font)}
+.search-bar input::placeholder{color:#9CA3AF}
+.rich-content{font-size:14px;line-height:1.8;color:var(--t1)}
+.rich-content p{margin-bottom:12px}
+.rich-content img{max-width:100%;border-radius:8px;margin:8px 0}
+.content-placeholder{display:flex;align-items:center;justify-content:center;background:#F3F4F6;border-radius:8px;padding:20px;margin:12px 0;font-size:13px;color:var(--t2);border:1px dashed var(--bd)}
+.content-placeholder.video{height:160px}
+.content-placeholder.video i{font-size:40px;color:#CBD5E1;margin-right:12px}
+.faq-item{padding:12px 0;border-bottom:1px solid var(--bd);cursor:pointer}
+.faq-item .faq-q{font-size:14px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.faq-item .faq-a{font-size:13px;color:var(--t2);margin-top:8px;line-height:1.6;display:none}
+.faq-item .faq-a.open{display:block}
+.proposal-flow{margin:16px 0}
+.proposal-flow .pf-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:#E5E7EB}
+.proposal-flow .pf-bar .pf-seg{height:100%}
+.pf-seg.done{background:var(--s)}
+.pf-seg.active{background:var(--p)}
+.pf-seg.pending{background:#E5E7EB}
+.proposal-flow .pf-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--t2)}
+.pc-section-title{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.pc-section-title .bar{width:4px;height:22px;border-radius:2px;background:var(--p);flex-shrink:0}
+.pc-section-title .bar.green{background:var(--s)}
+.pc-section-title .bar.amber{background:var(--w)}
+.pc-section-title .bar.red{background:var(--d)}
+.pc-section-title h2{font-size:20px;font-weight:700}
+.sc-list{display:flex;flex-direction:column;gap:10px}
+.sc-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--cd);border-radius:var(--r);box-shadow:var(--sd);cursor:pointer;border:2px solid transparent;transition:var(--trans)}
+.sc-item:hover{border-color:var(--p)}
+.sc-item .sc-avatar{width:40px;height:40px;border-radius:50%;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0}
+.sc-item .sc-info{flex:1;min-width:0}
+.sc-item .sc-info .sc-name{font-size:14px;font-weight:500}
+.sc-item .sc-info .sc-meta{font-size:12px;color:var(--t2);margin-top:2px;display:flex;gap:16px}
+.sc-item .sc-arrow{color:var(--t2)}
+#mp-zx-gg-index .menu-card .icon{background:var(--pl);color:var(--p);border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+#mp-zx-xx-index .menu-card .icon{background:#FEF3E2;color:#D97706;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+#mp-zx-hd-index .menu-card .icon{background:#DCFCE7;color:#16A34A;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+@media(max-width:768px){.vs .vs-title{display:none}#mobileView .phone{width:100%;height:100%;border-radius:0}}
+</style>
+</head>
+<body>
+
+<!-- View Switcher -->
+<div class="vs" id="viewSwitcher">
+  <span class="vs-title"><i class="fas fa-newspaper"></i> 制造资讯 · 原型</span>
+  <button class="active" data-view="mobile"><i class="fas fa-mobile-alt"></i> 手机端</button>
+  <button data-view="pc"><i class="fas fa-desktop"></i> 电脑端</button>
+  <button data-view="portal"><i class="fas fa-shield-alt"></i> 管理门户</button>
+  <button class="vs-share" onclick="shareProto()"><i class="fas fa-share-alt"></i> 分享</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================== MOBILE VIEW ============================== -->
+<div class="view" id="mobileView">
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span style="font-weight:800;letter-spacing:.5px;font-size:11px">XTEP 特步</span><span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-full"></i></span></div>
+    <div class="app-header"><button class="back" id="mBack" onclick="mGoBack()" style="visibility:hidden"><i class="fas fa-chevron-left"></i></button><span class="title" id="mTitle">制造资讯</span><span class="right"></span></div>
+    <div class="page-content" id="mContent">
+
+      <!-- ====== 制造资讯首页 ====== -->
+      <div class="m-page active" id="mp-zx-index">
+        <div style="background:linear-gradient(135deg,var(--p),#3730A3);color:#fff;border-radius:var(--r);padding:20px;margin-bottom:20px">
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px"><i class="fas fa-newspaper"></i> 制造资讯</div>
+          <div style="font-size:13px;opacity:.9;line-height:1.6">制度公告·学习园地·互动服务<br>全员覆盖的信息服务平台</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-zx-gg-index')" style="border-color:#EEF2FF">
+            <span class="icon" style="background:var(--pl);color:var(--p);border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-bullhorn"></i></span>
+            <div class="name">公告制度</div>
+            <div class="desc">公告·制度文件</div>
+          </div>
+          <div class="menu-card" onclick="mNav('mp-zx-xx-index')" style="border-color:#FEF3E2">
+            <span class="icon" style="background:#FEF3E2;color:#D97706;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-graduation-cap"></i></span>
+            <div class="name">学习园地</div>
+            <div class="desc">课程·安全·指南</div>
+          </div>
+          <div class="menu-card" onclick="mNav('mp-zx-hd-index')" style="border-color:#F0FFF4">
+            <span class="icon" style="background:#DCFCE7;color:#16A34A;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-comments"></i></span>
+            <div class="name">互动服务</div>
+            <div class="desc">提案·IT报修</div>
+          </div>
+          <div class="menu-card" onclick="showToast('暂无个人收藏')" style="border-color:#F3F0FF">
+            <span class="icon" style="background:#F3F0FF;color:#7C3AED;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-star"></i></span>
+            <div class="name">我的收藏</div>
+            <div class="desc">收藏的制度/指南</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title" style="display:flex;justify-content:space-between"><span>最新公告</span><span style="font-size:12px;color:var(--p);cursor:pointer" onclick="mNav('mp-zx-gg-list')">全部 →</span></div>
+          <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">五一劳动节放假安排通知</div><div class="news-meta">行政部 · 05-20</div></div></div>
+          <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">2026年安全生产月活动通知</div><div class="news-meta">安全管理部 · 05-18</div></div></div>
+          <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><div class="news-info"><div class="news-title">第一季度生产运营简报</div><div class="news-meta">生产部 · 05-15</div></div></div>
+        </div>
+      </div>
+
+      <!-- ====== 公告制度首页 ====== -->
+      <div class="m-page" id="mp-zx-gg-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">信息发布</div>
+          <div style="font-size:20px;font-weight:700">公告制度</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-zx-gg-list')" style="position:relative"><span class="icon"><i class="fas fa-bullhorn"></i></span><div class="name">公告</div><div class="desc">最新+未读排序</div><span class="badge badge-p0" style="position:absolute;top:8px;right:8px">5</span></div>
+          <div class="menu-card" onclick="mNav('mp-zx-zd-list')"><span class="icon"><i class="fas fa-file-contract"></i></span><div class="name">制度文件</div><div class="desc">在线查阅·版本管理</div></div>
+          <div class="menu-card" onclick="mNav('mp-zx-gg-publish')"><span class="icon"><i class="fas fa-pen"></i></span><div class="name">发布公告</div><div class="desc">管理员入口</div></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title" style="font-size:14px">最近公告</div>
+          <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">五一劳动节放假安排通知</div><div class="news-meta">行政部 · 05-20</div></div></div>
+          <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">安全生产月活动通知</div><div class="news-meta">安全管理部 · 05-18</div></div></div>
+        </div>
+      </div>
+
+      <!-- ====== 公告列表 ====== -->
+      <div class="m-page" id="mp-zx-gg-list">
+        <div class="cat-tags">
+          <span class="cat-tag active" onclick="switchCat(this)">全部</span>
+          <span class="cat-tag" onclick="switchCat(this)">行政</span>
+          <span class="cat-tag" onclick="switchCat(this)">安全</span>
+          <span class="cat-tag" onclick="switchCat(this)">生产</span>
+          <span class="cat-tag" onclick="switchCat(this)">其他</span>
+        </div>
+        <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">五一劳动节放假安排通知</div><div class="news-meta">行政部 · 05-20 · <span class="badge badge-p0" style="font-size:10px">未读</span></div></div><i class="fas fa-chevron-right" style="color:var(--bd)"></i></div>
+        <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">2026年安全生产月活动通知</div><div class="news-meta">安全管理部 · 05-18 · <span class="badge badge-p0" style="font-size:10px">未读</span></div></div><i class="fas fa-chevron-right" style="color:var(--bd)"></i></div>
+        <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">关于加强车间安全管理的通知</div><div class="news-meta">安全管理部 · 05-17 · <span class="badge badge-p0" style="font-size:10px">未读</span></div></div><i class="fas fa-chevron-right" style="color:var(--bd)"></i></div>
+        <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><span class="unread-dot"></span><div class="news-info"><div class="news-title">关于调整夜班补贴标准的通知</div><div class="news-meta">行政部 · 05-16 · <span class="badge badge-p0" style="font-size:10px">未读</span></div></div><i class="fas fa-chevron-right" style="color:var(--bd)"></i></div>
+        <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><div class="news-info"><div class="news-title">第一季度生产运营简报</div><div class="news-meta">生产部 · 05-15</div></div><i class="fas fa-chevron-right" style="color:var(--bd)"></i></div>
+        <div class="news-item" onclick="mNav('mp-zx-gg-detail')"><div class="news-info"><div class="news-title">2026年夏季工服发放通知</div><div class="news-meta">行政部 · 05-12</div></div><i class="fas fa-chevron-right" style="color:var(--bd)"></i></div>
+      </div>
+
+      <!-- ====== 公告详情 ====== -->
+      <div class="m-page" id="mp-zx-gg-detail">
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:12px">五一劳动节放假安排通知</h2>
+          <div style="display:flex;gap:16px;font-size:12px;color:var(--t2);margin-bottom:16px;flex-wrap:wrap">
+            <span><i class="fas fa-building"></i> 行政部</span><span><i class="fas fa-clock"></i> 2026-05-20</span><span><i class="fas fa-users"></i> 泉州园区全员</span>
+          </div>
+          <div style="height:1px;background:var(--bd);margin-bottom:16px"></div>
+          <div class="rich-content">
+            <p><strong>各位同事：</strong></p>
+            <p>根据国家法定节假日安排，结合公司实际情况，现将2026年五一劳动节放假安排通知如下：</p>
+            <p><strong>一、放假时间</strong><br>5月1日（周五）至5月5日（周二），共5天。</p>
+            <p><strong>二、调休安排</strong><br>4月26日（周日）、5月9日（周六）正常上班。</p>
+            <p><strong>三、注意事项</strong><br>1. 放假期间各部门安排好值班人员；<br>2. 车间设备断电检查；<br>3. 宿舍区域注意防火防盗。</p>
+            <div class="content-placeholder video"><i class="fas fa-play-circle"></i> 附件：假期安全须知视频</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd);font-size:12px;color:var(--t2)">
+            <span><i class="fas fa-check-circle"></i> 已阅读 1,280/2,000 人</span>
+            <button class="btn btn-sm btn-outline" onclick="showToast('附件下载中...')"><i class="fas fa-download"></i> 下载附件</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 公告发布 ====== -->
+      <div class="m-page" id="mp-zx-gg-publish">
+        <div class="card">
+          <div class="form-group"><label class="required">公告标题</label><input class="form-control" placeholder="请输入公告标题"></div>
+          <div class="form-group"><label class="required">分类</label><select class="form-control"><option>请选择分类</option><option>行政通知</option><option>安全管理</option><option>生产运营</option><option>其他</option></select></div>
+          <div class="form-group"><label class="required">投放范围</label><select class="form-control"><option>泉州园区全员</option><option>制造一部</option><option>制造二部</option><option>按班组指定</option></select></div>
+          <div class="form-group"><label class="required">正文内容</label><textarea class="form-control" rows="6" placeholder="支持图片、视频插入..."></textarea></div>
+          <div class="form-group"><label>附件</label><div style="display:flex;gap:8px"><div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#CBD5E1;cursor:pointer;border:2px dashed var(--bd)">+</div></div><div style="font-size:11px;color:var(--t2);margin-top:4px">支持图片、视频上传</div></div>
+        </div>
+        <div style="background:var(--pl);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:var(--p);display:flex;align-items:center;gap:8px"><i class="fas fa-info-circle"></i> 提交后将发送至直接上级审批</div>
+        <div class="grid-2">
+          <button class="btn btn-outline btn-block" onclick="showToast('已存为草稿')">存草稿</button>
+          <button class="btn btn-p btn-block" onclick="showToast('已提交审批！待直接上级确认')">提交审批</button>
+        </div>
+      </div>
+
+      <!-- ====== 制度列表 ====== -->
+      <div class="m-page" id="mp-zx-zd-list">
+        <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="搜索制度关键词..."></div>
+        <div class="cat-tags">
+          <span class="cat-tag active" onclick="switchCat(this)">全部</span>
+          <span class="cat-tag" onclick="switchCat(this)">人事</span>
+          <span class="cat-tag" onclick="switchCat(this)">行政</span>
+          <span class="cat-tag" onclick="switchCat(this)">生产</span>
+          <span class="cat-tag" onclick="switchCat(this)">安全</span>
+        </div>
+        <div class="sc-list">
+          <div class="sc-item" onclick="mNav('mp-zx-zd-detail')">
+            <div class="sc-avatar"><i class="fas fa-file-alt"></i></div>
+            <div class="sc-info"><div class="sc-name">考勤管理制度</div><div class="sc-meta"><span>v3.2</span><span>2026-03-01 生效</span></div></div><span class="badge badge-s">生效中</span><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-zx-zd-detail')">
+            <div class="sc-avatar"><i class="fas fa-file-alt"></i></div>
+            <div class="sc-info"><div class="sc-name">安全生产管理制度</div><div class="sc-meta"><span>v2.0</span><span>2025-12-15 生效</span></div></div><span class="badge badge-s">生效中</span><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-zx-zd-detail')">
+            <div class="sc-avatar"><i class="fas fa-file-alt"></i></div>
+            <div class="sc-info"><div class="sc-name">员工手册</div><div class="sc-meta"><span>v5.1</span><span>2025-09-01 生效</span></div></div><span class="badge badge-s">生效中</span><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="showToast('该版本已失效')">
+            <div class="sc-avatar" style="background:#FEE8E8;color:var(--d)"><i class="fas fa-file-alt"></i></div>
+            <div class="sc-info"><div class="sc-name">旧版考勤制度</div><div class="sc-meta"><span>v3.1</span><span>2026-02-28 失效</span></div></div><span class="badge badge-p0">已失效</span><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 制度详情 ====== -->
+      <div class="m-page" id="mp-zx-zd-detail">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h2 style="font-size:18px">考勤管理制度</h2><span class="badge badge-s">✅ 生效中</span>
+          </div>
+          <div style="display:flex;gap:16px;font-size:12px;color:var(--t2);margin-bottom:16px">
+            <span>版本：v3.2</span><span>生效日期：2026-03-01</span>
+          </div>
+          <div style="height:1px;background:var(--bd);margin-bottom:16px"></div>
+          <div class="rich-content">
+            <p><strong>第一章 总则</strong></p>
+            <p>第一条 为规范公司考勤管理，保障生产秩序，根据国家相关法律法规，结合公司实际，制定本制度。</p>
+            <p><strong>第二章 考勤规则</strong></p>
+            <p>第二条 公司实行每日8小时工作制，上午8:00-12:00，下午13:30-17:30。</p>
+            <p>第三条 员工应按时打卡上下班，迟到、早退累计超过30分钟按旷工半天处理。</p>
+            <p><strong>第三章 请假管理</strong></p>
+            <p>第四条 请假须提前填写《请假申请单》，经批准后方可休假。</p>
+            <p>...</p>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd)">
+            <button class="btn btn-sm btn-outline" onclick="showToast('已加入收藏')"><i class="far fa-star"></i> 收藏</button>
+            <button class="btn btn-sm btn-outline" onclick="showToast('版本历史：v1.0(2023-01) → v2.0(2024-06) → v3.0(2025-03) → v3.2(2026-03)')"><i class="fas fa-history"></i> 版本历史</button>
+          </div>
+          <div style="background:#FEF3C7;border-radius:8px;padding:10px;margin-top:12px;font-size:12px;color:#D97706;text-align:center"><i class="fas fa-lock"></i> 本文档仅供在线阅读，不支持下载</div>
+        </div>
+      </div>
+
+      <!-- ====== 学习园地首页 ====== -->
+      <div class="m-page" id="mp-zx-xx-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">知识学习</div>
+          <div style="font-size:20px;font-weight:700">学习园地</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-zx-xx-culture')"><span class="icon"><i class="fas fa-book-open"></i></span><div class="name">文化天地</div><div class="desc">特智汇课程/培训</div></div>
+          <div class="menu-card" onclick="mNav('mp-zx-xx-safety')"><span class="icon"><i class="fas fa-shield-alt"></i></span><div class="name">安全小红书</div><div class="desc">安全知识/操作流程</div></div>
+          <div class="menu-card" onclick="mNav('mp-zx-xx-guide')"><span class="icon"><i class="fas fa-compass"></i></span><div class="name">行政服务指南</div><div class="desc">流程·指引·FAQ</div></div>
+        </div>
+      </div>
+
+      <!-- ====== 文化天地 ====== -->
+      <div class="m-page" id="mp-zx-xx-culture">
+        <div class="jump-page">
+          <div class="j-icon">📚</div>
+          <h2>文化天地</h2>
+          <p>课程/培训通知便捷可查<br>员工自行管理学习时长<br>按需检索免费学习资源</p>
+          <button class="btn btn-p btn-block" onclick="showToast('正在免登跳转至特智汇学习平台...')" style="margin-bottom:12px">前往特智汇学习平台 <i class="fas fa-arrow-right"></i></button>
+          <div class="card" style="width:100%;text-align:left">
+            <div class="card-title" style="font-size:14px">最近课程</div>
+            <div style="font-size:13px;color:var(--t2);line-height:2">· 安全生产培训（必修）<br>· 消防应急演练实操<br>· 5S现场管理课程</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 安全小红书列表 ====== -->
+      <div class="m-page" id="mp-zx-xx-safety">
+        <div style="font-size:13px;color:var(--t2);margin-bottom:12px">安全管理部发布 · 安全知识推送</div>
+        <div class="sc-list">
+          <div class="sc-item" onclick="mNav('mp-zx-xx-safety-detail')">
+            <div class="sc-avatar" style="background:#FEE8E8;color:var(--d)"><i class="fas fa-fire-extinguisher"></i></div>
+            <div class="sc-info"><div class="sc-name">消防安全操作规范</div><div class="sc-meta">安全管理部 · 05-22</div></div><span class="badge badge-p0">新</span><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-zx-xx-safety-detail')">
+            <div class="sc-avatar" style="background:#FEF3C7;color:#D97706"><i class="fas fa-bolt"></i></div>
+            <div class="sc-info"><div class="sc-name">用电安全须知</div><div class="sc-meta">安全管理部 · 05-18</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-zx-xx-safety-detail')">
+            <div class="sc-avatar" style="background:var(--pl);color:var(--p)"><i class="fas fa-cogs"></i></div>
+            <div class="sc-info"><div class="sc-name">设备安全防护指南</div><div class="sc-meta">安全管理部 · 05-15</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-zx-xx-safety-detail')">
+            <div class="sc-avatar" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-hard-hat"></i></div>
+            <div class="sc-info"><div class="sc-name">个人防护用品使用规范</div><div class="sc-meta">安全管理部 · 05-10</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 安全知识详情 ====== -->
+      <div class="m-page" id="mp-zx-xx-safety-detail">
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:8px">消防安全操作规范</h2>
+          <div style="font-size:12px;color:var(--t2);margin-bottom:16px">安全管理部 · 2026-05-22</div>
+          <div style="height:1px;background:var(--bd);margin-bottom:16px"></div>
+          <div class="rich-content">
+            <p><strong>一、灭火器使用规范</strong></p>
+            <p>1. 提——提起灭火器；<br>2. 拔——拔掉保险销；<br>3. 握——握住喷管对准火源根部；<br>4. 压——压下压把喷射灭火。</p>
+            <p><strong>二、逃生通道指引</strong></p>
+            <p>各车间设有2条以上安全逃生通道，指示标识为绿色应急灯，请熟记就近逃生路线。</p>
+            <p><strong>三、应急响应流程</strong></p>
+            <p>发现火情 → 立即报警（119/厂内安保）→ 启动消防设施 → 组织人员疏散 → 集合点清点人数。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 行政服务指南 ====== -->
+      <div class="m-page" id="mp-zx-xx-guide">
+        <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="搜索指南..."></div>
+        <div class="cat-tags">
+          <span class="cat-tag active" onclick="switchCat(this)">全部</span>
+          <span class="cat-tag" onclick="switchCat(this)">住宿</span>
+          <span class="cat-tag" onclick="switchCat(this)">食堂</span>
+          <span class="cat-tag" onclick="switchCat(this)">通行</span>
+          <span class="cat-tag" onclick="switchCat(this)">福利</span>
+          <span class="cat-tag" onclick="switchCat(this)">其他</span>
+        </div>
+        <div class="sc-list">
+          <div class="sc-item" onclick="showToast('住宿申请流程：提交申请→班组长确认→宿管审批→入住')">
+            <div class="sc-avatar" style="background:var(--pl);color:var(--p)"><i class="fas fa-home"></i></div>
+            <div class="sc-info"><div class="sc-name">住宿申请流程</div><div class="sc-meta">含视频演示</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="showToast('食堂报餐指引：每日17:00前通过本平台报次日餐')">
+            <div class="sc-avatar" style="background:#FEF3E2;color:#D97706"><i class="fas fa-utensils"></i></div>
+            <div class="sc-info"><div class="sc-name">食堂报餐指引</div><div class="sc-meta">报餐时间·取消规则</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="showToast('通行证办理：前往TMS系统办理')">
+            <div class="sc-avatar" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-id-card"></i></div>
+            <div class="sc-info"><div class="sc-name">通行证办理流程</div><div class="sc-meta">人员·物品放行</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="showToast('员工福利政策：节日福利/生日福利/高温补贴等')">
+            <div class="sc-avatar" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-gift"></i></div>
+            <div class="sc-info"><div class="sc-name">员工福利政策</div><div class="sc-meta">各类福利申请条件</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title" style="font-size:14px">常见问题 FAQ</div>
+          <div class="faq-item" onclick="this.querySelector('.faq-a').classList.toggle('open')">
+            <div class="faq-q">住宿申请需要什么材料？<i class="fas fa-chevron-down"></i></div>
+            <div class="faq-a">需提供身份证复印件、入职通知书，特殊情况需提供家庭困难证明。</div>
+          </div>
+          <div class="faq-item" onclick="this.querySelector('.faq-a').classList.toggle('open')">
+            <div class="faq-q">报餐后可以取消吗？<i class="fas fa-chevron-down"></i></div>
+            <div class="faq-a">当天17:00前可取消次日报餐，超过时间不可取消，餐费照常扣除。</div>
+          </div>
+          <div class="faq-item" onclick="this.querySelector('.faq-a').classList.toggle('open')">
+            <div class="faq-q">通行证有效期多久？<i class="fas fa-chevron-down"></i></div>
+            <div class="faq-a">常规通行证有效期为当天，特殊长期通行证需单独审批。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 互动服务首页 ====== -->
+      <div class="m-page" id="mp-zx-hd-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">员工互动</div>
+          <div style="font-size:20px;font-weight:700">互动服务</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-zx-hd-proposal')"><span class="icon"><i class="fas fa-lightbulb"></i></span><div class="name">提案改善</div><div class="desc">合理化建议·工艺优化</div></div>
+          <div class="menu-card" onclick="mNav('mp-zx-hd-it')"><span class="icon"><i class="fas fa-laptop"></i></span><div class="name">IT服务</div><div class="desc">电脑·账号·网络报修</div></div>
+          <div class="menu-card" onclick="showToast('正在跳转生产通-员工意见箱...')"><span class="icon"><i class="fas fa-comment-dots"></i></span><div class="name">员工意见箱</div><div class="desc">跳转生产通模块</div></div>
+        </div>
+      </div>
+
+      <!-- ====== 提案改善列表 ====== -->
+      <div class="m-page" id="mp-zx-hd-proposal">
+        <div class="m-tabs">
+          <div class="m-tab active" onclick="switchMTab(this,'mp-zx-hd-proposal-t1')">我的提案(3)</div>
+          <div class="m-tab" onclick="switchMTab(this,'mp-zx-hd-proposal-t2')">全部提案</div>
+        </div>
+        <div class="m-tab-content active" id="mp-zx-hd-proposal-t1">
+          <div class="sc-list">
+            <div class="sc-item" onclick="mNav('mp-zx-hd-proposal-detail')">
+              <div class="sc-avatar" style="background:var(--pl);color:var(--p)"><i class="fas fa-lightbulb"></i></div>
+              <div class="sc-info"><div class="sc-name">针车工序优化方案</div><div class="sc-meta">05-20 · 初审通过</div></div>
+              <span class="badge badge-p1">待立项</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="mNav('mp-zx-hd-proposal-detail')">
+              <div class="sc-avatar" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-lightbulb"></i></div>
+              <div class="sc-info"><div class="sc-name">冲裁段降本方案</div><div class="sc-meta">05-15 · 实施中</div></div>
+              <span class="badge badge-info">实施中</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="mNav('mp-zx-hd-proposal-detail')">
+              <div class="sc-avatar" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-lightbulb"></i></div>
+              <div class="sc-info"><div class="sc-name">物流路线优化建议</div><div class="sc-meta">04-28 · 已完成</div></div>
+              <span class="badge badge-s">已激励</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+          </div>
+          <button class="btn btn-p btn-block" style="margin-top:12px" onclick="mNav('mp-zx-hd-proposal-new')"><i class="fas fa-plus"></i> 提交新提案</button>
+        </div>
+        <div class="m-tab-content" id="mp-zx-hd-proposal-t2">
+          <div class="sc-list">
+            <div class="sc-item" onclick="mNav('mp-zx-hd-proposal-detail')">
+              <div class="sc-avatar" style="background:#FEF3C7;color:#D97706"><i class="fas fa-lightbulb"></i></div>
+              <div class="sc-info"><div class="sc-name">包装线自动化改造提案</div><div class="sc-meta">李四 · 05-21 · 部门初审中</div></div><span class="badge badge-p1">初审中</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 提案提交 ====== -->
+      <div class="m-page" id="mp-zx-hd-proposal-new">
+        <div class="card">
+          <div class="form-group"><label class="required">提案类型</label><select class="form-control"><option>请选择类型</option><option>合理化建议</option><option>工艺优化</option><option>降本增效</option><option>其他</option></select></div>
+          <div class="form-group"><label class="required">标题</label><input class="form-control" placeholder="请输入提案标题"></div>
+          <div class="form-group"><label class="required">现状描述</label><textarea class="form-control" rows="3" placeholder="描述当前存在的问题或现状..."></textarea></div>
+          <div class="form-group"><label class="required">改进方案</label><textarea class="form-control" rows="3" placeholder="提出具体的改进建议..."></textarea></div>
+          <div class="form-group"><label>预期效益</label><textarea class="form-control" rows="2" placeholder="预估改进后的效益（可选）..."></textarea></div>
+          <div class="form-group"><label>附件</label><div style="display:flex;gap:8px"><div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#CBD5E1;cursor:pointer;border:2px dashed var(--bd)">+</div></div></div>
+        </div>
+        <div style="background:var(--pl);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:var(--p)">
+          <div style="font-weight:600;margin-bottom:6px">审批流程</div>
+          <div class="approve-chain" style="font-size:11px">
+            <span>员工提交</span><span class="arrow">→</span><span>部门初审</span><span class="arrow">→</span><span>评审立项</span><span class="arrow">→</span><span>实施落地</span><span class="arrow">→</span><span>效果反馈与激励</span>
+          </div>
+        </div>
+        <div class="grid-2">
+          <button class="btn btn-outline btn-block" onclick="showToast('已存为草稿')">存草稿</button>
+          <button class="btn btn-p btn-block" onclick="showToast('提案已提交！进入部门初审阶段')">提交提案</button>
+        </div>
+      </div>
+
+      <!-- ====== 提案详情 ====== -->
+      <div class="m-page" id="mp-zx-hd-proposal-detail">
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:12px">针车工序优化方案</h2>
+          <div style="display:flex;gap:16px;font-size:12px;color:var(--t2);margin-bottom:16px">
+            <span>提案人：张三</span><span>提交时间：2026-05-20</span><span>类型：工艺优化</span>
+          </div>
+          <div style="height:1px;background:var(--bd);margin-bottom:16px"></div>
+          <div class="rich-content">
+            <p><strong>现状描述</strong></p>
+            <p>当前针车段物料流转需人工搬运，效率较低，存在安全隐患。</p>
+            <p><strong>改进方案</strong></p>
+            <p>建议引入小型传送带装置，实现物料半自动化流转，预计效率提升30%。</p>
+            <p><strong>预期效益</strong></p>
+            <p>减少人工搬运时间，降低工伤风险，预计年节约工时成本约50万元。</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <div class="card-title" style="font-size:14px">审批进度</div>
+          <div class="progress-steps">
+            <div class="progress-step done"><div class="dot done">✓</div><div class="label">员工提交</div></div>
+            <div class="progress-step done"><div class="dot done">✓</div><div class="label">部门初审</div></div>
+            <div class="progress-step"><div class="dot active">⏳</div><div class="label">评审立项</div></div>
+            <div class="progress-step"><div class="dot pending">○</div><div class="label">实施落地</div></div>
+            <div class="progress-step"><div class="dot pending">○</div><div class="label">效果反馈</div></div>
+          </div>
+          <div style="background:var(--pl);border-radius:8px;padding:12px;margin-top:12px;font-size:13px;color:var(--p)">
+            <strong>初审意见（部门负责人 · 05-21）：</strong><br>方案可行，建议细化实施步骤和预算估算，同意进入评审立项阶段。
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== IT服务 ====== -->
+      <div class="m-page" id="mp-zx-hd-it">
+        <div class="card">
+          <div class="form-group"><label class="required">报修类型</label><select class="form-control"><option>请选择报修类型</option><option>电脑故障</option><option>账号问题</option><option>软件安装</option><option>网络故障</option><option>打印机故障</option><option>其他</option></select></div>
+          <div class="form-group"><label class="required">问题描述</label><textarea class="form-control" rows="4" placeholder="请描述您遇到的问题..."></textarea></div>
+          <div class="form-group"><label>所在位置</label><input class="form-control" value="泉州园区 · 制造一部 · 针车车间" readonly></div>
+          <div class="form-group"><label>联系电话</label><input class="form-control" value="138****5678"></div>
+          <div class="form-group"><label>截图附件</label><div style="display:flex;gap:8px"><div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#CBD5E1;cursor:pointer;border:2px dashed var(--bd)">+</div></div></div>
+        </div>
+        <button class="btn btn-p btn-block" onclick="showToast('报修已提交！工单号：IT-2026-0581，IT将尽快处理')" style="margin-top:12px">提交报修</button>
+        <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--t2)">紧急情况请拨打 IT热线：<span style="color:var(--p);font-weight:600">8888</span></div>
+      </div>
+
+    </div><!-- /page-content -->
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="tab active" onclick="mNav('mp-zx-index')"><i class="fas fa-home"></i><span>首页</span></div>
+      <div class="tab" onclick="mNav('mp-zx-gg-index')"><i class="fas fa-bullhorn"></i><span>公告</span></div>
+      <div class="tab" onclick="mNav('mp-zx-xx-index')"><i class="fas fa-graduation-cap"></i><span>学习</span></div>
+      <div class="tab" onclick="mNav('mp-zx-hd-index')"><i class="fas fa-comments"></i><span>互动</span></div>
+    </div>
+  </div><!-- /phone -->
+</div><!-- /mobileView -->
+
+<!-- ============================== PC VIEW ============================== -->
+<div class="view" id="pcView">
+  <div class="pc-layout">
+    <div class="pc-sidebar" id="pcSidebar">
+      <div class="logo"><i class="fas fa-newspaper"></i> 制造资讯</div>
+      <div class="nav-group">
+        <div class="g-label">内容管理</div>
+        <button class="nav-item active" data-pc="pc-dashboard" onclick="pcNav('pc-dashboard',this)"><i class="fas fa-th-large"></i> 工作台</button>
+        <button class="nav-item" data-pc="pc-notice" onclick="pcNav('pc-notice',this)"><i class="fas fa-bullhorn"></i> 公告制度</button>
+      </div>
+      <div class="nav-group">
+        <div class="g-label">学习互动</div>
+        <button class="nav-item" data-pc="pc-learn" onclick="pcNav('pc-learn',this)"><i class="fas fa-graduation-cap"></i> 学习园地</button>
+        <button class="nav-item" data-pc="pc-interact" onclick="pcNav('pc-interact',this)"><i class="fas fa-comments"></i> 互动服务</button>
+      </div>
+    </div>
+    <div class="pc-resizer" id="pcResizer"></div>
+    <div class="pc-main">
+      <div class="pc-header">
+        <div class="bc">制造资讯 / <span id="pcCrumb">工作台</span></div>
+        <div class="user"><i class="fas fa-bell" style="color:var(--t2);cursor:pointer;position:relative" onclick="showToast('5条新公告')"><span style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--d);border-radius:50%"></span></i><div class="avatar">王</div><span>王小明 · 行政部</span></div>
+      </div>
+      <div class="pc-content" id="pcContent">
+
+        <!-- PC Dashboard -->
+        <div class="pc-page active" id="pc-dashboard">
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">128</div><div class="label">本月公告</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">36</div><div class="label">生效制度</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--s)">45</div><div class="label">提案总数</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#7C3AED">12</div><div class="label">待审批</div></div>
+          </div>
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="db-card">
+              <div class="db-header"><h3>最新公告</h3><a onclick="pcNav('pc-notice',null)">管理 →</a></div>
+              <table>
+                <thead><tr><th>标题</th><th>发布单位</th><th>时间</th><th>已读</th></tr></thead>
+                <tbody>
+                  <tr><td>五一放假安排通知</td><td>行政部</td><td>05-20</td><td>1,280/2,000</td></tr>
+                  <tr><td>安全生产月通知</td><td>安全管理部</td><td>05-18</td><td>956/2,000</td></tr>
+                  <tr><td>车间安全管理通知</td><td>安全管理部</td><td>05-17</td><td>1,450/2,000</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>最新提案</h3><a onclick="pcNav('pc-interact',null)">查看 →</a></div>
+              <table>
+                <thead><tr><th>标题</th><th>提案人</th><th>时间</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr><td>针车工序优化方案</td><td>张三</td><td>05-20</td><td><span class="badge badge-p1">待立项</span></td></tr>
+                  <tr><td>包装线自动化改造</td><td>李四</td><td>05-21</td><td><span class="badge badge-p1">初审中</span></td></tr>
+                  <tr><td>冲裁段降本方案</td><td>王五</td><td>05-15</td><td><span class="badge badge-info">实施中</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC 公告制度 -->
+        <div class="pc-page" id="pc-notice">
+          <div class="pc-section-title"><div class="bar"></div><h2>公告制度管理</h2></div>
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="db-card">
+              <div class="db-header"><h3>公告列表</h3><button class="btn btn-sm btn-p" onclick="showToast('打开发布公告表单')"><i class="fas fa-plus"></i> 发布公告</button></div>
+              <table>
+                <thead><tr><th>标题</th><th>分类</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td>五一放假安排通知</td><td>行政</td><td>05-20</td><td><span class="badge badge-s">已发布</span></td><td class="actions"><button class="btn-act-p">编辑</button><button class="btn-act-d">撤回</button></td></tr>
+                  <tr><td>安全生产月通知</td><td>安全</td><td>05-18</td><td><span class="badge badge-p1">审批中</span></td><td class="actions"><button class="btn-act-p">查看</button></td></tr>
+                  <tr><td>车间安全通知</td><td>安全</td><td>05-17</td><td><span class="badge badge-s">已发布</span></td><td class="actions"><button class="btn-act-p">编辑</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>制度文件</h3><button class="btn btn-sm btn-outline" onclick="showToast('上传新制度文件')"><i class="fas fa-upload"></i> 上传</button></div>
+              <table>
+                <thead><tr><th>标题</th><th>版本</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td>考勤管理制度</td><td>v3.2</td><td><span class="badge badge-s">生效</span></td><td class="actions"><button class="btn-act-p">查看</button></td></tr>
+                  <tr><td>安全生产制度</td><td>v2.0</td><td><span class="badge badge-s">生效</span></td><td class="actions"><button class="btn-act-p">查看</button></td></tr>
+                  <tr><td>旧版考勤制度</td><td>v3.1</td><td><span class="badge badge-p0">失效</span></td><td class="actions"><button class="btn-act-p">查看</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC 学习园地 -->
+        <div class="pc-page" id="pc-learn">
+          <div class="pc-section-title"><div class="bar amber"></div><h2>学习园地</h2></div>
+          <div class="grid-3">
+            <div class="db-card" style="text-align:center;cursor:pointer" onclick="showToast('正在跳转特智汇学习平台...')">
+              <div style="font-size:40px;margin-bottom:12px">📚</div>
+              <h3>文化天地</h3>
+              <p style="font-size:13px;color:var(--t2)">特智汇课程/培训</p>
+            </div>
+            <div class="db-card" style="text-align:center;cursor:pointer" onclick="showToast('安全管理部发布安全知识内容')">
+              <div style="font-size:40px;margin-bottom:12px">🛡️</div>
+              <h3>安全小红书</h3>
+              <p style="font-size:13px;color:var(--t2)">安全知识/操作流程</p>
+            </div>
+            <div class="db-card" style="text-align:center;cursor:pointer" onclick="showToast('行政流程/办公指引/FAQ')">
+              <div style="font-size:40px;margin-bottom:12px">🧭</div>
+              <h3>行政服务指南</h3>
+              <p style="font-size:13px;color:var(--t2)">流程指引·FAQ</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC 互动服务 -->
+        <div class="pc-page" id="pc-interact">
+          <div class="pc-section-title"><div class="bar green"></div><h2>互动服务</h2></div>
+          <div class="db-card">
+            <div class="db-header"><h3>提案改善管理</h3><button class="btn btn-sm btn-p" onclick="showToast('提交新提案')"><i class="fas fa-plus"></i> 新提案</button></div>
+            <table>
+              <thead><tr><th>标题</th><th>提案人</th><th>类型</th><th>提交时间</th><th>当前状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>针车工序优化方案</td><td>张三</td><td>工艺优化</td><td>05-20</td><td><span class="badge badge-p1">待立项</span></td><td class="actions"><button class="btn-act-s">通过</button><button class="btn-act-d">驳回</button></td></tr>
+                <tr><td>包装线自动化改造</td><td>李四</td><td>合理化建议</td><td>05-21</td><td><span class="badge badge-p1">初审中</span></td><td class="actions"><button class="btn-act-s">通过</button><button class="btn-act-d">驳回</button></td></tr>
+                <tr><td>冲裁段降本方案</td><td>王五</td><td>降本增效</td><td>05-15</td><td><span class="badge badge-info">实施中</span></td><td class="actions"><button class="btn-act-p">跟进</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /pcView -->
+
+<!-- ============================== PORTAL VIEW ============================== -->
+<div class="view" id="portalView">
+  <div class="portal-layout">
+    <div class="portal-sidebar" id="portalSidebar">
+      <div class="logo"><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;font-style:italic;font-size:22px;letter-spacing:-1px;color:#60A5FA;line-height:1">XTEP</span><span style="font-size:14px;color:rgba(255,255,255,.3);font-weight:300;line-height:1">|</span><span style="font-weight:600;font-size:15px;line-height:1">制造资讯 · 管理门户</span></span><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:1px">特步 · 一站式管理平台</div></div>
+      <div class="nav-group">
+        <div class="g-label"><i class="fas fa-newspaper"></i> 资讯管理</div>
+        <button class="nav-item active" data-portal="portal-dashboard"><i class="fas fa-tachometer-alt"></i> 资讯总览</button>
+        <button class="nav-item" data-portal="portal-publish"><i class="fas fa-edit"></i> 内容发布管理</button>
+      </div>
+    </div>
+    <div class="portal-resizer" id="portalResizer"></div>
+    <div class="portal-main">
+      <div class="portal-header">
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="搜索公告、制度、提案..."></div>
+        <div class="user"><i class="fas fa-bell" style="color:var(--t2);cursor:pointer;position:relative" onclick="showToast('5条待审批公告')"><span style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--d);border-radius:50%"></span></i><div class="avatar">王</div><span>王小明 · 行政部</span></div>
+      </div>
+      <div class="portal-content" id="portalContent">
+
+        <div class="portal-page active" id="portal-dashboard">
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">128</div><div class="label">累计公告</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">5</div><div class="label">待审批公告</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--s)">45</div><div class="label">提案总数</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#7C3AED">8</div><div class="label">待处理提案</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="db-card">
+              <div class="db-header"><h3>内容发布趋势</h3></div>
+              <div style="display:flex;align-items:flex-end;gap:24px;height:160px;padding-top:20px">
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:60px;border-radius:8px 8px 0 0;width:100%"><span style="display:block;padding-top:8px;font-weight:600;color:var(--p)">12</span></div><span style="font-size:11px;color:var(--t2);display:block;margin-top:4px">1月</span></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:80px;border-radius:8px 8px 0 0;width:100%"><span style="display:block;padding-top:8px;font-weight:600;color:var(--p)">18</span></div><span style="font-size:11px;color:var(--t2);display:block;margin-top:4px">2月</span></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:95px;border-radius:8px 8px 0 0;width:100%"><span style="display:block;padding-top:8px;font-weight:600;color:var(--p)">22</span></div><span style="font-size:11px;color:var(--t2);display:block;margin-top:4px">3月</span></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:110px;border-radius:8px 8px 0 0;width:100%"><span style="display:block;padding-top:8px;font-weight:600;color:var(--p)">30</span></div><span style="font-size:11px;color:var(--t2);display:block;margin-top:4px">4月</span></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--p);height:140px;border-radius:8px 8px 0 0;width:100%"><span style="display:block;padding-top:8px;font-weight:600;color:#fff">46</span></div><span style="font-size:11px;color:var(--t2);display:block;margin-top:4px">5月</span></div>
+              </div>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>公告已读率</h3></div>
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>五一放假安排</span><span>64%</span></div>
+                  <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden"><div style="height:100%;width:64%;background:var(--p);border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>安全生产月通知</span><span>48%</span></div>
+                  <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden"><div style="height:100%;width:48%;background:#D97706;border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>车间安全管理通知</span><span>72%</span></div>
+                  <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden"><div style="height:100%;width:72%;background:var(--s);border-radius:3px"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>夜班补贴调整</span><span>35%</span></div>
+                  <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden"><div style="height:100%;width:35%;background:var(--d);border-radius:3px"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-page" id="portal-publish">
+          <div class="pc-section-title"><div class="bar"></div><h2>内容发布管理</h2></div>
+          <div class="grid-2">
+            <div class="db-card">
+              <div class="db-header"><h3>发布公告</h3></div>
+              <div class="form-group"><label>标题</label><input class="form-control" placeholder="请输入公告标题"></div>
+              <div class="form-group"><label>分类</label><select class="form-control"><option>行政通知</option><option>安全管理</option><option>生产运营</option></select></div>
+              <div class="form-group"><label>投放范围</label><select class="form-control"><option>泉州园区全员</option><option>按部门指定</option></select></div>
+              <div class="form-group"><label>正文</label><textarea class="form-control" rows="4" placeholder="支持富文本编辑..."></textarea></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline">存草稿</button>
+                <button class="btn btn-p" onclick="showToast('公告已提交审批')">发布</button>
+              </div>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>待审批公告</h3></div>
+              <table>
+                <thead><tr><th>标题</th><th>提交人</th><th>时间</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td>安全生产月通知</td><td>赵六</td><td>05-18</td><td class="actions"><button class="btn-act-s">通过</button><button class="btn-act-d">驳回</button></td></tr>
+                  <tr><td>夏季工服发放通知</td><td>钱七</td><td>05-12</td><td class="actions"><button class="btn-act-s">通过</button><button class="btn-act-d">驳回</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /portalView -->
+
+<script>
+// ===== View Switching =====
+document.querySelectorAll('.vs button[data-view]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.vs button[data-view]').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active');
+    var v=b.getAttribute('data-view');
+    document.getElementById('mobileView').style.display='none';
+    document.getElementById('pcView').style.display='none';
+    document.getElementById('portalView').style.display='none';
+    if(v==='mobile') document.getElementById('mobileView').style.display='flex';
+    if(v==='pc') document.getElementById('pcView').style.display='block';
+    if(v==='portal') document.getElementById('portalView').style.display='block';
+  });
+});
+document.getElementById('mobileView').style.display='flex';
+
+// ===== Mobile Navigation =====
+var mStack=['mp-zx-index'];
+function mNav(id){
+  var cur=document.querySelector('.m-page.active');
+  if(cur){cur.classList.remove('active');mStack.push(id);}
+  var next=document.getElementById(id);
+  if(next){next.classList.add('active')}
+  updateMTitle(id);
+  updateMBack();
+  updateBottomNav(id);
+}
+
+function mGoBack(){
+  if(mStack.length<=1)return;
+  document.querySelector('.m-page.active').classList.remove('active');
+  mStack.pop();
+  var prev=mStack[mStack.length-1];
+  var el=document.getElementById(prev);
+  if(el){el.classList.add('active')}
+  updateMTitle(prev);
+  updateMBack();
+  updateBottomNav(prev);
+}
+
+function updateMTitle(id){
+  var map={
+    'mp-zx-index':'制造资讯','mp-zx-gg-index':'公告制度','mp-zx-gg-list':'公告列表','mp-zx-gg-detail':'公告详情','mp-zx-gg-publish':'发布公告',
+    'mp-zx-zd-list':'制度文件','mp-zx-zd-detail':'制度详情',
+    'mp-zx-xx-index':'学习园地','mp-zx-xx-culture':'文化天地','mp-zx-xx-safety':'安全小红书','mp-zx-xx-safety-detail':'安全知识','mp-zx-xx-guide':'行政服务指南',
+    'mp-zx-hd-index':'互动服务','mp-zx-hd-proposal':'提案改善','mp-zx-hd-proposal-new':'提交提案','mp-zx-hd-proposal-detail':'提案详情','mp-zx-hd-it':'IT服务'
+  };
+  document.getElementById('mTitle').textContent=map[id]||'制造资讯';
+}
+
+function updateMBack(){
+  var back=document.getElementById('mBack');
+  back.style.visibility=mStack.length<=1?'hidden':'visible';
+}
+
+function updateBottomNav(id){
+  var tabs=document.querySelectorAll('.bottom-nav .tab');
+  tabs.forEach(function(t){t.classList.remove('active')});
+  var map={'mp-zx-index':0,'mp-zx-gg-index':1,'mp-zx-gg-list':1,'mp-zx-gg-detail':1,'mp-zx-gg-publish':1,'mp-zx-zd-list':1,'mp-zx-zd-detail':1,'mp-zx-xx-index':2,'mp-zx-xx-culture':2,'mp-zx-xx-safety':2,'mp-zx-xx-safety-detail':2,'mp-zx-xx-guide':2,'mp-zx-hd-index':3,'mp-zx-hd-proposal':3,'mp-zx-hd-proposal-new':3,'mp-zx-hd-proposal-detail':3,'mp-zx-hd-it':3};
+  var idx=map[id];
+  if(idx!==undefined&&tabs[idx]){tabs[idx].classList.add('active')}
+}
+
+// ===== PC Navigation =====
+function pcNav(id,btn){
+  document.querySelectorAll('.pc-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(id);
+  if(el){el.classList.add('active')}
+  document.querySelectorAll('.pc-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  if(btn){btn.classList.add('active')}
+  var crumbs={'pc-dashboard':'工作台','pc-notice':'公告制度','pc-learn':'学习园地','pc-interact':'互动服务'};
+  document.getElementById('pcCrumb').textContent=crumbs[id]||'';
+}
+
+// ===== Portal Navigation =====
+function portalNav(pageId){
+  document.querySelectorAll('.portal-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(pageId);if(el){el.classList.add('active')}
+  document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  var nav=document.querySelector('.portal-sidebar .nav-item[data-portal="'+pageId+'"]');
+  if(nav) nav.classList.add('active');
+}
+document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(item){
+  item.addEventListener('click',function(){portalNav(this.dataset.portal)});
+});
+
+// ===== Mobile Tab Switching =====
+function switchMTab(tab,contentId){
+  var parent=tab.parentElement;
+  parent.querySelectorAll('.m-tab').forEach(function(t){t.classList.remove('active')});
+  tab.classList.add('active');
+  var container=tab.closest('.m-page')||tab.closest('.pc-content');
+  if(!container)return;
+  container.querySelectorAll('.m-tab-content').forEach(function(c){c.classList.remove('active')});
+  var c=document.getElementById(contentId);
+  if(c){c.classList.add('active')}
+}
+
+// ===== Category Tag Switching =====
+function switchCat(tag){
+  var parent=tag.parentElement;
+  parent.querySelectorAll('.cat-tag').forEach(function(t){t.classList.remove('active')});
+  tag.classList.add('active');
+}
+
+// ===== Toast =====
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show')},2000);
+}
+
+// ===== Share =====
+function shareProto(){
+  var url=window.location.href;
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){showToast('链接已复制到剪贴板！')})}
+  else{showToast('分享链接：'+url)}
+}
+
+// ===== PC Sidebar Resizer =====
+(function(){
+  var sb=document.getElementById('pcSidebar'),rz=document.getElementById('pcResizer'),dragging=false,startX,startW;
+  rz.addEventListener('mousedown',function(e){dragging=true;startX=e.clientX;startW=sb.offsetWidth;rz.classList.add('active');e.preventDefault()});
+  document.addEventListener('mousemove',function(e){if(!dragging)return;var w=Math.max(160,Math.min(400,startW+e.clientX-startX));sb.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging){dragging=false;rz.classList.remove('active')}});
+})();
+
+// ===== Portal Sidebar Resizer =====
+(function(){
+  var sb=document.getElementById('portalSidebar'),rz=document.getElementById('portalResizer'),dragging=false,startX,startW;
+  rz.addEventListener('mousedown',function(e){dragging=true;startX=e.clientX;startW=sb.offsetWidth;rz.classList.add('active');e.preventDefault()});
+  document.addEventListener('mousemove',function(e){if(!dragging)return;var w=Math.max(180,Math.min(400,startW+e.clientX-startX));sb.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging){dragging=false;rz.classList.remove('active')}});
+})();
+</script>
+<script>
+(function() {
+  if (window.self === window.top) return;
+  var style = document.createElement('style');
+  style.textContent = '.phone>.status-bar,.phone>.app-header{display:none!important}.phone{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;margin:0!important;padding:0!important}.phone>.page-content{padding:0!important;margin:0!important}.phone>.bottom-nav{flex-shrink:0}';
+  document.head.appendChild(style);
+  var vsBar = document.querySelector('.vs');
+  if (vsBar) vsBar.style.display = 'none';
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.style.height = '100vh';
+    v.style.marginTop = '0';
+  });
+  function applyView(view) {
+    var mv = document.getElementById('mobileView');
+    var pv = document.getElementById('pcView');
+    var pv2 = document.getElementById('portalView');
+    if (mv) mv.style.display = 'none';
+    if (pv) pv.style.display = 'none';
+    if (pv2) pv2.style.display = 'none';
+    if (view === 'mobile' && mv) mv.style.display = 'flex';
+    else if (view === 'pc' && pv) pv.style.display = 'block';
+    else if (view === 'portal' && pv2) pv2.style.display = 'block';
+  }
+  var hash = window.location.hash.replace('#', '');
+  if (hash && ['mobile','pc','portal'].indexOf(hash) >= 0) {
+    applyView(hash);
+  }
+  window.addEventListener('message', function(e) {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === 'switchView' && e.data.view) {
+      applyView(e.data.view);
+    }
+    if (e.data.type === 'goBack') {
+      if (typeof mStack !== 'undefined' && mStack.length > 1) {
+        if (typeof mGoBack === 'function') mGoBack();
+      } else {
+        window.parent.postMessage({ type: 'closeModule' }, '*');
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

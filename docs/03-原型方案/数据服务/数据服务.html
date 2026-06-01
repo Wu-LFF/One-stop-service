@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据服务 — 原型方案</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--p:#0891B2;--pd:#0E7490;--pl:#ECFEFF;--xp:#E60012;--xpd:#CC0010;--xpl:#FFE8EA;--s:#34A853;--w:#FBBC04;--d:#EA4335;--di:#FEE8E8;--bg:#F5F7FA;--cd:#FFF;--t1:#1F2937;--t2:#6B7280;--bd:#E5E7EB;--sd:0 2px 12px rgba(0,0,0,.08);--r:12px;--r-sm:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;--trans:all .3s cubic-bezier(.4,0,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#E8ECF1;color:var(--t1);overflow:hidden;height:100vh}
+.vs{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;align-items:center;justify-content:center;gap:4px;background:#1F2937;padding:8px 16px;height:48px}
+.vs button{padding:6px 16px;border:none;background:transparent;color:#9CA3AF;font-size:13px;cursor:pointer;border-radius:6px;font-family:var(--font);transition:var(--trans)}
+.vs button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.vs button.active{color:#fff;background:var(--p)}
+.vs .vs-title{color:#fff;font-size:14px;font-weight:600;margin-right:auto}
+.vs .vs-share{background:var(--s);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;border:none;cursor:pointer;font-family:var(--font);margin-left:auto;transition:var(--trans)}
+.vs .vs-share:hover{opacity:.85}
+.view{display:none;width:100%;height:calc(100vh - 48px);margin-top:48px;position:relative}
+#mobileView{display:none;justify-content:center;align-items:center;background:#E8ECF1;padding:20px}
+#mobileView .phone{width:380px;height:780px;background:var(--bg);border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.phone .status-bar{height:44px;background:var(--p);display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#fff;font-size:12px;font-weight:600;flex-shrink:0}
+.phone .app-header{height:48px;background:var(--p);display:flex;align-items:center;padding:0 16px;color:#fff;flex-shrink:0;position:relative}
+.phone .app-header .back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;transition:var(--trans);font-size:18px;border:none;color:#fff;background:transparent}
+.phone .app-header .back:hover{background:rgba(255,255,255,.15)}
+.phone .app-header .title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.phone .app-header .right{width:36px}
+.phone .page-content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.phone .page-content::-webkit-scrollbar{width:0}
+.m-page{display:none;padding:16px;animation:mFadeIn .35s ease}
+.m-page.active{display:block}
+@keyframes mFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.phone .bottom-nav{height:56px;background:#fff;border-top:1px solid var(--bd);display:flex;flex-shrink:0;width:100%}
+.phone .bottom-nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--t2);cursor:pointer;transition:var(--trans);gap:2px;border:none;background:none;font-family:var(--font)}
+.phone .bottom-nav .tab i{font-size:20px;transition:var(--trans)}
+.phone .bottom-nav .tab.active{color:var(--p)}
+.phone .bottom-nav .tab:hover{color:var(--p)}
+#pcView{display:none}
+.pc-layout{display:flex;height:100%;background:var(--bg)}
+.pc-sidebar{width:240px;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;min-width:160px}
+.pc-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.pc-resizer:hover,.pc-resizer.active{background:var(--p)}
+.pc-resizer::after{content:"";position:absolute;inset:0 -4px}
+.pc-sidebar .logo{padding:20px 20px 16px;font-size:18px;font-weight:700;color:var(--p);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)}
+.pc-sidebar .logo i{font-size:24px}
+.pc-sidebar .nav-group{padding:12px 0}
+.pc-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.pc-sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--t1);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.pc-sidebar .nav-item i{width:20px;text-align:center;color:var(--t2);font-size:16px;transition:var(--trans)}
+.pc-sidebar .nav-item:hover{background:var(--pl);color:var(--p)}
+.pc-sidebar .nav-item:hover i{color:var(--p)}
+.pc-sidebar .nav-item.active{background:var(--pl);color:var(--p);font-weight:600}
+.pc-sidebar .nav-item.active i{color:var(--p)}
+.pc-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.pc-header{height:60px;background:#fff;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.pc-header .bc{font-size:14px;color:var(--t2)}
+.pc-header .bc span{color:var(--t1);font-weight:500}
+.pc-header .user{display:flex;align-items:center;gap:12px;font-size:14px}
+.pc-header .user .avatar{width:32px;height:32px;border-radius:50%;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.pc-content{flex:1;overflow-y:auto;padding:24px;position:relative}
+.pc-content::-webkit-scrollbar{width:6px}
+.pc-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+#portalView{display:none}
+.portal-layout{display:flex;height:100%}
+.portal-sidebar{width:260px;background:linear-gradient(180deg,#1F2937 0%,#111827 100%);display:flex;flex-direction:column;flex-shrink:0;min-width:180px}
+.portal-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.portal-resizer:hover,.portal-resizer.active{background:#60A5FA}
+.portal-resizer::after{content:"";position:absolute;inset:0 -4px}
+.portal-sidebar .logo{padding:20px 20px 16px;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.portal-sidebar .logo i{font-size:22px;color:#60A5FA}
+.portal-sidebar .nav-group{padding:16px 0}
+.portal-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.portal-sidebar .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.7);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.portal-sidebar .nav-item i{width:20px;text-align:center;font-size:16px}
+.portal-sidebar .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.portal-sidebar .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-right:3px solid #60A5FA;font-weight:500}
+.portal-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F0F2F5;min-width:400px}
+.portal-header{height:60px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;z-index:10}
+.portal-header .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);padding:8px 16px;border-radius:8px;width:320px}
+.portal-header .search-box i{color:var(--t2)}
+.portal-header .search-box input{border:none;background:none;outline:none;font-size:14px;width:100%;font-family:var(--font)}
+.portal-header .user{display:flex;align-items:center;gap:16px}
+.portal-header .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.portal-content{flex:1;overflow-y:auto;padding:24px}
+.portal-content::-webkit-scrollbar{width:6px}
+.portal-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.card{background:var(--cd);border-radius:var(--r);padding:20px;box-shadow:var(--sd);transition:var(--trans)}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.badge-p0{background:var(--di);color:var(--d)}
+.badge-p1{background:#FEF3C7;color:#D97706}
+.badge-s{background:#DCFCE7;color:#16A34A}
+.badge-info{background:var(--pl);color:var(--p)}
+.btn{padding:10px 24px;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:500;cursor:pointer;transition:var(--trans);font-family:var(--font)}
+.btn-p{background:var(--p);color:#fff}
+.btn-p:hover{background:var(--pd);transform:translateY(-1px);box-shadow:0 4px 12px rgba(8,145,178,.3)}
+.btn-outline{background:transparent;border:1px solid var(--bd);color:var(--t1)}
+.btn-outline:hover{border-color:var(--p);color:var(--p)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-block{width:100%}
+.stat-card{text-align:center;padding:16px}
+.stat-card .num{font-size:28px;font-weight:700;color:var(--t1)}
+.stat-card .label{font-size:13px;color:var(--t2);margin-top:4px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.db-card{background:#fff;border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:var(--trans)}
+.db-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.db-card .db-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.db-card .db-header h3{font-size:16px;font-weight:600}
+.db-card .db-header a{font-size:13px;color:var(--p);text-decoration:none;cursor:pointer}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+table th{text-align:left;padding:10px 12px;font-weight:600;color:var(--t2);font-size:12px;border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.3px}
+table td{padding:12px 12px;border-bottom:1px solid var(--bd)}
+table tr:hover td{background:#FAFBFC}
+.pc-page{display:none;animation:pcIn .4s ease}
+.pc-page.active{display:block}
+@keyframes pcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.portal-page{display:none;animation:portalIn .4s ease}
+.portal-page.active{display:block}
+@keyframes portalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu-card{background:var(--cd);border-radius:var(--r);padding:20px 12px;text-align:center;box-shadow:var(--sd);cursor:pointer;transition:var(--trans);border:2px solid transparent}
+.menu-card:hover{border-color:var(--p);transform:translateY(-2px)}
+.menu-card .icon{font-size:32px;margin-bottom:8px;display:block}
+.menu-card .name{font-size:14px;font-weight:600}
+.menu-card .desc{font-size:11px;color:var(--t2);margin-top:2px}
+.stat-row{display:flex;gap:8px;margin-bottom:12px}
+.stat-box{flex:1;text-align:center;padding:12px 6px;background:var(--cd);border-radius:8px;box-shadow:var(--sd)}
+.stat-box .num{font-size:20px;font-weight:700}
+.stat-box .lbl{font-size:11px;color:var(--t2);margin-top:2px}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{background:#F8FAFC;padding:10px 12px;text-align:left;font-weight:600;color:var(--t2);border-bottom:2px solid var(--bd)}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--bd)}
+.data-table tr:hover td{background:#F8FAFC}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:#1F2937;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;opacity:0;transition:all .5s ease;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.pc-section-title{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.pc-section-title .bar{width:4px;height:22px;border-radius:2px;background:var(--p);flex-shrink:0}
+.pc-section-title .bar.green{background:var(--s)}
+.pc-section-title .bar.amber{background:var(--w)}
+.pc-section-title h2{font-size:20px;font-weight:700}
+.sc-list{display:flex;flex-direction:column;gap:10px}
+.sc-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--cd);border-radius:var(--r);box-shadow:var(--sd);cursor:pointer;border:2px solid transparent;transition:var(--trans)}
+.sc-item:hover{border-color:var(--p)}
+.sc-item .sc-avatar{width:40px;height:40px;border-radius:50%;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0}
+.sc-item .sc-info{flex:1;min-width:0}
+.sc-item .sc-info .sc-name{font-size:14px;font-weight:500}
+.sc-item .sc-info .sc-meta{font-size:12px;color:var(--t2);margin-top:2px;display:flex;gap:16px}
+.sc-item .sc-arrow{color:var(--t2)}
+/* Chart simulations */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:8px}
+.bar-col{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bar-col .bar-val{font-size:10px;color:var(--t2);margin-bottom:2px}
+.bar-col .bar{width:100%;max-width:32px;border-radius:4px 4px 0 0;min-height:4px;transition:var(--trans)}
+.bar-col .bar.cyan{background:linear-gradient(180deg,#22D3EE,#0891B2)}
+.bar-col .bar.green{background:linear-gradient(180deg,#4ADE80,#16A34A)}
+.bar-col .bar.amber{background:linear-gradient(180deg,#FBBF24,#D97706)}
+.bar-label{font-size:10px;color:var(--t2);margin-top:4px}
+.h-bar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.h-bar .h-label{width:60px;font-size:12px;text-align:right;flex-shrink:0}
+.h-bar .h-track{flex:1;height:16px;background:#F3F4F6;border-radius:8px;overflow:hidden}
+.h-bar .h-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:8px;font-size:10px;color:#fff;font-weight:600}
+.h-bar .h-fill.cyan{background:linear-gradient(90deg,#22D3EE,#0891B2)}
+.h-bar .h-fill.green{background:linear-gradient(90deg,#4ADE80,#16A34A)}
+.h-bar .h-fill.amber{background:linear-gradient(90deg,#FBBF24,#D97706)}
+.h-bar .h-val{font-size:12px;color:var(--t2);width:36px;flex-shrink:0}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi-card{background:var(--cd);border-radius:var(--r-sm);padding:14px;text-align:center;box-shadow:var(--sd);position:relative;overflow:hidden}
+.kpi-card .kpi-num{font-size:24px;font-weight:700}
+.kpi-card .kpi-label{font-size:11px;color:var(--t2);margin-top:2px}
+.kpi-card .kpi-change{font-size:10px;margin-top:2px}
+.kpi-card .kpi-change.up{color:var(--s)}
+.kpi-card .kpi-change.down{color:var(--d)}
+.calendar{width:100%}
+.calendar .cal-header{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:var(--t2);margin-bottom:4px;font-weight:600}
+.calendar .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.calendar .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:50%;cursor:pointer;transition:var(--trans)}
+.calendar .cal-day.ok{background:#DCFCE7;color:#16A34A}
+.calendar .cal-day.leave{background:#FEF3C7;color:#D97706}
+.calendar .cal-day.absent{background:var(--di);color:var(--d)}
+.calendar .cal-day.future{color:var(--t2)}
+.donut-sim{width:100px;height:100px;border-radius:50%;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center}
+.donut-sim .donut-inner{width:60px;height:60px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.trend-up{color:var(--s)}
+.trend-down{color:var(--d)}
+.rank-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.rank-item .rank-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.rank-item .rank-num.top1{background:#FEF3C7;color:#D97706}
+.rank-item .rank-num.top2{background:#F3F4F6;color:var(--t2)}
+.rank-item .rank-num.top3{background:#FDE8E0;color:#C2410C}
+.rank-item .rank-info{flex:1;min-width:0}
+.rank-item .rank-info .rank-name{font-size:13px;font-weight:500}
+.rank-item .rank-val{font-size:14px;font-weight:600}
+@media(max-width:768px){.vs .vs-title{display:none}#mobileView .phone{width:100%;height:100%;border-radius:0}}
+</style>
+</head>
+<body>
+
+<div class="vs" id="viewSwitcher">
+  <span class="vs-title"><i class="fas fa-chart-pie"></i> 数据服务 · 原型</span>
+  <button class="active" data-view="mobile"><i class="fas fa-mobile-alt"></i> 手机端</button>
+  <button data-view="pc"><i class="fas fa-desktop"></i> 电脑端</button>
+  <button data-view="portal"><i class="fas fa-shield-alt"></i> 管理门户</button>
+  <button class="vs-share" onclick="shareProto()"><i class="fas fa-share-alt"></i> 分享</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================== MOBILE VIEW ============================== -->
+<div class="view" id="mobileView">
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span style="font-weight:800;letter-spacing:.5px;font-size:11px">XTEP 特步</span><span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-full"></i></span></div>
+    <div class="app-header"><button class="back" id="mBack" onclick="mGoBack()" style="visibility:hidden"><i class="fas fa-chevron-left"></i></button><span class="title" id="mTitle">数据服务</span><span class="right"></span></div>
+    <div class="page-content" id="mContent">
+
+      <!-- ====== 数据服务首页 ====== -->
+      <div class="m-page active" id="mp-sj-index">
+        <div style="background:linear-gradient(135deg,var(--p),#155E75);color:#fff;border-radius:var(--r);padding:20px;margin-bottom:20px">
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px"><i class="fas fa-chart-pie"></i> 数据服务</div>
+          <div style="font-size:13px;opacity:.9;line-height:1.6">个人·团队·运营数据看板<br>系统自动采集，实时可视化</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-sj-gr-index')" style="border-color:#ECFEFF">
+            <span class="icon" style="background:var(--pl);color:var(--p);border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-chart-line"></i></span>
+            <div class="name">个人看板</div><div class="desc">考勤·工资·报工</div>
+          </div>
+          <div class="menu-card" onclick="mNav('mp-sj-td-index')" style="border-color:#FEF3E2">
+            <span class="icon" style="background:#FEF3E2;color:#D97706;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-chart-bar"></i></span>
+            <div class="name">团队看板</div><div class="desc">班组·部门数据</div>
+          </div>
+          <div class="menu-card" onclick="mNav('mp-sj-yy-index')" style="border-color:#F3F0FF">
+            <span class="icon" style="background:#F3F0FF;color:#7C3AED;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-chart-pie"></i></span>
+            <div class="name">运营分析</div><div class="desc">园区总览·趋势</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title">📊 我的数据快照</div>
+          <div class="stat-row">
+            <div class="stat-box"><div class="num" style="color:var(--p)">21</div><div class="lbl">本月出勤(天)</div></div>
+            <div class="stat-box"><div class="num" style="color:#16A34A">¥5,150</div><div class="lbl">实发工资</div></div>
+            <div class="stat-box"><div class="num" style="color:#D97706">22,000</div><div class="lbl">月产量(件)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 个人看板首页 ====== -->
+      <div class="m-page" id="mp-sj-gr-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">数据服务</div>
+          <div style="font-size:20px;font-weight:700">个人看板</div>
+        </div>
+        <div class="sc-list">
+          <div class="sc-item" onclick="mNav('mp-sj-gr-kq')">
+            <div class="sc-avatar"><i class="fas fa-calendar-check"></i></div>
+            <div class="sc-info"><div class="sc-name">我的考勤</div><div class="sc-meta">本月出勤 21天 · 出勤率 95.5%</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-sj-gr-gz')">
+            <div class="sc-avatar" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-coins"></i></div>
+            <div class="sc-info"><div class="sc-name">我的工资</div><div class="sc-meta">本月实发 ¥5,150.00</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-sj-gr-bg')">
+            <div class="sc-avatar" style="background:#FEF3E2;color:#D97706"><i class="fas fa-industry"></i></div>
+            <div class="sc-info"><div class="sc-name">我的报工</div><div class="sc-meta">本月完成 22,000件 · 日均 1,048件</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 个人考勤数据 ====== -->
+      <div class="m-page" id="mp-sj-gr-kq">
+        <div class="kpi-grid" style="margin-bottom:16px">
+          <div class="kpi-card"><div class="kpi-num" style="color:var(--p)">22</div><div class="kpi-label">应出勤(天)</div></div>
+          <div class="kpi-card"><div class="kpi-num" style="color:#16A34A">21</div><div class="kpi-label">实际出勤(天)</div></div>
+          <div class="kpi-card"><div class="kpi-num" style="color:#D97706">1</div><div class="kpi-label">请假(天)</div></div>
+          <div class="kpi-card"><div class="kpi-num" style="color:var(--d)">0</div><div class="kpi-label">旷工(天)</div></div>
+          <div class="kpi-card"><div class="kpi-num">0</div><div class="kpi-label">迟到(次)</div></div>
+          <div class="kpi-card"><div class="kpi-num">0</div><div class="kpi-label">早退(次)</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">出勤日历 · 2026年5月</div>
+          <div class="calendar">
+            <div class="cal-header"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+            <div class="cal-grid">
+              <span class="cal-day future">1</span><span class="cal-day future">2</span><span class="cal-day future">3</span><span class="cal-day ok">4</span><span class="cal-day ok">5</span><span class="cal-day future" style="color:#CBD5E1">6</span><span class="cal-day future" style="color:#CBD5E1">7</span>
+              <span class="cal-day ok">8</span><span class="cal-day ok">9</span><span class="cal-day ok">10</span><span class="cal-day ok">11</span><span class="cal-day ok">12</span><span class="cal-day future" style="color:#CBD5E1">13</span><span class="cal-day future" style="color:#CBD5E1">14</span>
+              <span class="cal-day ok">15</span><span class="cal-day ok">16</span><span class="cal-day ok">17</span><span class="cal-day ok">18</span><span class="cal-day leave">19</span><span class="cal-day future" style="color:#CBD5E1">20</span><span class="cal-day future" style="color:#CBD5E1">21</span>
+              <span class="cal-day ok" style="background:var(--pl);color:var(--p);font-weight:700">22</span><span class="cal-day future">23</span><span class="cal-day future">24</span><span class="cal-day future">25</span><span class="cal-day future">26</span><span class="cal-day future" style="color:#CBD5E1">27</span><span class="cal-day future" style="color:#CBD5E1">28</span>
+              <span class="cal-day future">29</span><span class="cal-day future">30</span><span class="cal-day future">31</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--t2)"><span>🟢 出勤</span><span>🟡 请假</span><span>🔴 缺勤</span><span>⚪ 未到</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">出勤率趋势（近6月）</div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-val">96%</div><div class="bar cyan" style="height:86px"></div><div class="bar-label">12月</div></div>
+            <div class="bar-col"><div class="bar-val">94%</div><div class="bar cyan" style="height:82px"></div><div class="bar-label">1月</div></div>
+            <div class="bar-col"><div class="bar-val">97%</div><div class="bar cyan" style="height:88px"></div><div class="bar-label">2月</div></div>
+            <div class="bar-col"><div class="bar-val">98%</div><div class="bar cyan" style="height:92px"></div><div class="bar-label">3月</div></div>
+            <div class="bar-col"><div class="bar-val">95%</div><div class="bar cyan" style="height:84px"></div><div class="bar-label">4月</div></div>
+            <div class="bar-col"><div class="bar-val" style="color:var(--p);font-weight:700">95.5%</div><div class="bar" style="height:85px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">5月</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 个人工资数据 ====== -->
+      <div class="m-page" id="mp-sj-gr-gz">
+        <div class="card" style="text-align:center;margin-bottom:12px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">2026年5月 · 实发工资</div>
+          <div style="font-size:36px;font-weight:700;color:var(--p)">¥5,150.00</div>
+          <div style="font-size:12px;color:var(--s);margin-top:4px"><i class="fas fa-arrow-up"></i> 较上月 +¥320</div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">工资构成</div>
+          <div class="donut-sim" style="background:conic-gradient(#0891B2 0% 59%, #34A853 59% 82%, #FBBC04 82% 100%);margin-bottom:12px">
+            <div class="donut-inner">计件59%</div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:16px;font-size:12px;margin-bottom:8px">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--p);margin-right:4px"></span>计件 59%</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--s);margin-right:4px"></span>奖金 23%</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--w);margin-right:4px"></span>津贴 18%</span>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <table class="data-table">
+            <thead><tr><th>项目</th><th style="text-align:right">金额(元)</th></tr></thead>
+            <tbody>
+              <tr><td>基本工资</td><td style="text-align:right">3,000.00</td></tr>
+              <tr><td>岗位津贴</td><td style="text-align:right">500.00</td></tr>
+              <tr style="font-weight:600"><td>计件工资</td><td style="text-align:right;color:var(--p)">5,100.00</td></tr>
+              <tr style="background:#F8FAFC;font-weight:700"><td>应发合计</td><td style="text-align:right">8,600.00</td></tr>
+              <tr><td>社保</td><td style="text-align:right;color:var(--d)">-450.00</td></tr>
+              <tr><td>公积金</td><td style="text-align:right;color:var(--d)">-200.00</td></tr>
+              <tr style="background:#F8FAFC;font-weight:700"><td>实发合计</td><td style="text-align:right;font-size:16px;color:var(--p)">5,150.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">近6月工资趋势</div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-val">4,800</div><div class="bar cyan" style="height:72px"></div><div class="bar-label">12月</div></div>
+            <div class="bar-col"><div class="bar-val">4,650</div><div class="bar cyan" style="height:68px"></div><div class="bar-label">1月</div></div>
+            <div class="bar-col"><div class="bar-val">5,200</div><div class="bar cyan" style="height:78px"></div><div class="bar-label">2月</div></div>
+            <div class="bar-col"><div class="bar-val">4,900</div><div class="bar cyan" style="height:74px"></div><div class="bar-label">3月</div></div>
+            <div class="bar-col"><div class="bar-val">4,830</div><div class="bar cyan" style="height:73px"></div><div class="bar-label">4月</div></div>
+            <div class="bar-col"><div class="bar-val" style="color:var(--p);font-weight:700">5,150</div><div class="bar" style="height:80px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">5月</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 个人报工统计 ====== -->
+      <div class="m-page" id="mp-sj-gr-bg">
+        <div class="kpi-grid" style="margin-bottom:16px">
+          <div class="kpi-card"><div class="kpi-num" style="color:var(--p)">22,000</div><div class="kpi-label">月产量(件)</div></div>
+          <div class="kpi-card"><div class="kpi-num">176h</div><div class="kpi-label">月工时</div></div>
+          <div class="kpi-card"><div class="kpi-num">1,048</div><div class="kpi-label">日均产量(件)</div></div>
+          <div class="kpi-card"><div class="kpi-num" style="color:var(--s)">21</div><div class="kpi-label">工作天数</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">工序分布</div>
+          <div class="h-bar"><span class="h-label">针车支流</span><div class="h-track"><div class="h-fill cyan" style="width:72%">72%</div></div><span class="h-val">15,840件</span></div>
+          <div class="h-bar"><span class="h-label">冲裁段</span><div class="h-track"><div class="h-fill green" style="width:28%">28%</div></div><span class="h-val">6,160件</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">近21天日报工趋势</div>
+          <div class="bar-chart" style="height:90px">
+            <div class="bar-col"><div class="bar" style="height:62px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">1</div></div>
+            <div class="bar-col"><div class="bar" style="height:52px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">3</div></div>
+            <div class="bar-col"><div class="bar" style="height:68px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">5</div></div>
+            <div class="bar-col"><div class="bar" style="height:48px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">7</div></div>
+            <div class="bar-col"><div class="bar" style="height:72px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">9</div></div>
+            <div class="bar-col"><div class="bar" style="height:60px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">11</div></div>
+            <div class="bar-col"><div class="bar" style="height:65px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">13</div></div>
+            <div class="bar-col"><div class="bar" style="height:55px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">15</div></div>
+            <div class="bar-col"><div class="bar" style="height:70px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">17</div></div>
+            <div class="bar-col"><div class="bar" style="height:58px;background:linear-gradient(180deg,#22D3EE,#0891B2)"></div><div class="bar-label">19</div></div>
+            <div class="bar-col"><div class="bar" style="height:66px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">21</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 团队看板首页 ====== -->
+      <div class="m-page" id="mp-sj-td-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">数据服务</div>
+          <div style="font-size:20px;font-weight:700">团队看板</div>
+        </div>
+        <div class="sc-list">
+          <div class="sc-item" onclick="mNav('mp-sj-td-bz')">
+            <div class="sc-avatar"><i class="fas fa-users"></i></div>
+            <div class="sc-info"><div class="sc-name">班组数据</div><div class="sc-meta">针车一班 · 18人 · 今日产量 21,600件</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="mNav('mp-sj-td-bm')">
+            <div class="sc-avatar" style="background:#FEF3E2;color:#D97706"><i class="fas fa-building"></i></div>
+            <div class="sc-info"><div class="sc-name">部门数据</div><div class="sc-meta">制造一部 · 128人 · 月产量 652,800件</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 班组数据看板 ====== -->
+      <div class="m-page" id="mp-sj-td-bz">
+        <div style="margin-bottom:12px;font-size:13px;color:var(--t2)">针车一班 · 今日数据</div>
+        <div class="kpi-grid" style="margin-bottom:16px">
+          <div class="kpi-card" style="background:var(--pl)"><div class="kpi-num" style="color:var(--p)">21,600</div><div class="kpi-label">今日产量(件)</div></div>
+          <div class="kpi-card" style="background:#DCFCE7"><div class="kpi-num" style="color:#16A34A">18/18</div><div class="kpi-label">出勤人数</div></div>
+          <div class="kpi-card" style="background:#FEF3E2"><div class="kpi-num" style="color:#D97706">1,200</div><div class="kpi-label">人均产量(件)</div></div>
+          <div class="kpi-card" style="background:var(--di)"><div class="kpi-num" style="color:var(--d)">2</div><div class="kpi-label">待确认报工</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">成员报工排行</div>
+          <div class="rank-item"><span class="rank-num top1">1</span><div class="rank-info"><div class="rank-name">张三</div></div><span class="rank-val">1,200件</span></div>
+          <div class="rank-item"><span class="rank-num top2">2</span><div class="rank-info"><div class="rank-name">李四</div></div><span class="rank-val">1,150件</span></div>
+          <div class="rank-item"><span class="rank-num top3">3</span><div class="rank-info"><div class="rank-name">王五</div></div><span class="rank-val">980件</span></div>
+          <div class="rank-item"><span class="rank-num" style="background:#F3F4F6">4</span><div class="rank-info"><div class="rank-name">赵六</div></div><span class="rank-val">950件</span></div>
+          <div class="rank-item"><span class="rank-num" style="background:#F3F4F6">5</span><div class="rank-info"><div class="rank-name">钱七</div></div><span class="rank-val">920件</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">近7天产量趋势</div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-val">18k</div><div class="bar cyan" style="height:68px"></div><div class="bar-label">16</div></div>
+            <div class="bar-col"><div class="bar-val">19k</div><div class="bar cyan" style="height:72px"></div><div class="bar-label">17</div></div>
+            <div class="bar-col"><div class="bar-val">17k</div><div class="bar cyan" style="height:64px"></div><div class="bar-label">18</div></div>
+            <div class="bar-col"><div class="bar-val">20k</div><div class="bar cyan" style="height:76px"></div><div class="bar-label">19</div></div>
+            <div class="bar-col"><div class="bar-val">19k</div><div class="bar cyan" style="height:72px"></div><div class="bar-label">20</div></div>
+            <div class="bar-col"><div class="bar-val">21k</div><div class="bar cyan" style="height:80px"></div><div class="bar-label">21</div></div>
+            <div class="bar-col"><div class="bar-val" style="color:var(--p);font-weight:700">21.6k</div><div class="bar" style="height:88px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">22</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 部门数据看板 ====== -->
+      <div class="m-page" id="mp-sj-td-bm">
+        <div style="margin-bottom:12px;font-size:13px;color:var(--t2)">制造一部 · 本月数据</div>
+        <div class="kpi-grid" style="margin-bottom:16px">
+          <div class="kpi-card" style="background:var(--pl)"><div class="kpi-num" style="color:var(--p)">652,800</div><div class="kpi-label">总产量(件)</div></div>
+          <div class="kpi-card" style="background:#DCFCE7"><div class="kpi-num" style="color:#16A34A">128/135</div><div class="kpi-label">在岗人数</div></div>
+          <div class="kpi-card" style="background:#FEF3E2"><div class="kpi-num" style="color:#D97706">95.2%</div><div class="kpi-label">出勤率 <span class="trend-up">↑2.1%</span></div></div>
+          <div class="kpi-card" style="background:var(--di)"><div class="kpi-num" style="color:var(--d)">12</div><div class="kpi-label">异常笔数</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">班组产量排行</div>
+          <div class="h-bar"><span class="h-label">冲裁段</span><div class="h-track"><div class="h-fill cyan" style="width:100%">298,000</div></div><span class="h-val">1st</span></div>
+          <div class="h-bar"><span class="h-label">针车一班</span><div class="h-track"><div class="h-fill green" style="width:65%">192,400</div></div><span class="h-val">2nd</span></div>
+          <div class="h-bar"><span class="h-label">针车二班</span><div class="h-track"><div class="h-fill amber" style="width:55%">162,400</div></div><span class="h-val">3rd</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">各班组出勤率</div>
+          <div class="h-bar"><span class="h-label">冲裁段</span><div class="h-track"><div class="h-fill green" style="width:98%">98%</div></div><span class="h-val">98%</span></div>
+          <div class="h-bar"><span class="h-label">针车一班</span><div class="h-track"><div class="h-fill cyan" style="width:95%">95%</div></div><span class="h-val">95%</span></div>
+          <div class="h-bar"><span class="h-label">针车二班</span><div class="h-track"><div class="h-fill amber" style="width:92%">92%</div></div><span class="h-val">92%</span></div>
+        </div>
+      </div>
+
+      <!-- ====== 运营分析首页 ====== -->
+      <div class="m-page" id="mp-sj-yy-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">数据服务</div>
+          <div style="font-size:20px;font-weight:700">运营分析</div>
+        </div>
+        <div class="sc-list">
+          <div class="sc-item" onclick="mNav('mp-sj-yy-overview')">
+            <div class="sc-avatar" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-city"></i></div>
+            <div class="sc-info"><div class="sc-name">园区运营总览</div><div class="sc-meta">泉州园区 · 3大板块核心指标</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="showToast('人事数据详情：在职1,280人 · 本月入职18 · 离职3')">
+            <div class="sc-avatar"><i class="fas fa-user-tie"></i></div>
+            <div class="sc-info"><div class="sc-name">人事数据</div><div class="sc-meta">在职·流失·出勤率</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+          <div class="sc-item" onclick="showToast('生产数据详情：月产量652,800件 · 效率提升3.2%')">
+            <div class="sc-avatar" style="background:#FEF3E2;color:#D97706"><i class="fas fa-industry"></i></div>
+            <div class="sc-info"><div class="sc-name">生产数据</div><div class="sc-meta">产量·效率·异常</div></div><i class="fas fa-chevron-right sc-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 园区运营总览 ====== -->
+      <div class="m-page" id="mp-sj-yy-overview">
+        <div style="margin-bottom:12px;font-size:13px;color:var(--t2)">泉州园区 · 实时运营总览</div>
+        <div class="kpi-grid" style="margin-bottom:16px">
+          <div class="kpi-card" style="background:var(--pl)"><div class="kpi-num" style="color:var(--p)">1,280</div><div class="kpi-label">在岗人数</div><div class="kpi-change up">↑ 较上月+12</div></div>
+          <div class="kpi-card" style="background:#DCFCE7"><div class="kpi-num" style="color:#16A34A">78,100</div><div class="kpi-label">今日产量(件)</div></div>
+          <div class="kpi-card" style="background:#FEF3E2"><div class="kpi-num" style="color:#D97706">652,800</div><div class="kpi-label">月产量(件)</div><div class="kpi-change up">↑ 较上月+8.2%</div></div>
+          <div class="kpi-card" style="background:var(--di)"><div class="kpi-num" style="color:var(--d)">12</div><div class="kpi-label">异常笔数</div><div class="kpi-change down">↓ 较上月-3</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">人事概况</div>
+          <div class="stat-row">
+            <div class="stat-box"><div class="num" style="color:var(--s)">95.2%</div><div class="lbl">出勤率 <span class="trend-up">↑2.1%</span></div></div>
+            <div class="stat-box"><div class="num" style="color:var(--p)">18</div><div class="lbl">本月入职</div></div>
+            <div class="stat-box"><div class="num" style="color:var(--d)">3</div><div class="lbl">本月离职</div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">生产概况 · 月产量趋势</div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar-val">520k</div><div class="bar cyan" style="height:64px"></div><div class="bar-label">12月</div></div>
+            <div class="bar-col"><div class="bar-val">480k</div><div class="bar cyan" style="height:58px"></div><div class="bar-label">1月</div></div>
+            <div class="bar-col"><div class="bar-val">560k</div><div class="bar cyan" style="height:70px"></div><div class="bar-label">2月</div></div>
+            <div class="bar-col"><div class="bar-val">600k</div><div class="bar cyan" style="height:76px"></div><div class="bar-label">3月</div></div>
+            <div class="bar-col"><div class="bar-val">603k</div><div class="bar cyan" style="height:77px"></div><div class="bar-label">4月</div></div>
+            <div class="bar-col"><div class="bar-val" style="color:var(--p);font-weight:700">652k</div><div class="bar" style="height:88px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">5月</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">异常分布（本月）</div>
+          <div class="h-bar"><span class="h-label">物料短缺</span><div class="h-track"><div class="h-fill cyan" style="width:42%">5笔</div></div><span class="h-val">42%</span></div>
+          <div class="h-bar"><span class="h-label">设备故障</span><div class="h-track"><div class="h-fill amber" style="width:33%">4笔</div></div><span class="h-val">33%</span></div>
+          <div class="h-bar"><span class="h-label">工序错误</span><div class="h-track"><div class="h-fill green" style="width:17%">2笔</div></div><span class="h-val">17%</span></div>
+          <div class="h-bar"><span class="h-label">其他</span><div class="h-track"><div class="h-fill" style="width:8%;background:#CBD5E1">1笔</div></div><span class="h-val">8%</span></div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+
+    <div class="bottom-nav">
+      <div class="tab active" onclick="mNav('mp-sj-index')"><i class="fas fa-home"></i><span>首页</span></div>
+      <div class="tab" onclick="mNav('mp-sj-gr-index')"><i class="fas fa-chart-line"></i><span>个人</span></div>
+      <div class="tab" onclick="mNav('mp-sj-td-index')"><i class="fas fa-chart-bar"></i><span>团队</span></div>
+      <div class="tab" onclick="mNav('mp-sj-yy-index')"><i class="fas fa-chart-pie"></i><span>运营</span></div>
+    </div>
+  </div>
+</div><!-- /mobileView -->
+
+<!-- ============================== PC VIEW ============================== -->
+<div class="view" id="pcView">
+  <div class="pc-layout">
+    <div class="pc-sidebar" id="pcSidebar">
+      <div class="logo"><i class="fas fa-chart-pie"></i> 数据服务</div>
+      <div class="nav-group">
+        <div class="g-label">数据看板</div>
+        <button class="nav-item active" data-pc="pc-dashboard" onclick="pcNav('pc-dashboard',this)"><i class="fas fa-th-large"></i> 数据总览</button>
+        <button class="nav-item" data-pc="pc-personal" onclick="pcNav('pc-personal',this)"><i class="fas fa-chart-line"></i> 个人数据</button>
+        <button class="nav-item" data-pc="pc-team" onclick="pcNav('pc-team',this)"><i class="fas fa-chart-bar"></i> 团队管理</button>
+        <button class="nav-item" data-pc="pc-analytics" onclick="pcNav('pc-analytics',this)"><i class="fas fa-chart-pie"></i> 运营分析</button>
+      </div>
+    </div>
+    <div class="pc-resizer" id="pcResizer"></div>
+    <div class="pc-main">
+      <div class="pc-header">
+        <div class="bc">数据服务 / <span id="pcCrumb">数据总览</span></div>
+        <div class="user"><i class="fas fa-bell" style="color:var(--t2);cursor:pointer" onclick="showToast('无新消息')"></i><div class="avatar">张</div><span>张三 · 制造一部</span></div>
+      </div>
+      <div class="pc-content" id="pcContent">
+
+        <div class="pc-page active" id="pc-dashboard">
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">1,280</div><div class="label">园区在岗</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#16A34A">78,100</div><div class="label">今日产量</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">652,800</div><div class="label">月产量</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--d)">12</div><div class="label">异常笔数</div></div>
+          </div>
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="db-card">
+              <div class="db-header"><h3>产量趋势（近6月）</h3></div>
+              <div class="bar-chart" style="height:160px">
+                <div class="bar-col"><div class="bar-val">520k</div><div class="bar cyan" style="height:90px"></div><div class="bar-label">12月</div></div>
+                <div class="bar-col"><div class="bar-val">480k</div><div class="bar cyan" style="height:80px"></div><div class="bar-label">1月</div></div>
+                <div class="bar-col"><div class="bar-val">560k</div><div class="bar cyan" style="height:98px"></div><div class="bar-label">2月</div></div>
+                <div class="bar-col"><div class="bar-val">600k</div><div class="bar cyan" style="height:108px"></div><div class="bar-label">3月</div></div>
+                <div class="bar-col"><div class="bar-val">603k</div><div class="bar cyan" style="height:109px"></div><div class="bar-label">4月</div></div>
+                <div class="bar-col"><div class="bar-val" style="color:var(--p);font-weight:700">652k</div><div class="bar" style="height:130px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">5月</div></div>
+              </div>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>班组排行</h3></div>
+              <table><thead><tr><th>#</th><th>班组</th><th>月产量</th><th>出勤率</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>冲裁段</td><td style="font-weight:600">298,000</td><td>98%</td></tr>
+                <tr><td>2</td><td>针车一班</td><td>192,400</td><td>95%</td></tr>
+                <tr><td>3</td><td>针车二班</td><td>162,400</td><td>92%</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div class="db-card">
+            <div class="db-header"><h3>考勤出勤率</h3></div>
+            <div class="h-bar"><span class="h-label">冲裁段</span><div class="h-track"><div class="h-fill green" style="width:98%">98%</div></div><span class="h-val">98%</span></div>
+            <div class="h-bar"><span class="h-label">针车一班</span><div class="h-track"><div class="h-fill cyan" style="width:95%">95%</div></div><span class="h-val">95%</span></div>
+            <div class="h-bar"><span class="h-label">针车二班</span><div class="h-track"><div class="h-fill amber" style="width:92%">92%</div></div><span class="h-val">92%</span></div>
+          </div>
+        </div>
+
+        <div class="pc-page" id="pc-personal">
+          <div class="pc-section-title"><div class="bar"></div><h2>个人数据看板</h2></div>
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="db-card"><div class="db-header"><h3>我的考勤</h3></div><div class="stat-row"><div class="stat-box"><div class="num">21</div><div class="lbl">实际出勤</div></div><div class="stat-box"><div class="num">22</div><div class="lbl">应出勤</div></div><div class="stat-box"><div class="num">95.5%</div><div class="lbl">出勤率</div></div></div></div>
+            <div class="db-card"><div class="db-header"><h3>我的工资</h3></div><div style="text-align:center"><div style="font-size:32px;font-weight:700;color:var(--p)">¥5,150</div><div style="font-size:12px;color:var(--s)">↑ 较上月 +¥320</div></div></div>
+          </div>
+          <div class="db-card">
+            <div class="db-header"><h3>近6月工资趋势</h3></div>
+            <div class="bar-chart" style="height:140px">
+              <div class="bar-col"><div class="bar-val">4,800</div><div class="bar cyan" style="height:82px"></div><div class="bar-label">12月</div></div>
+              <div class="bar-col"><div class="bar-val">4,650</div><div class="bar cyan" style="height:78px"></div><div class="bar-label">1月</div></div>
+              <div class="bar-col"><div class="bar-val">5,200</div><div class="bar cyan" style="height:90px"></div><div class="bar-label">2月</div></div>
+              <div class="bar-col"><div class="bar-val">4,900</div><div class="bar cyan" style="height:84px"></div><div class="bar-label">3月</div></div>
+              <div class="bar-col"><div class="bar-val">4,830</div><div class="bar cyan" style="height:83px"></div><div class="bar-label">4月</div></div>
+              <div class="bar-col"><div class="bar-val" style="color:var(--p);font-weight:700">5,150</div><div class="bar" style="height:92px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">5月</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pc-page" id="pc-team">
+          <div class="pc-section-title"><div class="bar amber"></div><h2>团队管理看板</h2></div>
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="db-card"><div class="db-header"><h3>班组数据 — 针车一班</h3></div><div class="stat-row"><div class="stat-box"><div class="num" style="color:var(--p)">21,600</div><div class="lbl">今日产量</div></div><div class="stat-box"><div class="num">18</div><div class="lbl">出勤</div></div><div class="stat-box"><div class="num">1,200</div><div class="lbl">人均</div></div></div></div>
+            <div class="db-card"><div class="db-header"><h3>部门数据 — 制造一部</h3></div><div class="stat-row"><div class="stat-box"><div class="num" style="color:var(--p)">652,800</div><div class="lbl">月产量</div></div><div class="stat-box"><div class="num">128</div><div class="lbl">在岗</div></div><div class="stat-box"><div class="num">95.2%</div><div class="lbl">出勤率</div></div></div></div>
+          </div>
+          <div class="db-card">
+            <div class="db-header"><h3>成员产量排行</h3></div>
+            <table><thead><tr><th>#</th><th>姓名</th><th>今日产量</th><th>月累计</th><th>出勤率</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>张三</td><td style="font-weight:600">1,200</td><td>22,000</td><td>98%</td></tr>
+              <tr><td>2</td><td>李四</td><td>1,150</td><td>20,500</td><td>96%</td></tr>
+              <tr><td>3</td><td>王五</td><td>980</td><td>18,200</td><td>94%</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+
+        <div class="pc-page" id="pc-analytics">
+          <div class="pc-section-title"><div class="bar"></div><h2>运营分析</h2></div>
+          <div class="grid-3" style="margin-bottom:16px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">1,280</div><div class="label">在岗人数</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#16A34A">95.2%</div><div class="label">出勤率</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">12</div><div class="label">异常待处理</div></div>
+          </div>
+          <div class="db-card">
+            <div class="db-header"><h3>异常分布</h3></div>
+            <div class="h-bar"><span class="h-label">物料短缺</span><div class="h-track"><div class="h-fill cyan" style="width:42%">5笔</div></div><span class="h-val">42%</span></div>
+            <div class="h-bar"><span class="h-label">设备故障</span><div class="h-track"><div class="h-fill amber" style="width:33%">4笔</div></div><span class="h-val">33%</span></div>
+            <div class="h-bar"><span class="h-label">工序错误</span><div class="h-track"><div class="h-fill green" style="width:17%">2笔</div></div><span class="h-val">17%</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /pcView -->
+
+<!-- ============================== PORTAL VIEW ============================== -->
+<div class="view" id="portalView">
+  <div class="portal-layout">
+    <div class="portal-sidebar" id="portalSidebar">
+      <div class="logo"><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;font-style:italic;font-size:22px;letter-spacing:-1px;color:#60A5FA;line-height:1">XTEP</span><span style="font-size:14px;color:rgba(255,255,255,.3);font-weight:300;line-height:1">|</span><span style="font-weight:600;font-size:15px;line-height:1">数据服务 · 管理门户</span></span><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:1px">特步 · 一站式管理平台</div></div>
+      <div class="nav-group">
+        <div class="g-label"><i class="fas fa-chart-line"></i> 数据运营</div>
+        <button class="nav-item active" data-portal="portal-dashboard"><i class="fas fa-tachometer-alt"></i> 数据总览</button>
+        <button class="nav-item" data-portal="portal-analytics"><i class="fas fa-chart-line"></i> 运营分析</button>
+      </div>
+    </div>
+    <div class="portal-resizer" id="portalResizer"></div>
+    <div class="portal-main">
+      <div class="portal-header">
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="搜索员工、班组..."></div>
+        <div class="user"><i class="fas fa-bell" style="color:var(--t2);cursor:pointer" onclick="showToast('无新消息')"></i><div class="avatar">陈</div><span>陈建国 · 生管经理</span></div>
+      </div>
+      <div class="portal-content" id="portalContent">
+
+        <div class="portal-page active" id="portal-dashboard">
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">1,280</div><div class="label">在岗总人数</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#16A34A">95.2%</div><div class="label">出勤率</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">652,800</div><div class="label">月产量(件)</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--d)">12</div><div class="label">异常笔数</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="db-card">
+              <div class="db-header"><h3>各模块数据概览</h3></div>
+              <table><thead><tr><th>模块</th><th>核心指标</th><th>值</th><th>趋势</th></tr></thead>
+              <tbody>
+                <tr><td>人事通</td><td>本月入职/离职</td><td>18 / 3</td><td><span class="trend-up">↑ 净增15</span></td></tr>
+                <tr><td>行政通</td><td>待处理工单</td><td>24</td><td><span class="trend-down">↓ -5</span></td></tr>
+                <tr><td>生产通</td><td>月产量</td><td>652,800</td><td><span class="trend-up">↑ +8.2%</span></td></tr>
+              </tbody></table>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>异常分布</h3></div>
+              <div class="h-bar"><span class="h-label">物料短缺</span><div class="h-track"><div class="h-fill cyan" style="width:42%">5</div></div><span class="h-val">42%</span></div>
+              <div class="h-bar"><span class="h-label">设备故障</span><div class="h-track"><div class="h-fill amber" style="width:33%">4</div></div><span class="h-val">33%</span></div>
+              <div class="h-bar"><span class="h-label">工序错误</span><div class="h-track"><div class="h-fill green" style="width:17%">2</div></div><span class="h-val">17%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-page" id="portal-analytics">
+          <div class="pc-section-title"><div class="bar"></div><h2>运营分析大屏</h2></div>
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">1,280</div><div class="label">在岗人数</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#16A34A">78,100</div><div class="label">今日产量</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">95.2%</div><div class="label">出勤率</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--d)">12</div><div class="label">异常</div></div>
+          </div>
+          <div class="db-card">
+            <div class="db-header"><h3>月产量趋势</h3></div>
+            <div class="bar-chart" style="height:180px">
+              <div class="bar-col"><div class="bar-val">520k</div><div class="bar cyan" style="height:100px"></div><div class="bar-label">12月</div></div>
+              <div class="bar-col"><div class="bar-val">480k</div><div class="bar cyan" style="height:88px"></div><div class="bar-label">1月</div></div>
+              <div class="bar-col"><div class="bar-val">560k</div><div class="bar cyan" style="height:108px"></div><div class="bar-label">2月</div></div>
+              <div class="bar-col"><div class="bar-val">600k</div><div class="bar cyan" style="height:118px"></div><div class="bar-label">3月</div></div>
+              <div class="bar-col"><div class="bar-val">603k</div><div class="bar cyan" style="height:120px"></div><div class="bar-label">4月</div></div>
+              <div class="bar-col"><div class="bar-val" style="color:var(--p);font-weight:700">652k</div><div class="bar" style="height:148px;background:linear-gradient(180deg,#22D3EE,var(--p))"></div><div class="bar-label" style="color:var(--p);font-weight:600">5月</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /portalView -->
+
+<script>
+document.querySelectorAll('.vs button[data-view]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.vs button[data-view]').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active');
+    var v=b.getAttribute('data-view');
+    document.getElementById('mobileView').style.display='none';
+    document.getElementById('pcView').style.display='none';
+    document.getElementById('portalView').style.display='none';
+    if(v==='mobile') document.getElementById('mobileView').style.display='flex';
+    if(v==='pc') document.getElementById('pcView').style.display='block';
+    if(v==='portal') document.getElementById('portalView').style.display='block';
+  });
+});
+document.getElementById('mobileView').style.display='flex';
+
+var mStack=['mp-sj-index'];
+function mNav(id){
+  var cur=document.querySelector('.m-page.active');
+  if(cur){cur.classList.remove('active');mStack.push(id);}
+  var next=document.getElementById(id);
+  if(next){next.classList.add('active')}
+  updateMTitle(id);updateMBack();updateBottomNav(id);
+}
+function mGoBack(){
+  if(mStack.length<=1)return;
+  document.querySelector('.m-page.active').classList.remove('active');
+  mStack.pop();
+  var prev=mStack[mStack.length-1];
+  var el=document.getElementById(prev);
+  if(el){el.classList.add('active')}
+  updateMTitle(prev);updateMBack();updateBottomNav(prev);
+}
+function updateMTitle(id){
+  var map={'mp-sj-index':'数据服务','mp-sj-gr-index':'个人看板','mp-sj-gr-kq':'我的考勤','mp-sj-gr-gz':'我的工资','mp-sj-gr-bg':'我的报工','mp-sj-td-index':'团队看板','mp-sj-td-bz':'班组数据','mp-sj-td-bm':'部门数据','mp-sj-yy-index':'运营分析','mp-sj-yy-overview':'园区运营总览'};
+  document.getElementById('mTitle').textContent=map[id]||'数据服务';
+}
+function updateMBack(){document.getElementById('mBack').style.visibility=mStack.length<=1?'hidden':'visible';}
+function updateBottomNav(id){
+  var tabs=document.querySelectorAll('.bottom-nav .tab');
+  tabs.forEach(function(t){t.classList.remove('active')});
+  var map={'mp-sj-index':0,'mp-sj-gr-index':1,'mp-sj-gr-kq':1,'mp-sj-gr-gz':1,'mp-sj-gr-bg':1,'mp-sj-td-index':2,'mp-sj-td-bz':2,'mp-sj-td-bm':2,'mp-sj-yy-index':3,'mp-sj-yy-overview':3};
+  var idx=map[id];
+  if(idx!==undefined&&tabs[idx]){tabs[idx].classList.add('active')}
+}
+function pcNav(id,btn){
+  document.querySelectorAll('.pc-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(id);if(el){el.classList.add('active')}
+  document.querySelectorAll('.pc-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  if(btn){btn.classList.add('active')}
+  document.getElementById('pcCrumb').textContent={'pc-dashboard':'数据总览','pc-personal':'个人数据','pc-team':'团队管理','pc-analytics':'运营分析'}[id]||'';
+}
+function portalNav(pageId){
+  document.querySelectorAll('.portal-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(pageId);if(el){el.classList.add('active')}
+  document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  var nav=document.querySelector('.portal-sidebar .nav-item[data-portal="'+pageId+'"]');
+  if(nav) nav.classList.add('active');
+}
+document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(item){
+  item.addEventListener('click',function(){portalNav(this.dataset.portal)});
+});
+
+var toastTimer;
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show')},2000);}
+function shareProto(){var url=window.location.href;if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){showToast('链接已复制！')})}else{showToast('分享链接：'+url)}}
+(function(){
+  var sb=document.getElementById('pcSidebar'),rz=document.getElementById('pcResizer'),dragging=false,startX,startW;
+  rz.addEventListener('mousedown',function(e){dragging=true;startX=e.clientX;startW=sb.offsetWidth;rz.classList.add('active');e.preventDefault()});
+  document.addEventListener('mousemove',function(e){if(!dragging)return;var w=Math.max(160,Math.min(400,startW+e.clientX-startX));sb.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging){dragging=false;rz.classList.remove('active')}});
+})();
+(function(){
+  var sb=document.getElementById('portalSidebar'),rz=document.getElementById('portalResizer'),dragging=false,startX,startW;
+  rz.addEventListener('mousedown',function(e){dragging=true;startX=e.clientX;startW=sb.offsetWidth;rz.classList.add('active');e.preventDefault()});
+  document.addEventListener('mousemove',function(e){if(!dragging)return;var w=Math.max(180,Math.min(400,startW+e.clientX-startX));sb.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging){dragging=false;rz.classList.remove('active')}});
+})();
+</script>
+<script>
+(function() {
+  if (window.self === window.top) return;
+  var style = document.createElement('style');
+  style.textContent = '.phone>.status-bar,.phone>.app-header{display:none!important}.phone{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;margin:0!important;padding:0!important}.phone>.page-content{padding:0!important;margin:0!important}.phone>.bottom-nav{flex-shrink:0}';
+  document.head.appendChild(style);
+  var vsBar = document.querySelector('.vs');
+  if (vsBar) vsBar.style.display = 'none';
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.style.height = '100vh';
+    v.style.marginTop = '0';
+  });
+  function applyView(view) {
+    var mv = document.getElementById('mobileView');
+    var pv = document.getElementById('pcView');
+    var pv2 = document.getElementById('portalView');
+    if (mv) mv.style.display = 'none';
+    if (pv) pv.style.display = 'none';
+    if (pv2) pv2.style.display = 'none';
+    if (view === 'mobile' && mv) mv.style.display = 'flex';
+    else if (view === 'pc' && pv) pv.style.display = 'block';
+    else if (view === 'portal' && pv2) pv2.style.display = 'block';
+  }
+  var hash = window.location.hash.replace('#', '');
+  if (hash && ['mobile','pc','portal'].indexOf(hash) >= 0) {
+    applyView(hash);
+  }
+  window.addEventListener('message', function(e) {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === 'switchView' && e.data.view) {
+      applyView(e.data.view);
+    }
+    if (e.data.type === 'goBack') {
+      if (typeof mStack !== 'undefined' && mStack.length > 1) {
+        if (typeof mGoBack === 'function') mGoBack();
+      } else {
+        window.parent.postMessage({ type: 'closeModule' }, '*');
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

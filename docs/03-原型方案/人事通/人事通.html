@@ -154,7 +154,6 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .calendar .days .day.selected { outline: 2px solid var(--p); outline-offset: -2px; box-shadow: 0 0 0 3px rgba(30,109,242,.2); transform: scale(1.05); background: var(--pl) !important; z-index: 2; position: relative; }
 
 
-
 /* Calendar - small status dot */
 .calendar .days .day .status-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; margin-top: 2px; }
 .calendar .days .day .day-num { font-size: 15px; font-weight: 600; line-height: 1.2; }
@@ -664,25 +663,118 @@ tr.clickable:hover td { background: var(--pl) !important; }
             <div class="db-card"><div class="db-header"><h3>消息提醒规则</h3></div><table><tr><th>场景</th><th>推送对象</th><th>频率</th></tr><tr><td>考勤异常</td><td>员工</td><td>每3天</td></tr><tr><td>审批超期</td><td>审批人</td><td>每天</td></tr><tr><td>确认超期</td><td>直接上级</td><td>每天</td></tr><tr><td>离职预警</td><td>人事专员</td><td>提前3天</td></tr></table></div>
           </div>
         </div>
-        <div class="portal-page" id="portal-approve"><h2 style="font-size:22px;margin-bottom:24px">待审批</h2><div class="db-card"><div class="table-wrap"><table><tr><th>类型</th><th>申请人</th><th>工号</th><th>部门</th><th>详情</th><th>提交时间</th><th>操作</th></tr><tr><td><span class="badge badge-info">请假</span></td><td>李四</td><td>20240101</td><td>制造二部</td><td style="cursor:pointer" onclick="viewApprovalDetail('请假','李四','制造二部','2026-05-14 09:30','事假2天，家里有事需要处理','待审批')"><u>事假2天</u></td><td>2026-05-14 09:30</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-info">补卡</span></td><td>王五</td><td>20240102</td><td>制造一部</td><td style="cursor:pointer" onclick="viewApprovalDetail('补卡','王五','制造一部','2026-05-14 10:15','补卡申请：5月14日上午 忘记打卡','待审批')"><u>5/14上午</u></td><td>2026-05-14 10:15</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-p0">离职</span></td><td>赵六</td><td>20200015</td><td>品质部</td><td style="cursor:pointer" onclick="viewApprovalDetail('离职','赵六','品质部','2026-05-14 08:20','个人原因，最后工作日6月1日','待审批')"><u>个人原因</u></td><td>2026-05-14 08:20</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-info">销假</span></td><td>孙七</td><td>20240088</td><td>仓储部</td><td style="cursor:pointer" onclick="viewApprovalDetail('销假','孙七','仓储部','2026-05-13 16:40','提前返岗销假','待审批')"><u>提前返岗</u></td><td>2026-05-13 16:40</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr></table></div></div></div>
-        <div class="portal-page" id="portal-history"><h2 style="font-size:22px;margin-bottom:24px">审批记录</h2><div class="db-card"><div class="table-wrap"><table><tr><th>类型</th><th>申请人</th><th>结果</th><th>处理人</th><th>处理时间</th><th>操作</th></tr><tr class="clickable" onclick="viewApprovalDetail('请假','周八','制造一部','2026-05-13 14:20','事假3天，已休完','已通过')"><td><span class="badge badge-s">请假</span></td><td>周八</td><td><span class="badge badge-s">已通过</span></td><td>张经理</td><td>2026-05-13 14:20</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();viewApprovalDetail('请假','周八','制造一部','2026-05-13 14:20','事假3天，已休完','已通过')">详情</button></td></tr><tr class="clickable" onclick="viewApprovalDetail('补卡','吴九','制造二部','2026-05-13 11:00','补卡：5月12日下午忘记打卡','已通过')"><td><span class="badge badge-s">补卡</span></td><td>吴九</td><td><span class="badge badge-s">已通过</span></td><td>李主管</td><td>2026-05-13 11:00</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();viewApprovalDetail('补卡','吴九','制造二部','2026-05-13 11:00','补卡：5月12日下午忘记打卡','已通过')">详情</button></td></tr><tr class="clickable" onclick="viewApprovalDetail('离职','郑十','品质部','2026-05-12 16:30','个人原因辞职','已驳回')"><td><span class="badge badge-p0">离职</span></td><td>郑十</td><td><span class="badge badge-p0">已驳回</span></td><td>王经理</td><td>2026-05-12 16:30</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();viewApprovalDetail('离职','郑十','品质部','2026-05-12 16:30','个人原因辞职','已驳回')">详情</button></td></tr></table></div></div></div>
-        <div class="portal-page" id="portal-employee"><h2 style="font-size:22px;margin-bottom:24px">员工信息</h2><div style="display:flex;gap:12px;margin-bottom:16px"><select class="form-control" style="width:160px"><option>全部部门</option><option>制造一部</option><option>制造二部</option><option>品质部</option></select><select class="form-control" style="width:120px"><option>全部状态</option><option>在职</option><option>离职</option></select><button class="btn btn-p btn-sm" onclick="showToast('搜索中...')"><i class="fas fa-search"></i> 搜索</button></div><div class="db-card"><div class="table-wrap"><table><tr><th>工号</th><th>姓名</th><th>部门</th><th>岗位</th><th>状态</th><th>操作</th></tr><tr><td>20240101</td><td>张三</td><td>制造一部</td><td>针车工</td><td><span class="badge badge-s">在职</span></td><td><button class="btn btn-outline btn-sm" onclick="viewEmployeeDetail('张三','20240101','制造一部','针车工')">查看</button></td></tr><tr><td>20240102</td><td>李四</td><td>制造二部</td><td>成型工</td><td><span class="badge badge-s">在职</span></td><td><button class="btn btn-outline btn-sm" onclick="viewEmployeeDetail('李四','20240102','制造二部','成型工')">查看</button></td></tr><tr><td>20200015</td><td>赵六</td><td>品质部</td><td>质检员</td><td><span class="badge badge-p0">离职中</span></td><td><button class="btn btn-outline btn-sm" onclick="viewEmployeeDetail('赵六','20200015','品质部','质检员')">查看</button></td></tr></table></div></div></div>
-        <div class="portal-page" id="portal-transfer"><h2 style="font-size:22px;margin-bottom:24px">调动管理</h2><div class="db-card"><div class="table-wrap"><table><tr><th>姓名</th><th>原部门</th><th>目标部门</th><th>状态</th><th>操作</th></tr><tr><td>张三</td><td>制造一部</td><td>制造二部</td><td><span class="badge badge-p1">审批中</span></td><td><button class="btn btn-outline btn-sm" onclick="viewTransferDetail('张三','制造一部-针车课','制造二部-成型课','审批中')">查看</button></td></tr></table></div></div></div>
-        <div class="portal-page" id="portal-resign"><h2 style="font-size:22px;margin-bottom:24px">离职管理</h2><div class="db-card"><div class="table-wrap"><table><tr><th>姓名</th><th>部门</th><th>离职日期</th><th>状态</th><th>操作</th></tr><tr><td>赵六</td><td>品质部</td><td>2026-06-01</td><td><span class="badge badge-p1">审批中</span></td><td><button class="btn btn-outline btn-sm" onclick="viewResignDetail('赵六','品质部','2026-06-01','审批中')">查看</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-approve"><h2 style="font-size:22px;margin-bottom:24px">待审批</h2><div class="db-card"><div class="table-wrap"><table><tr><th>类型</th><th>申请人</th><th>工号</th><th>部门</th><th>详情</th><th>提交时间</th><th>操作</th></tr><tr><td><span class="badge badge-info">请假</span></td><td>李四</td><td>20240101</td><td>制造二部</td><td style="cursor:pointer" onclick="portalNav('portal-approve-detail')"><u>事假2天</u></td><td>2026-05-14 09:30</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-info">补卡</span></td><td>王五</td><td>20240102</td><td>制造一部</td><td style="cursor:pointer" onclick="portalNav('portal-approve-detail')"><u>5/14上午</u></td><td>2026-05-14 10:15</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-p0">离职</span></td><td>赵六</td><td>20200015</td><td>品质部</td><td style="cursor:pointer" onclick="portalNav('portal-approve-detail')"><u>个人原因</u></td><td>2026-05-14 08:20</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr><tr><td><span class="badge badge-info">销假</span></td><td>孙七</td><td>20240088</td><td>仓储部</td><td style="cursor:pointer" onclick="portalNav('portal-approve-detail')"><u>提前返岗</u></td><td>2026-05-13 16:40</td><td class="actions"><button style="background:#DCFCE7;color:#16A34A" onclick="showToast('已审批通过')">通过</button><button style="background:var(--di);color:var(--d)" onclick="showToast('已驳回')">驳回</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-history"><h2 style="font-size:22px;margin-bottom:24px">审批记录</h2><div class="db-card"><div class="table-wrap"><table><tr><th>类型</th><th>申请人</th><th>结果</th><th>处理人</th><th>处理时间</th><th>操作</th></tr><tr class="clickable" onclick="portalNav('portal-approve-detail')"><td><span class="badge badge-s">请假</span></td><td>周八</td><td><span class="badge badge-s">已通过</span></td><td>张经理</td><td>2026-05-13 14:20</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();portalNav('portal-approve-detail')">详情</button></td></tr><tr class="clickable" onclick="portalNav('portal-approve-detail')"><td><span class="badge badge-s">补卡</span></td><td>吴九</td><td><span class="badge badge-s">已通过</span></td><td>李主管</td><td>2026-05-13 11:00</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();portalNav('portal-approve-detail')">详情</button></td></tr><tr class="clickable" onclick="portalNav('portal-approve-detail')"><td><span class="badge badge-p0">离职</span></td><td>郑十</td><td><span class="badge badge-p0">已驳回</span></td><td>王经理</td><td>2026-05-12 16:30</td><td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();portalNav('portal-approve-detail')">详情</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-employee"><h2 style="font-size:22px;margin-bottom:24px">员工信息</h2><div style="display:flex;gap:12px;margin-bottom:16px"><select class="form-control" style="width:160px"><option>全部部门</option><option>制造一部</option><option>制造二部</option><option>品质部</option></select><select class="form-control" style="width:120px"><option>全部状态</option><option>在职</option><option>离职</option></select><button class="btn btn-p btn-sm" onclick="showToast('搜索中...')"><i class="fas fa-search"></i> 搜索</button></div><div class="db-card"><div class="table-wrap"><table><tr><th>工号</th><th>姓名</th><th>部门</th><th>岗位</th><th>状态</th><th>操作</th></tr><tr><td>20240101</td><td>张三</td><td>制造一部</td><td>针车工</td><td><span class="badge badge-s">在职</span></td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-employee-detail')">查看</button></td></tr><tr><td>20240102</td><td>李四</td><td>制造二部</td><td>成型工</td><td><span class="badge badge-s">在职</span></td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-employee-detail')">查看</button></td></tr><tr><td>20200015</td><td>赵六</td><td>品质部</td><td>质检员</td><td><span class="badge badge-p0">离职中</span></td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-employee-detail')">查看</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-transfer"><h2 style="font-size:22px;margin-bottom:24px">调动管理</h2><div class="db-card"><div class="table-wrap"><table><tr><th>姓名</th><th>原部门</th><th>目标部门</th><th>状态</th><th>操作</th></tr><tr><td>张三</td><td>制造一部</td><td>制造二部</td><td><span class="badge badge-p1">审批中</span></td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-transfer-detail')">查看</button></td></tr></table></div></div></div>
+        <div class="portal-page" id="portal-resign"><h2 style="font-size:22px;margin-bottom:24px">离职管理</h2><div class="db-card"><div class="table-wrap"><table><tr><th>姓名</th><th>部门</th><th>离职日期</th><th>状态</th><th>操作</th></tr><tr><td>赵六</td><td>品质部</td><td>2026-06-01</td><td><span class="badge badge-p1">审批中</span></td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-resign-detail')">查看</button></td></tr></table></div></div></div>
         <div class="portal-page" id="portal-attendance"><h2 style="font-size:22px;margin-bottom:24px">考勤总览</h2><div class="grid-4" style="margin-bottom:24px"><div class="db-card stat-card" style="cursor:pointer" onclick="portalNav('portal-attendance')"><div class="num" style="color:var(--s)">97.2%</div><div class="label">出勤率</div></div><div class="db-card stat-card" style="cursor:pointer" onclick="showToast('查看请假中员工列表')"><div class="num" style="color:var(--w)">23</div><div class="label">请假中</div></div><div class="db-card stat-card" style="cursor:pointer" onclick="showToast('查看今日异常明细')"><div class="num" style="color:var(--d)">15</div><div class="label">今日异常</div></div><div class="db-card stat-card" style="cursor:pointer" onclick="showToast('查看确认详情')"><div class="num" style="color:var(--p)">89%</div><div class="label">确认率</div></div></div><div class="db-card"><div class="db-header"><h3>考勤确认统计</h3><a style="cursor:pointer" onclick="showToast('查看全部考勤统计')">查看全部 →</a></div><div class="table-wrap"><table><tr><th>部门</th><th>应确认</th><th>已确认</th><th>未确认</th><th>确认率</th><th>操作</th></tr><tr><td>制造一部</td><td>320</td><td>298</td><td>22</td><td>93%</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造一部未确认员工发送提醒')">提醒</button></td></tr><tr><td>制造二部</td><td>280</td><td>245</td><td>35</td><td>88%</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造二部未确认员工发送提醒')">提醒</button></td></tr><tr><td>品质部</td><td>85</td><td>80</td><td>5</td><td>94%</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向品质部未确认员工发送提醒')">提醒</button></td></tr></table></div></div></div>
         <div class="portal-page" id="portal-salary"><h2 style="font-size:22px;margin-bottom:24px">薪酬管理</h2><div class="db-card"><div class="db-header"><h3>工资确认状态</h3></div><div class="table-wrap"><table><tr><th>部门</th><th>应确认</th><th>已确认</th><th>未确认</th><th>操作</th></tr><tr><td>制造一部</td><td>320</td><td>280</td><td>40</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造一部40名未确认员工发送提醒')">提醒</button></td></tr><tr><td>制造二部</td><td>280</td><td>230</td><td>50</td><td><button class="btn btn-outline btn-sm" onclick="showToast('已向制造二部50名未确认员工发送提醒')">提醒</button></td></tr></table></div></div></div>
-        <div class="portal-page" id="portal-rules"><h2 style="font-size:22px;margin-bottom:24px">提醒规则配置</h2><div class="db-card"><table><tr><th>场景</th><th>触发条件</th><th>推送对象</th><th>频率</th><th>操作</th></tr><tr><td>考勤异常</td><td>漏打卡/缺勤</td><td>员工</td><td>每3天</td><td><button class="btn btn-outline btn-sm" onclick="editRule('考勤异常','漏打卡/缺勤','员工','每3天')">编辑</button></td></tr><tr><td>审批超期</td><td>1天未审批</td><td>审批人</td><td>每天</td><td><button class="btn btn-outline btn-sm" onclick="editRule('审批超期','1天未审批','审批人','每天')">编辑</button></td></tr><tr><td>确认超期</td><td>1天未确认</td><td>直接上级</td><td>每天</td><td><button class="btn btn-outline btn-sm" onclick="editRule('确认超期','1天未确认','直接上级','每天')">编辑</button></td></tr><tr><td>离职预警</td><td>提前3天</td><td>人事专员</td><td>一次</td><td><button class="btn btn-outline btn-sm" onclick="editRule('离职预警','提前3天','人事专员','一次')">编辑</button></td></tr></table></div></div>
+        <div class="portal-page" id="portal-rules"><h2 style="font-size:22px;margin-bottom:24px">提醒规则配置</h2><div class="db-card"><table><tr><th>场景</th><th>触发条件</th><th>推送对象</th><th>频率</th><th>操作</th></tr><tr><td>考勤异常</td><td>漏打卡/缺勤</td><td>员工</td><td>每3天</td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-rules-edit')">编辑</button></td></tr><tr><td>审批超期</td><td>1天未审批</td><td>审批人</td><td>每天</td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-rules-edit')">编辑</button></td></tr><tr><td>确认超期</td><td>1天未确认</td><td>直接上级</td><td>每天</td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-rules-edit')">编辑</button></td></tr><tr><td>离职预警</td><td>提前3天</td><td>人事专员</td><td>一次</td><td><button class="btn btn-outline btn-sm" onclick="portalNav('portal-rules-edit')">编辑</button></td></tr></table></div></div>
+
+        <!-- Portal Detail: 审批详情 -->
+        <div class="portal-page" id="portal-approve-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-approve')"><i class="fas fa-arrow-left"></i> 返回审批列表</span></div>
+          <div class="card" style="max-width:640px">
+            <div class="card-title">审批详情 — 李四</div>
+            <div class="detail-grid">
+              <div class="field"><label>审批类型</label><div class="value"><span class="badge badge-info">请假</span></div></div>
+              <div class="field"><label>当前状态</label><div class="value"><span class="badge badge-p1">待审批</span></div></div>
+              <div class="field"><label>申请人</label><div class="value">李四</div></div>
+              <div class="field"><label>部门</label><div class="value">制造二部</div></div>
+              <div class="field"><label>提交时间</label><div class="value">2026-05-14 09:30</div></div>
+              <div class="field full"><label>申请内容</label><div class="value" style="padding:10px;background:var(--bg);border-radius:6px;font-weight:400">事假2天，家里有事需要处理</div></div>
+              <div class="field full"><label>审批意见</label><div class="value" style="padding:10px;background:#FFFBEB;border-radius:6px;font-weight:400;color:#92400E">待审批</div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px">
+              <button class="btn btn-s" onclick="showToast('已审批通过');portalNav('portal-approve')">通过</button>
+              <button class="btn" style="background:var(--d);color:#fff" onclick="showToast('已驳回');portalNav('portal-approve')">驳回</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Portal Detail: 员工详情 -->
+        <div class="portal-page" id="portal-employee-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-employee')"><i class="fas fa-arrow-left"></i> 返回员工列表</span></div>
+          <div class="card" style="max-width:640px">
+            <div class="card-title">员工档案 — 张三</div>
+            <div class="detail-grid">
+              <div class="field"><label>姓名</label><div class="value">张三</div></div>
+              <div class="field"><label>工号</label><div class="value">20240101</div></div>
+              <div class="field"><label>部门</label><div class="value">制造一部</div></div>
+              <div class="field"><label>岗位</label><div class="value">针车工</div></div>
+              <div class="field"><label>状态</label><div class="value"><span class="badge badge-s">在职</span></div></div>
+              <div class="field"><label>入职日期</label><div class="value">2020-03-01</div></div>
+              <div class="field"><label>联系电话</label><div class="value">138****5678</div></div>
+              <div class="field full" style="margin-top:8px"><label>工作经历</label><div class="value" style="font-weight:400;line-height:1.8">2020-2022 制造一部 针车工<br>2022-2024 制造一部 组长<br>2024-至今 制造一部 针车工</div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-outline" onclick="portalNav('portal-employee')">返回</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Edit: 提醒规则编辑 -->
+        <div class="portal-page" id="portal-rules-edit">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-rules')"><i class="fas fa-arrow-left"></i> 返回规则列表</span></div>
+          <div class="card" style="max-width:500px">
+            <div class="card-title">编辑提醒规则</div>
+            <div style="font-size:13px;line-height:2">
+              <label style="font-weight:600;display:block;margin-bottom:4px">场景名称</label><input class="form-control" value="考勤异常" readonly style="background:var(--bg)">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">触发条件</label><input class="form-control" value="漏打卡/缺勤">
+              <label style="font-weight:600;display:block;margin:12px 0 4px">推送对象</label><select class="form-control" style="appearance:none"><option selected>员工</option><option>审批人</option><option>直接上级</option><option>人事专员</option></select>
+              <label style="font-weight:600;display:block;margin:12px 0 4px">推送频率</label><select class="form-control" style="appearance:none"><option selected>每3天</option><option>每天</option><option>一次</option></select>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-p" onclick="showToast('规则已保存');portalNav('portal-rules')">保存</button><button class="btn btn-sm btn-outline" onclick="portalNav('portal-rules')">取消</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Detail: 调动详情 -->
+        <div class="portal-page" id="portal-transfer-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-transfer')"><i class="fas fa-arrow-left"></i> 返回调动列表</span></div>
+          <div class="card" style="max-width:640px">
+            <div class="card-title">调动详情 — 张三</div>
+            <div class="detail-grid">
+              <div class="field"><label>员工</label><div class="value">张三</div></div>
+              <div class="field"><label>状态</label><div class="value"><span class="badge badge-p1">审批中</span></div></div>
+              <div class="field"><label>原部门</label><div class="value">制造一部-针车课</div></div>
+              <div class="field"><label>目标部门</label><div class="value">制造二部-成型课</div></div>
+              <div class="field full"><label>审批链进度</label>
+                <div class="value"><div class="approve-chain" style="margin-top:4px">
+                  <div class="node active"><span class="label">人事专员</span><span class="name">&#10003;</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                  <div class="node active"><span class="label">员工确认</span><span class="name">&#10003;</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                  <div class="node active"><span class="label">原上级</span><span class="name">&#10003;</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                  <div class="node"><span class="label">原经理</span><span class="name">&#9203;</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                  <div class="node"><span class="label">现上级</span><span class="name">—</span></div>
+                </div></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-outline" onclick="portalNav('portal-transfer')">返回</button></div>
+          </div>
+        </div>
+
+        <!-- Portal Detail: 离职详情 -->
+        <div class="portal-page" id="portal-resign-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-resign')"><i class="fas fa-arrow-left"></i> 返回离职列表</span></div>
+          <div class="card" style="max-width:640px">
+            <div class="card-title">离职详情 — 赵六</div>
+            <div class="detail-grid">
+              <div class="field"><label>员工</label><div class="value">赵六</div></div>
+              <div class="field"><label>部门</label><div class="value">品质部</div></div>
+              <div class="field"><label>计划离职日期</label><div class="value">2026-06-01</div></div>
+              <div class="field"><label>状态</label><div class="value"><span class="badge badge-p0">审批中</span></div></div>
+              <div class="field full"><label>离职原因</label><div class="value" style="padding:10px;background:var(--bg);border-radius:6px;font-weight:400">个人原因，回老家发展</div></div>
+              <div class="field full"><label>手续进度</label>
+                <div class="value"><div class="checklist" style="margin-top:4px">
+                  <div class="item done"><div class="step-num" style="background:var(--s)">&#10003;</div><div class="step-info"><div class="name">员工确认</div></div><span style="color:var(--s);font-size:12px">已完成</span></div>
+                  <div class="item"><div class="step-num" style="background:var(--w)">2</div><div class="step-info"><div class="name">直接上级确认</div></div><span class="badge badge-p1" style="font-size:11px">待处理</span></div>
+                </div></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-outline" onclick="portalNav('portal-resign')">返回</button></div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
-</div>
-
-<!-- Portal Modal -->
-<div class="modal-overlay" id="portalModal" onclick="closeModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-header"><h3 id="modalTitle">详情</h3><button onclick="closeModal()"><i class="fas fa-times"></i></button></div>
-    <div class="modal-body" id="modalBody"></div>
-    <div class="modal-footer" id="modalFooter" style="display:none"></div>
   </div>
 </div>
 
@@ -954,35 +1046,6 @@ function toggleUserMenu() { const m = document.getElementById('userMenu'); close
 function closeUserMenu() { const m = document.getElementById('userMenu'); if(m) m.classList.remove('show'); userMenuOpen = false; }
 document.addEventListener('click', function(e) { if (!e.target.closest('.bell-wrap')&&!e.target.closest('#notifPanel')) closeNotif(); if (!e.target.closest('.user-dropdown')&&!e.target.closest('#userMenu')) closeUserMenu(); });
 
-function openModal(t, h, f) { document.getElementById('modalTitle').textContent=t; document.getElementById('modalBody').innerHTML=h; const ft=document.getElementById('modalFooter'); if(f){ft.innerHTML=f;ft.style.display='flex';}else{ft.style.display='none';} document.getElementById('portalModal').classList.add('show'); }
-function closeModal() { document.getElementById('portalModal').classList.remove('show'); }
-
-function viewApprovalDetail(type,name,dept,time,reason,status){
-  const c=status==='已通过'?'var(--s)':status==='已驳回'?'var(--d)':'var(--w)';
-  openModal('审批详情 — '+name,
-    '<div class="detail-grid"><div class="field"><label>审批类型</label><div class="value"><span class="badge badge-info">'+type+'</span></div></div><div class="field"><label>当前状态</label><div class="value"><span class="badge" style="background:'+c+'20;color:'+c+'">'+status+'</span></div></div><div class="field"><label>申请人</label><div class="value">'+name+'</div></div><div class="field"><label>部门</label><div class="value">'+dept+'</div></div><div class="field"><label>提交时间</label><div class="value">'+time+'</div></div><div class="field full"><label>申请内容</label><div class="value" style="padding:10px;background:var(--bg);border-radius:6px;font-weight:400">'+reason+'</div></div><div class="field full"><label>审批意见</label><div class="value" style="padding:10px;background:#FFFBEB;border-radius:6px;font-weight:400;color:#92400E">'+(status==='已通过'?'同意，已处理完毕。 — 张经理':status==='已驳回'?'不同意，请补充材料后重新提交。 — 王经理':'待审批')+'</div></div></div>');
-}
-
-function viewEmployeeDetail(name,id,dept,pos){
-  openModal('员工档案 — '+name,
-    '<div class="detail-grid"><div class="field"><label>姓名</label><div class="value">'+name+'</div></div><div class="field"><label>工号</label><div class="value">'+id+'</div></div><div class="field"><label>部门</label><div class="value">'+dept+'</div></div><div class="field"><label>岗位</label><div class="value">'+pos+'</div></div><div class="field"><label>状态</label><div class="value"><span class="badge badge-s">在职</span></div></div><div class="field"><label>入职日期</label><div class="value">2020-03-01</div></div><div class="field"><label>联系电话</label><div class="value">138****'+Math.floor(Math.random()*9000+1000)+'</div></div><div class="field full" style="margin-top:8px"><label>工作经历</label><div class="value" style="font-weight:400;line-height:1.8">2020-2022 制造一部 针车工<br>2022-2024 制造一部 组长<br>2024-至今 '+dept+' '+pos+'</div></div></div>');
-}
-
-function editRule(scene,condition,target,freq){
-  openModal('编辑提醒规则',
-    '<div class="form-group"><label>场景名称</label><input class="form-control" value="'+scene+'" readonly style="background:var(--bg)"></div><div class="form-group"><label>触发条件</label><input class="form-control" value="'+condition+'"></div><div class="form-group"><label>推送对象</label><select class="form-control"><option'+(target==='员工'?' selected':'')+'>员工</option><option'+(target==='审批人'?' selected':'')+'>审批人</option><option'+(target==='直接上级'?' selected':'')+'>直接上级</option><option'+(target==='人事专员'?' selected':'')+'>人事专员</option></select></div><div class="form-group"><label>推送频率</label><select class="form-control"><option'+(freq==='每3天'?' selected':'')+'>每3天</option><option'+(freq==='每天'?' selected':'')+'>每天</option><option'+(freq==='一次'?' selected':'')+'>一次</option></select></div>',
-    '<button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-p" onclick="showToast(\'规则已保存\');closeModal()">保存</button>');
-}
-
-function viewTransferDetail(name,from,to,status){
-  openModal('调动详情 — '+name,
-    '<div class="detail-grid"><div class="field"><label>员工</label><div class="value">'+name+'</div></div><div class="field"><label>状态</label><div class="value"><span class="badge badge-p1">'+status+'</span></div></div><div class="field"><label>原部门</label><div class="value">'+from+'</div></div><div class="field"><label>目标部门</label><div class="value">'+to+'</div></div><div class="field full"><label>审批链进度</label><div class="value"><div class="approve-chain" style="margin-top:4px"><div class="node active"><span class="label">人事专员</span><span class="name">✓</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node active"><span class="label">员工确认</span><span class="name">✓</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node active"><span class="label">原上级</span><span class="name">✓</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node"><span class="label">原经理</span><span class="name">⏳</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span><div class="node"><span class="label">现上级</span><span class="name">—</span></div></div></div></div></div>');
-}
-
-function viewResignDetail(name,dept,date,status){
-  openModal('离职详情 — '+name,
-    '<div class="detail-grid"><div class="field"><label>员工</label><div class="value">'+name+'</div></div><div class="field"><label>部门</label><div class="value">'+dept+'</div></div><div class="field"><label>计划离职日期</label><div class="value">'+date+'</div></div><div class="field"><label>状态</label><div class="value"><span class="badge badge-p0">'+status+'</span></div></div><div class="field full"><label>离职原因</label><div class="value" style="padding:10px;background:var(--bg);border-radius:6px;font-weight:400">个人原因，回老家发展</div></div><div class="field full"><label>手续进度</label><div class="value"><div class="checklist" style="margin-top:4px"><div class="item done"><div class="step-num" style="background:var(--s)">✓</div><div class="step-info"><div class="name">员工确认</div></div><span style="color:var(--s);font-size:12px">已完成</span></div><div class="item"><div class="step-num" style="background:var(--w)">2</div><div class="step-info"><div class="name">直接上级确认</div></div><span class="badge badge-p1" style="font-size:11px">待处理</span></div></div></div></div></div>');
-}
 
 // View switching
 function switchView(view) {
@@ -1179,6 +1242,48 @@ function toggleAiVoice() {
 	// Init attendance calendar for May
 		switchView('mobile');
 		pcRenderAttCalendar(5);
+</script>
+<script>
+(function() {
+  if (window.self === window.top) return;
+  var style = document.createElement('style');
+  style.textContent = '.phone>.status-bar,.phone>.app-header{display:none!important}.phone{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;margin:0!important;padding:0!important}.phone>.page-content{padding:0!important;margin:0!important}.phone>.bottom-nav{flex-shrink:0}';
+  document.head.appendChild(style);
+  var vsBar = document.querySelector('.vs');
+  if (vsBar) vsBar.style.display = 'none';
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.style.height = '100vh';
+    v.style.marginTop = '0';
+  });
+  function applyView(view) {
+    var mv = document.getElementById('mobileView');
+    var pv = document.getElementById('pcView');
+    var pv2 = document.getElementById('portalView');
+    if (mv) mv.style.display = 'none';
+    if (pv) pv.style.display = 'none';
+    if (pv2) pv2.style.display = 'none';
+    if (view === 'mobile' && mv) mv.style.display = 'flex';
+    else if (view === 'pc' && pv) pv.style.display = 'block';
+    else if (view === 'portal' && pv2) pv2.style.display = 'block';
+  }
+  var hash = window.location.hash.replace('#', '');
+  if (hash && ['mobile','pc','portal'].indexOf(hash) >= 0) {
+    applyView(hash);
+  }
+  window.addEventListener('message', function(e) {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === 'switchView' && e.data.view) {
+      applyView(e.data.view);
+    }
+    if (e.data.type === 'goBack') {
+      if (typeof mStack !== 'undefined' && mStack.length > 1) {
+        if (typeof mGoBack === 'function') mGoBack();
+      } else {
+        window.parent.postMessage({ type: 'closeModule' }, '*');
+      }
+    }
+  });
+})();
 </script>
 </body>
 </html>

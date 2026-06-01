@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生产通 — 原型方案</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--p:#1E6DF2;--pd:#1557C4;--pl:#E8F0FE;--xp:#E60012;--xpd:#CC0010;--xpl:#FFE8EA;--s:#34A853;--w:#FBBC04;--d:#EA4335;--di:#FEE8E8;--bg:#F5F7FA;--cd:#FFF;--t1:#1F2937;--t2:#6B7280;--bd:#E5E7EB;--sd:0 2px 12px rgba(0,0,0,.08);--r:12px;--r-sm:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;--trans:all .3s cubic-bezier(.4,0,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#E8ECF1;color:var(--t1);overflow:hidden;height:100vh}
+.vs{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;align-items:center;justify-content:center;gap:4px;background:#1F2937;padding:8px 16px;height:48px}
+.vs button{padding:6px 16px;border:none;background:transparent;color:#9CA3AF;font-size:13px;cursor:pointer;border-radius:6px;font-family:var(--font);transition:var(--trans)}
+.vs button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.vs button.active{color:#fff;background:var(--p)}
+.vs .vs-title{color:#fff;font-size:14px;font-weight:600;margin-right:auto}
+.vs .vs-share{background:var(--s);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;border:none;cursor:pointer;font-family:var(--font);margin-left:auto;transition:var(--trans)}
+.vs .vs-share:hover{opacity:.85}
+.view{display:none;width:100%;height:calc(100vh - 48px);margin-top:48px;position:relative}
+#mobileView{display:none;justify-content:center;align-items:center;background:#E8ECF1;padding:20px}
+#mobileView .phone{width:380px;height:780px;background:var(--bg);border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.phone .status-bar{height:44px;background:var(--p);display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#fff;font-size:12px;font-weight:600;flex-shrink:0}
+.phone .app-header{height:48px;background:var(--p);display:flex;align-items:center;padding:0 16px;color:#fff;flex-shrink:0;position:relative}
+.phone .app-header .back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;transition:var(--trans);font-size:18px;border:none;color:#fff;background:transparent}
+.phone .app-header .back:hover{background:rgba(255,255,255,.15)}
+.phone .app-header .title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.phone .app-header .right{width:36px}
+.phone .page-content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.phone .page-content::-webkit-scrollbar{width:0}
+.m-page{display:none;padding:16px;animation:mFadeIn .35s ease}
+.m-page.active{display:block}
+@keyframes mFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes mSlideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes mSlideOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-40px)}}
+.phone .bottom-nav{height:56px;background:#fff;border-top:1px solid var(--bd);display:flex;flex-shrink:0;width:100%}
+.phone .bottom-nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--t2);cursor:pointer;transition:var(--trans);gap:2px;border:none;background:none;font-family:var(--font)}
+.phone .bottom-nav .tab i{font-size:20px;transition:var(--trans)}
+.phone .bottom-nav .tab.active{color:var(--p)}
+.phone .bottom-nav .tab:hover{color:var(--p)}
+#pcView{display:none}
+.pc-layout{display:flex;height:100%;background:var(--bg)}
+.pc-sidebar{width:240px;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;min-width:160px}
+.pc-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.pc-resizer:hover,.pc-resizer.active{background:var(--p)}
+.pc-resizer::after{content:"";position:absolute;inset:0 -4px}
+.pc-sidebar .logo{padding:20px 20px 16px;font-size:18px;font-weight:700;color:var(--p);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)}
+.pc-sidebar .logo i{font-size:24px}
+.pc-sidebar .nav-group{padding:12px 0}
+.pc-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.pc-sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--t1);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.pc-sidebar .nav-item i{width:20px;text-align:center;color:var(--t2);font-size:16px;transition:var(--trans)}
+.pc-sidebar .nav-item:hover{background:var(--pl);color:var(--p)}
+.pc-sidebar .nav-item:hover i{color:var(--p)}
+.pc-sidebar .nav-item.active{background:var(--pl);color:var(--p);font-weight:600}
+.pc-sidebar .nav-item.active i{color:var(--p)}
+.pc-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.pc-header{height:60px;background:#fff;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.pc-header .bc{font-size:14px;color:var(--t2)}
+.pc-header .bc span{color:var(--t1);font-weight:500}
+.pc-header .user{display:flex;align-items:center;gap:12px;font-size:14px}
+.pc-header .user .avatar{width:32px;height:32px;border-radius:50%;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.pc-content{flex:1;overflow-y:auto;padding:24px;position:relative}
+.pc-content::-webkit-scrollbar{width:6px}
+.pc-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+#portalView{display:none}
+.portal-layout{display:flex;height:100%}
+.portal-sidebar{width:260px;background:linear-gradient(180deg,#1F2937 0%,#111827 100%);display:flex;flex-direction:column;flex-shrink:0;min-width:180px}
+.portal-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.portal-resizer:hover,.portal-resizer.active{background:#60A5FA}
+.portal-resizer::after{content:"";position:absolute;inset:0 -4px}
+.portal-sidebar .logo{padding:20px 20px 16px;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.portal-sidebar .logo i{font-size:22px;color:#60A5FA}
+.portal-sidebar .nav-group{padding:16px 0}
+.portal-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.portal-sidebar .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.7);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.portal-sidebar .nav-item i{width:20px;text-align:center;font-size:16px}
+.portal-sidebar .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.portal-sidebar .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-right:3px solid #60A5FA;font-weight:500}
+.portal-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F0F2F5;min-width:400px}
+.portal-header{height:60px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;z-index:10}
+.portal-header .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);padding:8px 16px;border-radius:8px;width:320px}
+.portal-header .search-box i{color:var(--t2)}
+.portal-header .search-box input{border:none;background:none;outline:none;font-size:14px;width:100%;font-family:var(--font)}
+.portal-header .user{display:flex;align-items:center;gap:16px}
+.portal-header .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.portal-content{flex:1;overflow-y:auto;padding:24px}
+.portal-content::-webkit-scrollbar{width:6px}
+.portal-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.card{background:var(--cd);border-radius:var(--r);padding:20px;box-shadow:var(--sd);transition:var(--trans)}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.badge-p0{background:var(--di);color:var(--d)}
+.badge-p1{background:#FEF3C7;color:#D97706}
+.badge-s{background:#DCFCE7;color:#16A34A}
+.badge-info{background:var(--pl);color:var(--p)}
+.btn{padding:10px 24px;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:500;cursor:pointer;transition:var(--trans);font-family:var(--font)}
+.btn-p{background:var(--p);color:#fff}
+.btn-p:hover{background:var(--pd);transform:translateY(-1px);box-shadow:0 4px 12px rgba(30,109,242,.3)}
+.btn-s{background:var(--s);color:#fff}
+.btn-s:hover{opacity:.9;transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--bd);color:var(--t1)}
+.btn-outline:hover{border-color:var(--p);color:var(--p)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-block{width:100%}
+.btn-danger{background:var(--d);color:#fff}
+.btn-danger:hover{opacity:.9}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:var(--t2);margin-bottom:6px;font-weight:500}
+.form-group .required::after{content:' *';color:var(--d)}
+.form-control{width:100%;padding:10px 14px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:14px;outline:none;transition:var(--trans);font-family:var(--font);background:#FFF}
+.form-control:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(30,109,242,.12)}
+select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.stat-card{text-align:center;padding:16px}
+.stat-card .num{font-size:28px;font-weight:700;color:var(--t1)}
+.stat-card .label{font-size:13px;color:var(--t2);margin-top:4px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.db-card{background:#fff;border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:var(--trans)}
+.db-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.db-card .db-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.db-card .db-header h3{font-size:16px;font-weight:600}
+.db-card .db-header a{font-size:13px;color:var(--p);text-decoration:none;cursor:pointer}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+table th{text-align:left;padding:10px 12px;font-weight:600;color:var(--t2);font-size:12px;border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.3px}
+table td{padding:12px 12px;border-bottom:1px solid var(--bd)}
+table tr:hover td{background:#FAFBFC}
+table .actions{display:flex;gap:6px}
+table .actions button{padding:4px 10px;border:none;border-radius:4px;font-size:12px;cursor:pointer;transition:var(--trans);font-family:var(--font)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-overlay.show{display:flex}
+.modal-content{background:#fff;border-radius:16px;width:560px;max-width:90vw;max-height:80vh;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;display:flex;flex-direction:column}
+.modal-content .modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--bd)}
+.modal-content .modal-header h3{font-size:17px;font-weight:600}
+.modal-content .modal-header button{width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;cursor:pointer;font-size:18px;transition:var(--trans);display:flex;align-items:center;justify-content:center;color:var(--t2)}
+.modal-content .modal-header button:hover{background:var(--di);color:var(--d)}
+.modal-content .modal-body{padding:24px;overflow-y:auto}
+.modal-content .modal-footer{padding:16px 24px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:8px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.detail-grid .field label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px}
+.detail-grid .field .value{font-size:15px;font-weight:500}
+.detail-grid .field.full{grid-column:1/-1}
+.pc-page{display:none;animation:pcIn .4s ease}
+.pc-page.active{display:block}
+@keyframes pcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.portal-page{display:none;animation:portalIn .4s ease}
+.portal-page.active{display:block}
+@keyframes portalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu-card{background:var(--cd);border-radius:var(--r);padding:20px 12px;text-align:center;box-shadow:var(--sd);cursor:pointer;transition:var(--trans);border:2px solid transparent}
+.menu-card:hover{border-color:var(--p);transform:translateY(-2px)}
+.menu-card .icon{font-size:32px;margin-bottom:8px;display:block}
+.menu-card .name{font-size:14px;font-weight:600}
+.menu-card .desc{font-size:11px;color:var(--t2);margin-top:2px}
+.m-tabs{display:flex;gap:0;margin-bottom:12px;background:#F3F4F6;border-radius:8px;padding:3px}
+.m-tab{flex:1;padding:6px 0;text-align:center;font-size:13px;border-radius:6px;cursor:pointer;transition:var(--trans);color:var(--t2)}
+.m-tab.active{background:#fff;color:var(--t1);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.jump-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px}
+.jump-page .j-icon{font-size:56px;margin-bottom:16px}
+.jump-page h2{font-size:20px;margin-bottom:8px}
+.jump-page p{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:24px;max-width:300px}
+.progress-steps{display:flex;align-items:flex-start;gap:0;margin:16px 0}
+.progress-step{flex:1;text-align:center;position:relative}
+.progress-step .dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:12px;font-weight:600}
+.progress-step .dot.done{background:var(--s);color:#fff}
+.progress-step .dot.active{background:var(--p);color:#fff}
+.progress-step .dot.pending{background:#E5E7EB;color:var(--t2)}
+.progress-step .label{font-size:11px;color:var(--t2)}
+.progress-step::after{content:'';position:absolute;top:14px;right:-50%;width:100%;height:2px;background:#E5E7EB;z-index:0}
+.progress-step:last-child::after{display:none}
+.progress-step.done::after{background:var(--s)}
+.scene-card{display:flex;align-items:center;gap:16px;padding:16px;background:var(--cd);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sd);cursor:pointer;border:2px solid transparent;transition:var(--trans)}
+.scene-card:hover{border-color:var(--p)}
+.scene-card .s-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.stat-row{display:flex;gap:8px;margin-bottom:12px}
+.stat-box{flex:1;text-align:center;padding:12px 6px;background:var(--cd);border-radius:8px;box-shadow:var(--sd)}
+.stat-box .num{font-size:20px;font-weight:700}
+.stat-box .lbl{font-size:11px;color:var(--t2);margin-top:2px}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{background:#F8FAFC;padding:10px 12px;text-align:left;font-weight:600;color:var(--t2);border-bottom:2px solid var(--bd)}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--bd)}
+.data-table tr:hover td{background:#F8FAFC}
+.radio-group{display:flex;gap:16px;flex-wrap:wrap}
+.radio-group label{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:400;color:var(--t1);cursor:pointer}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.status-dot.green{background:var(--s)}
+.status-dot.red{background:var(--d)}
+.status-dot.amber{background:var(--w)}
+.approve-chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.approve-chain .node{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);min-width:56px}
+.approve-chain .node .label{font-size:11px;color:var(--t2)}
+.approve-chain .node .name{font-size:13px;font-weight:500}
+.approve-chain .node.active{background:var(--pl)}
+.approve-chain .node.active .label{color:var(--p)}
+.approve-chain .node.active .name{color:var(--p)}
+.approve-chain .arrow{color:var(--t2);font-size:14px}
+.scan-area{width:220px;height:220px;margin:20px auto;background:#F3F4F6;border:3px dashed var(--bd);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.scan-area .scan-line{position:absolute;width:90%;height:2px;background:var(--p);top:30%;left:5%;animation:scanMove 2s ease-in-out infinite;opacity:.8}
+@keyframes scanMove{0%{top:10%}50%{top:80%}100%{top:10%}}
+.scan-area i{font-size:64px;color:#CBD5E1}
+.scan-area .scan-tip{font-size:13px;color:var(--t2);margin-top:8px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:#1F2937;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;opacity:0;transition:all .5s ease;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.btn-act{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:none;border-radius:4px;font-size:12px;cursor:pointer;transition:var(--trans);font-family:var(--font);font-weight:500}
+.btn-act-p{background:var(--pl);color:var(--p)}
+.btn-act-p:hover{background:#D6E4FB}
+.btn-act-s{background:#DCFCE7;color:#16A34A}
+.btn-act-s:hover{background:#BBF7D0}
+.btn-act-d{background:var(--di);color:var(--d)}
+.btn-act-d:hover{background:#FECACA}
+.btn-act-w{background:#FEF3C7;color:#D97706}
+.btn-act-w:hover{background:#FDE68A}
+#mp-bg-index .menu-card .icon{background:var(--pl);color:var(--p);border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+#mp-cx-index .menu-card .icon{background:#DCFCE7;color:#16A34A;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+#mp-qt-index .menu-card .icon{background:#F3F0FF;color:#7C3AED;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px}
+.highlight-row{background:#FFF8E1!important}
+.highlight-row td{color:#D97706;font-weight:500}
+.sc-list{display:flex;flex-direction:column;gap:10px}
+.sc-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--cd);border-radius:var(--r);box-shadow:var(--sd);cursor:pointer;border:2px solid transparent;transition:var(--trans)}
+.sc-item:hover{border-color:var(--p)}
+.sc-item .sc-avatar{width:40px;height:40px;border-radius:50%;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0}
+.sc-item .sc-info{flex:1;min-width:0}
+.sc-item .sc-info .sc-name{font-size:14px;font-weight:500}
+.sc-item .sc-info .sc-meta{font-size:12px;color:var(--t2);margin-top:2px;display:flex;gap:16px}
+.sc-item .sc-arrow{color:var(--t2)}
+.pc-section-title{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.pc-section-title .bar{width:4px;height:22px;border-radius:2px;background:var(--p);flex-shrink:0}
+.pc-section-title .bar.green{background:var(--s)}
+.pc-section-title .bar.amber{background:var(--w)}
+.pc-section-title .bar.red{background:var(--d)}
+.pc-section-title h2{font-size:20px;font-weight:700}
+@media(max-width:768px){.vs .vs-title{display:none}#mobileView .phone{width:100%;height:100%;border-radius:0}}
+</style>
+</head>
+<body>
+
+<!-- View Switcher -->
+<div class="vs" id="viewSwitcher">
+  <span class="vs-title"><i class="fas fa-industry"></i> 生产通 · 原型</span>
+  <button class="active" data-view="mobile"><i class="fas fa-mobile-alt"></i> 手机端</button>
+  <button data-view="pc"><i class="fas fa-desktop"></i> 电脑端</button>
+  <button data-view="portal"><i class="fas fa-shield-alt"></i> 管理门户</button>
+  <button class="vs-share" onclick="shareProto()"><i class="fas fa-share-alt"></i> 分享</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================== MOBILE VIEW ============================== -->
+<div class="view" id="mobileView">
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span style="font-weight:800;letter-spacing:.5px;font-size:11px">XTEP 特步</span><span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-full"></i></span></div>
+    <div class="app-header"><button class="back" id="mBack" onclick="mGoBack()" style="visibility:hidden"><i class="fas fa-chevron-left"></i></button><span class="title" id="mTitle">生产通</span><span class="right"></span></div>
+    <div class="page-content" id="mContent">
+
+      <!-- ====== 生产通首页 ====== -->
+      <div class="m-page active" id="mp-sc-index">
+        <div style="background:linear-gradient(135deg,#0D9488,#0F766E);color:#fff;border-radius:var(--r);padding:20px;margin-bottom:20px">
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px"><i class="fas fa-industry"></i> 生产通</div>
+          <div style="font-size:13px;opacity:.9;line-height:1.6">制造生产服务统一入口<br>报工 · 查询 · 异常上报</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-bg-index')" style="border-color:#E8F0FE">
+            <span class="icon" style="background:var(--pl);color:var(--p)"><i class="fas fa-clipboard-check"></i></span>
+            <div class="name">报工板块</div>
+            <div class="desc">MES报工·确认·审核</div>
+          </div>
+          <div class="menu-card" onclick="mNav('mp-cx-index')" style="border-color:#F0FFF4">
+            <span class="icon" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-search"></i></span>
+            <div class="name">查询板块</div>
+            <div class="desc">扫描·报工明细·件资</div>
+          </div>
+          <div class="menu-card" onclick="mNav('mp-qt-index')" style="border-color:#F3F0FF">
+            <span class="icon" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-ellipsis-h"></i></span>
+            <div class="name">其他板块</div>
+            <div class="desc">样鞋·异常上报·意见箱</div>
+          </div>
+          <div class="menu-card" onclick="showToast('暂无数据')" style="border-color:#FEF3E2">
+            <span class="icon" style="background:#FEF3E2;color:#D97706"><i class="fas fa-chart-line"></i></span>
+            <div class="name">我的统计</div>
+            <div class="desc">本月报工汇总</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title">今日生产快报</div>
+          <div class="stat-row">
+            <div class="stat-box"><div class="num" style="color:var(--p)">128</div><div class="lbl">今日报工</div></div>
+            <div class="stat-box"><div class="num" style="color:#D97706">12</div><div class="lbl">待确认</div></div>
+            <div class="stat-box"><div class="num" style="color:var(--s)">116</div><div class="lbl">已审核</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 报工板块首页 ====== -->
+      <div class="m-page" id="mp-bg-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">制造生产</div>
+          <div style="font-size:20px;font-weight:700">报工板块</div>
+        </div>
+        <div class="stat-row" style="margin-bottom:16px">
+          <div class="stat-box"><div class="num" style="color:var(--p)">128</div><div class="lbl">今日报工笔数</div></div>
+          <div class="stat-box"><div class="num" style="color:#D97706">12</div><div class="lbl">待确认</div></div>
+          <div class="stat-box"><div class="num" style="color:#7C3AED">3</div><div class="lbl">待终审</div></div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-bg-mesbg')"><span class="icon"><i class="fas fa-tasks"></i></span><div class="name">MES报工</div><div class="desc">冲裁段·针车支流</div></div>
+          <div class="menu-card" onclick="mNav('mp-bg-bgqr')" style="position:relative"><span class="icon"><i class="fas fa-check-double"></i></span><div class="name">报工确认</div><div class="desc">班组长→课长审核</div><span class="badge badge-p1" style="position:absolute;top:8px;right:8px">12</span></div>
+          <div class="menu-card" onclick="mNav('mp-bg-bgsh')" style="position:relative"><span class="icon"><i class="fas fa-stamp"></i></span><div class="name">报工审核</div><div class="desc">生管经理终审</div><span class="badge" style="position:absolute;top:8px;right:8px;background:#F3F0FF;color:#7C3AED">3</span></div>
+        </div>
+      </div>
+
+      <!-- ====== MES报工（跳转页） ====== -->
+      <div class="m-page" id="mp-bg-mesbg">
+        <div class="jump-page">
+          <div class="j-icon">🏭</div>
+          <h2>MES 报工</h2>
+          <p>员工报账功能对接MES现有系统<br>覆盖冲裁段、针车支流等工序<br>当前为服装板块报工入口</p>
+          <button class="btn btn-p btn-block" onclick="showToast('正在免登跳转至MES报工系统...')" style="margin-bottom:12px">前往MES系统报工 <i class="fas fa-arrow-right"></i></button>
+          <div class="card" style="width:100%;text-align:left;font-size:12px;color:var(--t2)"><i class="fas fa-info-circle"></i> MES系统报工数据将自动同步至本平台</div>
+        </div>
+      </div>
+
+      <!-- ====== 报工确认列表 ====== -->
+      <div class="m-page" id="mp-bg-bgqr">
+        <div class="m-tabs">
+          <div class="m-tab active" onclick="switchMTab(this,'mp-bg-bgqr-t1')">待确认(12)</div>
+          <div class="m-tab" onclick="switchMTab(this,'mp-bg-bgqr-t2')">已确认</div>
+        </div>
+        <div class="m-tab-content active" id="mp-bg-bgqr-t1">
+          <div class="sc-list">
+            <div class="sc-item" onclick="showBgqrDetail('张三','针车一班','针车支流','1,200','8h','班组长确认')">
+              <div class="sc-avatar">张</div>
+              <div class="sc-info"><div class="sc-name">张三 · 针车一班</div><div class="sc-meta"><span>05-22 14:30</span><span>针车支流</span><span>1,200件</span></div></div>
+              <span class="badge badge-p1">待班组长确认</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="showBgqrDetail('李四','冲裁段','冲裁段','2,000','8h','课长审核')">
+              <div class="sc-avatar">李</div>
+              <div class="sc-info"><div class="sc-name">李四 · 冲裁段</div><div class="sc-meta"><span>05-22 10:15</span><span>冲裁段</span><span>2,000件</span></div></div>
+              <span class="badge badge-p1">待课长审核</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="showBgqrDetail('王五','针车二班','针车支流','980','8h','班组长确认')">
+              <div class="sc-avatar">王</div>
+              <div class="sc-info"><div class="sc-name">王五 · 针车二班</div><div class="sc-meta"><span>05-22 09:45</span><span>针车支流</span><span>980件</span></div></div>
+              <span class="badge badge-p1">待班组长确认</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+          </div>
+        </div>
+        <div class="m-tab-content" id="mp-bg-bgqr-t2">
+          <div class="sc-list">
+            <div class="sc-item" onclick="showBgqrDetail('赵六','冲裁段','冲裁段','1,800','8h','已确认')">
+              <div class="sc-avatar" style="background:#DCFCE7;color:#16A34A">赵</div>
+              <div class="sc-info"><div class="sc-name">赵六 · 冲裁段</div><div class="sc-meta"><span>05-21</span><span>冲裁段</span><span>1,800件</span></div></div>
+              <span class="badge badge-s">已确认</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 报工审核列表 ====== -->
+      <div class="m-page" id="mp-bg-bgsh">
+        <div style="margin-bottom:12px;font-size:13px;color:var(--t2)">生管经理 · 班组汇总审核</div>
+        <div class="m-tabs">
+          <div class="m-tab active" onclick="switchMTab(this,'mp-bg-bgsh-t1')">待审核(3)</div>
+          <div class="m-tab" onclick="switchMTab(this,'mp-bg-bgsh-t2')">已审核</div>
+        </div>
+        <div class="m-tab-content active" id="mp-bg-bgsh-t1">
+          <div class="sc-list">
+            <div class="sc-item" onclick="showBgshDetail('针车一班','05-22','18','21,600','3')">
+              <div class="sc-avatar" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-users"></i></div>
+              <div class="sc-info"><div class="sc-name">针车一班 · 05-22</div><div class="sc-meta"><span>18人</span><span>总产量 21,600件</span></div></div>
+              <span class="badge" style="background:#F3F0FF;color:#7C3AED">3笔异常</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="showBgshDetail('冲裁段','05-22','12','38,000','0')">
+              <div class="sc-avatar" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-users"></i></div>
+              <div class="sc-info"><div class="sc-name">冲裁段 · 05-22</div><div class="sc-meta"><span>12人</span><span>总产量 38,000件</span></div></div>
+              <span class="badge badge-s">正常</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="showBgshDetail('针车二班','05-22','15','18,500','1')">
+              <div class="sc-avatar" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-users"></i></div>
+              <div class="sc-info"><div class="sc-name">针车二班 · 05-22</div><div class="sc-meta"><span>15人</span><span>总产量 18,500件</span></div></div>
+              <span class="badge" style="background:#F3F0FF;color:#7C3AED">1笔异常</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+          </div>
+        </div>
+        <div class="m-tab-content" id="mp-bg-bgsh-t2">
+          <div class="sc-list">
+            <div class="sc-item">
+              <div class="sc-avatar" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-users"></i></div>
+              <div class="sc-info"><div class="sc-name">针车一班 · 05-21</div><div class="sc-meta"><span>18人</span><span>总产量 20,800件</span></div></div>
+              <span class="badge badge-s">已审核</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 查询板块首页 ====== -->
+      <div class="m-page" id="mp-cx-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">数据查询</div>
+          <div style="font-size:20px;font-weight:700">查询板块</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-cx-cksm')"><span class="icon"><i class="fas fa-qrcode"></i></span><div class="name">仓库扫描</div><div class="desc">扫码出入库</div></div>
+          <div class="menu-card" onclick="mNav('mp-cx-bgmx')"><span class="icon"><i class="fas fa-list-alt"></i></span><div class="name">报工明细查询</div><div class="desc">按时间/工序查询</div></div>
+          <div class="menu-card" onclick="mNav('mp-cx-jzcx')"><span class="icon"><i class="fas fa-coins"></i></span><div class="name">件资查询</div><div class="desc">工序单价·工资明细</div></div>
+        </div>
+      </div>
+
+      <!-- ====== 仓库扫描 ====== -->
+      <div class="m-page" id="mp-cx-cksm">
+        <div class="card" style="text-align:center">
+          <div class="form-group"><label>操作类型</label>
+            <div class="radio-group" style="justify-content:center">
+              <label><input type="radio" name="scanType" checked> 物料入库</label>
+              <label><input type="radio" name="scanType"> 成品出库</label>
+            </div>
+          </div>
+          <div class="scan-area" onclick="showToast('扫码成功！物料：XT-CL-2026-0581 已入库 ✓')">
+            <div class="scan-line"></div>
+            <i class="fas fa-qrcode"></i>
+            <span class="scan-tip">对准条码/二维码扫描</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2)">点击扫描区域模拟扫码</div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <div class="card-title" style="font-size:14px">最近扫描记录</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd)">
+              <div><span class="badge badge-s" style="margin-right:6px">入库</span>XT-CL-2026-0581</div><span style="font-size:12px;color:var(--t2)">05-22 14:30</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd)">
+              <div><span class="badge badge-info" style="margin-right:6px">出库</span>XT-CP-2026-0320</div><span style="font-size:12px;color:var(--t2)">05-22 10:15</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+              <div><span class="badge badge-s" style="margin-right:6px">入库</span>XT-CL-2026-0578</div><span style="font-size:12px;color:var(--t2)">05-22 08:45</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 报工明细查询 ====== -->
+      <div class="m-page" id="mp-cx-bgmx">
+        <div class="card" style="margin-bottom:12px">
+          <div class="grid-2">
+            <div class="form-group"><label>开始日期</label><input type="date" class="form-control" value="2026-05-01"></div>
+            <div class="form-group"><label>结束日期</label><input type="date" class="form-control" value="2026-05-22"></div>
+          </div>
+          <div class="form-group"><label>工序</label><select class="form-control"><option>全部工序</option><option>冲裁段</option><option>针车支流</option><option>成型段</option></select></div>
+          <button class="btn btn-p btn-block btn-sm" onclick="showToast('查询完成，共 45 条记录')">查询</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">查询结果</div>
+          <table class="data-table">
+            <thead><tr><th>日期</th><th>工序</th><th>产量(件)</th><th>工时</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr><td>05-22</td><td>针车支流</td><td>1,200</td><td>8h</td><td><span class="badge badge-s">已确认</span></td></tr>
+              <tr><td>05-22</td><td>冲裁段</td><td>2,000</td><td>8h</td><td><span class="badge badge-s">已确认</span></td></tr>
+              <tr><td>05-21</td><td>针车支流</td><td>1,150</td><td>8h</td><td><span class="badge badge-s">已确认</span></td></tr>
+              <tr><td>05-21</td><td>成型段</td><td>850</td><td>8h</td><td><span class="badge badge-info">已审核</span></td></tr>
+              <tr><td>05-20</td><td>冲裁段</td><td>1,900</td><td>8h</td><td><span class="badge badge-info">已审核</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== 件资查询 ====== -->
+      <div class="m-page" id="mp-cx-jzcx">
+        <div class="form-group"><label>查询月份</label><input type="month" class="form-control" value="2026-05"></div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title" style="font-size:14px">工序明细</div>
+          <table class="data-table">
+            <thead><tr><th>工序</th><th>单价(元)</th><th>完成数</th><th>小计(元)</th></tr></thead>
+            <tbody>
+              <tr><td>针车支流</td><td>0.15</td><td>22,000</td><td style="font-weight:600">3,300.00</td></tr>
+              <tr><td>冲裁段</td><td>0.10</td><td>18,000</td><td style="font-weight:600">1,800.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title" style="font-size:14px">工资汇总</div>
+          <table class="data-table">
+            <tbody>
+              <tr><td>计件工资</td><td style="text-align:right;font-weight:600">5,100.00</td></tr>
+              <tr><td>奖金</td><td style="text-align:right;color:var(--s);font-weight:600">+200.00</td></tr>
+              <tr><td>扣款</td><td style="text-align:right;color:var(--d);font-weight:600">-150.00</td></tr>
+              <tr style="background:#F8FAFC"><td>实发合计</td><td style="text-align:right;font-weight:700;font-size:16px;color:var(--p)">5,150.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:12px;color:var(--t2);text-align:center;margin-top:12px"><i class="fas fa-lock"></i> 仅可见自己的件资数据</div>
+      </div>
+
+      <!-- ====== 其他板块首页 ====== -->
+      <div class="m-page" id="mp-qt-index">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;color:var(--t2);margin-bottom:4px">更多服务</div>
+          <div style="font-size:20px;font-weight:700">其他板块</div>
+        </div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="mNav('mp-qt-yxgl')"><span class="icon"><i class="fas fa-shoe-prints"></i></span><div class="name">样鞋管理</div><div class="desc">制作·入库·领用·报废</div></div>
+          <div class="menu-card" onclick="mNav('mp-qt-jzyc')"><span class="icon"><i class="fas fa-exclamation-triangle"></i></span><div class="name">件资异常上报</div><div class="desc">物料·设备·工序异常</div></div>
+          <div class="menu-card" onclick="mNav('mp-qt-yjyx')"><span class="icon"><i class="fas fa-comment-dots"></i></span><div class="name">员工意见箱</div><div class="desc">合理化建议·问题反馈</div></div>
+        </div>
+      </div>
+
+      <!-- ====== 样鞋管理列表 ====== -->
+      <div class="m-page" id="mp-qt-yxgl">
+        <div class="m-tabs">
+          <div class="m-tab active" onclick="switchMTab(this,'mp-qt-yxgl-t1')">制作中(3)</div>
+          <div class="m-tab" onclick="switchMTab(this,'mp-qt-yxgl-t2')">已入库</div>
+          <div class="m-tab" onclick="switchMTab(this,'mp-qt-yxgl-t3')">领用中</div>
+          <div class="m-tab" onclick="switchMTab(this,'mp-qt-yxgl-t4')">已报废</div>
+        </div>
+        <div class="m-tab-content active" id="mp-qt-yxgl-t1">
+          <div class="sc-list">
+            <div class="sc-item" onclick="showToast('查看样鞋详情：XT-2026-001')">
+              <div class="sc-avatar" style="background:#FEF3C7;color:#D97706"><i class="fas fa-shoe-prints"></i></div>
+              <div class="sc-info"><div class="sc-name">XT-2026-001</div><div class="sc-meta"><span>运动鞋</span><span>研发部</span></div></div>
+              <span class="badge badge-p1">制作中</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="showToast('查看样鞋详情：XT-2026-002')">
+              <div class="sc-avatar" style="background:#FEF3C7;color:#D97706"><i class="fas fa-shoe-prints"></i></div>
+              <div class="sc-info"><div class="sc-name">XT-2026-002</div><div class="sc-meta"><span>跑鞋</span><span>生产部</span></div></div>
+              <span class="badge badge-p1">制作中</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+            <div class="sc-item" onclick="showToast('查看样鞋详情：XT-2026-003')">
+              <div class="sc-avatar" style="background:#FEF3C7;color:#D97706"><i class="fas fa-shoe-prints"></i></div>
+              <div class="sc-info"><div class="sc-name">XT-2026-003</div><div class="sc-meta"><span>休闲鞋</span><span>研发部</span></div></div>
+              <span class="badge badge-p1">制作中</span><i class="fas fa-chevron-right sc-arrow"></i>
+            </div>
+          </div>
+          <button class="btn btn-p btn-block" style="margin-top:12px" onclick="mNav('mp-qt-yxgl-add')"><i class="fas fa-plus"></i> 新增样鞋</button>
+        </div>
+        <div class="m-tab-content" id="mp-qt-yxgl-t2">
+          <div class="sc-list">
+            <div class="sc-item"><div class="sc-avatar" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-shoe-prints"></i></div><div class="sc-info"><div class="sc-name">XT-2026-000</div><div class="sc-meta"><span>运动鞋</span><span>研发部</span></div></div><span class="badge badge-s">已入库</span><i class="fas fa-chevron-right sc-arrow"></i></div>
+          </div>
+        </div>
+        <div class="m-tab-content" id="mp-qt-yxgl-t3">
+          <div style="text-align:center;padding:40px;color:var(--t2)"><i class="fas fa-box-open" style="font-size:40px;display:block;margin-bottom:8px"></i>暂无领用记录</div>
+        </div>
+        <div class="m-tab-content" id="mp-qt-yxgl-t4">
+          <div class="sc-list">
+            <div class="sc-item"><div class="sc-avatar" style="background:#FEE8E8;color:var(--d)"><i class="fas fa-shoe-prints"></i></div><div class="sc-info"><div class="sc-name">XT-2025-089</div><div class="sc-meta"><span>跑鞋</span><span>生产部</span></div></div><span class="badge badge-p0">已报废</span><i class="fas fa-chevron-right sc-arrow"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 样鞋新增 ====== -->
+      <div class="m-page" id="mp-qt-yxgl-add">
+        <div class="card">
+          <div class="form-group"><label class="required">样鞋类型</label><select class="form-control"><option>请选择样鞋类型</option><option>运动鞋</option><option>跑鞋</option><option>休闲鞋</option><option>篮球鞋</option></select></div>
+          <div class="form-group"><label class="required">归属部门</label><select class="form-control"><option>请选择归属部门</option><option>研发部</option><option>生产部</option><option>品管部</option></select></div>
+          <div class="form-group"><label>数量</label><input type="number" class="form-control" value="1" min="1"></div>
+          <div class="form-group"><label>备注</label><textarea class="form-control" rows="3" placeholder="选填"></textarea></div>
+        </div>
+        <div class="grid-2" style="margin-top:12px">
+          <button class="btn btn-outline btn-block" onclick="mGoBack()">取消</button>
+          <button class="btn btn-p btn-block" onclick="showToast('样鞋创建成功！编号：XT-2026-004');mGoBack()">提交</button>
+        </div>
+      </div>
+
+      <!-- ====== 件资异常上报 ====== -->
+      <div class="m-page" id="mp-qt-jzyc">
+        <div class="card">
+          <div class="form-group"><label class="required">异常类型</label><select class="form-control"><option>请选择异常类型</option><option>物料短缺</option><option>设备故障</option><option>工序错误</option><option>其他</option></select></div>
+          <div class="form-group"><label class="required">发生时间</label><input type="datetime-local" class="form-control"></div>
+          <div class="form-group"><label>涉及工序</label><select class="form-control"><option>请选择工序</option><option>冲裁段</option><option>针车支流</option><option>成型段</option></select></div>
+          <div class="form-group"><label class="required">异常描述</label><textarea class="form-control" rows="4" placeholder="请描述您发现的异常情况..."></textarea></div>
+          <div class="form-group"><label>现场照片</label><div style="display:flex;gap:8px"><div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#CBD5E1;cursor:pointer;border:2px dashed var(--bd)">+</div></div><div style="font-size:11px;color:var(--t2);margin-top:4px">最多上传3张照片</div></div>
+        </div>
+        <div style="background:#FEF3C7;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:#D97706;display:flex;align-items:center;gap:8px"><i class="fas fa-info-circle"></i> 上报后将直接推送至您的直接上级，上级可反馈问题或建议</div>
+        <button class="btn btn-p btn-block" onclick="showToast('异常已上报！已推送至直接上级（班组长：陈建国）')">提交上报</button>
+      </div>
+
+      <!-- ====== 员工意见箱 ====== -->
+      <div class="m-page" id="mp-qt-yjyx">
+        <div class="card">
+          <div class="form-group"><label class="required">意见类型</label><select class="form-control"><option>请选择意见类型</option><option>合理化建议</option><option>工艺优化</option><option>降本增效</option><option>管理改进</option><option>其他</option></select></div>
+          <div class="form-group"><label class="required">标题</label><input class="form-control" placeholder="请输入标题"></div>
+          <div class="form-group"><label class="required">详细内容</label><textarea class="form-control" rows="5" placeholder="请描述您的建议或意见..."></textarea></div>
+        </div>
+        <div style="background:var(--pl);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:var(--p);display:flex;align-items:center;gap:8px"><i class="fas fa-info-circle"></i> 反馈将提交至直接上级，上级可回复反馈</div>
+        <button class="btn btn-p btn-block" onclick="showToast('意见已提交！已推送至直接上级（班组长：陈建国）')">提交意见</button>
+      </div>
+
+    </div><!-- /page-content -->
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="tab active" onclick="mNav('mp-sc-index')"><i class="fas fa-home"></i><span>首页</span></div>
+      <div class="tab" onclick="mNav('mp-bg-index')"><i class="fas fa-clipboard-check"></i><span>报工</span></div>
+      <div class="tab" onclick="mNav('mp-cx-index')"><i class="fas fa-search"></i><span>查询</span></div>
+      <div class="tab" onclick="mNav('mp-qt-index')"><i class="fas fa-ellipsis-h"></i><span>其他</span></div>
+    </div>
+  </div><!-- /phone -->
+</div><!-- /mobileView -->
+
+<!-- ============================== PC VIEW ============================== -->
+<div class="view" id="pcView">
+  <div class="pc-layout">
+    <div class="pc-sidebar" id="pcSidebar">
+      <div class="logo"><i class="fas fa-industry"></i> 生产通</div>
+      <div class="nav-group">
+        <div class="g-label">报工板块</div>
+        <button class="nav-item active" data-pc="pc-dashboard" onclick="pcNav('pc-dashboard',this)"><i class="fas fa-th-large"></i> 工作台</button>
+        <button class="nav-item" data-pc="pc-approval" onclick="pcNav('pc-approval',this)"><i class="fas fa-check-double"></i> 报工审批</button>
+      </div>
+      <div class="nav-group">
+        <div class="g-label">查询板块</div>
+        <button class="nav-item" data-pc="pc-query" onclick="pcNav('pc-query',this)"><i class="fas fa-search"></i> 数据查询</button>
+      </div>
+      <div class="nav-group">
+        <div class="g-label">其他</div>
+        <button class="nav-item" data-pc="pc-other" onclick="pcNav('pc-other',this)"><i class="fas fa-ellipsis-h"></i> 其他功能</button>
+      </div>
+    </div>
+    <div class="pc-resizer" id="pcResizer"></div>
+    <div class="pc-main">
+      <div class="pc-header">
+        <div class="bc">生产通 / <span id="pcCrumb">工作台</span></div>
+        <div class="user"><i class="fas fa-bell" style="color:var(--t2);cursor:pointer" onclick="showToast('暂无新消息')"></i><div class="avatar">陈</div><span>陈建国 · 生管经理</span></div>
+      </div>
+      <div class="pc-content" id="pcContent">
+
+        <!-- PC Dashboard -->
+        <div class="pc-page active" id="pc-dashboard">
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">128</div><div class="label">今日报工笔数</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">12</div><div class="label">待班组长/课长确认</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#7C3AED">3</div><div class="label">待生管经理终审</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--s)">21,600</div><div class="label">今日产量(件)</div></div>
+          </div>
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="db-card">
+              <div class="db-header"><h3>快捷入口</h3></div>
+              <div class="menu-grid">
+                <div class="menu-card" onclick="pcNav('pc-approval',null)" style="border-color:#E8F0FE"><span class="icon" style="background:var(--pl);color:var(--p);border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-check-double"></i></span><div class="name">报工审批</div><div class="desc">确认·审核</div></div>
+                <div class="menu-card" onclick="pcNav('pc-query',null)" style="border-color:#F0FFF4"><span class="icon" style="background:#DCFCE7;color:#16A34A;border-radius:12px;width:48px;height:48px;line-height:48px;margin:0 auto 8px;font-size:22px"><i class="fas fa-table"></i></span><div class="name">数据查询</div><div class="desc">明细·件资</div></div>
+              </div>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>产量趋势（近7天）</h3></div>
+              <div style="display:flex;align-items:flex-end;gap:16px;height:160px;padding-top:20px">
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:100px;border-radius:8px 8px 0 0;width:100%;position:relative"><span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--t2)">05-16</span></div></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:115px;border-radius:8px 8px 0 0;width:100%;position:relative"><span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--t2)">05-17</span></div></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--p);height:130px;border-radius:8px 8px 0 0;width:100%;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:var(--p)">21,600</span><span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--t2)">05-22</span></div></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:95px;border-radius:8px 8px 0 0;width:100%;position:relative"><span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--t2)">05-19</span></div></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:108px;border-radius:8px 8px 0 0;width:100%;position:relative"><span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--t2)">05-20</span></div></div>
+                <div style="flex:1;text-align:center"><div style="background:var(--pl);height:120px;border-radius:8px 8px 0 0;width:100%;position:relative"><span style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--t2)">05-21</span></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="db-card">
+            <div class="db-header"><h3>今日报工明细</h3><a onclick="pcNav('pc-query',null)">查看全部 →</a></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>员工</th><th>班组</th><th>工序</th><th>产量(件)</th><th>工时</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr><td>张三</td><td>针车一班</td><td>针车支流</td><td>1,200</td><td>8h</td><td><span class="badge badge-p1">待确认</span></td></tr>
+                  <tr><td>李四</td><td>冲裁段</td><td>冲裁段</td><td>2,000</td><td>8h</td><td><span class="badge badge-s">已确认</span></td></tr>
+                  <tr><td>王五</td><td>针车二班</td><td>针车支流</td><td>980</td><td>8h</td><td><span class="badge badge-p1">待确认</span></td></tr>
+                  <tr><td>赵六</td><td>冲裁段</td><td>冲裁段</td><td>1,800</td><td>8h</td><td><span class="badge badge-info">已审核</span></td></tr>
+                  <tr><td>钱七</td><td>成型段</td><td>成型段</td><td>850</td><td>8h</td><td><span class="badge badge-s">已确认</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC 报工审批 -->
+        <div class="pc-page" id="pc-approval">
+          <div class="pc-section-title"><div class="bar"></div><h2>报工审批工作台</h2></div>
+          <div class="m-tabs" style="margin-bottom:16px;display:inline-flex;width:auto">
+            <div class="m-tab active" onclick="switchMTab(this,'pc-ap-t1')" style="padding:6px 20px">待确认(12)</div>
+            <div class="m-tab" onclick="switchMTab(this,'pc-ap-t2')" style="padding:6px 20px">待终审(3)</div>
+          </div>
+          <div class="m-tab-content active" id="pc-ap-t1">
+            <div class="db-card">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>员工</th><th>班组</th><th>报工日期</th><th>工序</th><th>产量(件)</th><th>工时</th><th>审批节点</th><th>操作</th></tr></thead>
+                  <tbody>
+                    <tr><td>张三</td><td>针车一班</td><td>05-22</td><td>针车支流</td><td>1,200</td><td>8h</td><td><span class="badge badge-p1">班组长确认</span></td><td class="actions"><button class="btn-act-s" onclick="showToast('已确认通过')">通过</button><button class="btn-act-d" onclick="showToast('已驳回')">驳回</button></td></tr>
+                    <tr><td>李四</td><td>冲裁段</td><td>05-22</td><td>冲裁段</td><td>2,000</td><td>8h</td><td><span class="badge badge-p1">课长审核</span></td><td class="actions"><button class="btn-act-s" onclick="showToast('已审核通过')">通过</button><button class="btn-act-d" onclick="showToast('已驳回')">驳回</button></td></tr>
+                    <tr><td>王五</td><td>针车二班</td><td>05-22</td><td>针车支流</td><td>980</td><td>8h</td><td><span class="badge badge-p1">班组长确认</span></td><td class="actions"><button class="btn-act-s" onclick="showToast('已确认通过')">通过</button><button class="btn-act-d" onclick="showToast('已驳回')">驳回</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="m-tab-content" id="pc-ap-t2">
+            <div class="db-card">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>班组</th><th>日期</th><th>人数</th><th>总产量(件)</th><th>异常笔数</th><th>状态</th><th>操作</th></tr></thead>
+                  <tbody>
+                    <tr class="highlight-row"><td>针车一班</td><td>05-22</td><td>18</td><td>21,600</td><td>3</td><td><span class="badge badge-p1">待终审</span></td><td class="actions"><button class="btn-act-s" onclick="showToast('终审通过，数据已归档')">终审通过</button><button class="btn-act-d" onclick="showToast('已驳回调整')">驳回调整</button></td></tr>
+                    <tr><td>冲裁段</td><td>05-22</td><td>12</td><td>38,000</td><td>0</td><td><span class="badge badge-p1">待终审</span></td><td class="actions"><button class="btn-act-s" onclick="showToast('终审通过，数据已归档')">终审通过</button><button class="btn-act-d" onclick="showToast('已驳回调整')">驳回调整</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC 数据查询 -->
+        <div class="pc-page" id="pc-query">
+          <div class="pc-section-title"><div class="bar green"></div><h2>数据查询</h2></div>
+          <div class="db-card" style="margin-bottom:16px">
+            <div class="grid-3">
+              <div class="form-group"><label>开始日期</label><input type="date" class="form-control" value="2026-05-01"></div>
+              <div class="form-group"><label>结束日期</label><input type="date" class="form-control" value="2026-05-22"></div>
+              <div class="form-group"><label>工序</label><select class="form-control"><option>全部工序</option><option>冲裁段</option><option>针车支流</option><option>成型段</option></select></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-p" onclick="showToast('查询完成，共 45 条记录')">查询报工明细</button>
+              <button class="btn btn-outline" onclick="showToast('导出中...')"><i class="fas fa-download"></i> 导出</button>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="db-card">
+              <div class="db-header"><h3>报工明细查询结果</h3></div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>日期</th><th>员工</th><th>工序</th><th>产量(件)</th><th>工时</th><th>状态</th></tr></thead>
+                  <tbody>
+                    <tr><td>05-22</td><td>张三</td><td>针车支流</td><td>1,200</td><td>8h</td><td><span class="badge badge-s">已确认</span></td></tr>
+                    <tr><td>05-22</td><td>李四</td><td>冲裁段</td><td>2,000</td><td>8h</td><td><span class="badge badge-s">已确认</span></td></tr>
+                    <tr><td>05-21</td><td>王五</td><td>针车支流</td><td>1,150</td><td>8h</td><td><span class="badge badge-info">已审核</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>件资汇总（2026年5月）</h3></div>
+              <table>
+                <thead><tr><th>工序</th><th>单价(元)</th><th>完成数</th><th>小计(元)</th></tr></thead>
+                <tbody>
+                  <tr><td>针车支流</td><td>0.15</td><td>22,000</td><td>3,300.00</td></tr>
+                  <tr><td>冲裁段</td><td>0.10</td><td>18,000</td><td>1,800.00</td></tr>
+                  <tr style="background:#F8FAFC;font-weight:700"><td colspan="3">计件工资合计</td><td style="color:var(--p)">5,100.00</td></tr>
+                  <tr><td colspan="3">奖金</td><td style="color:var(--s)">+200.00</td></tr>
+                  <tr><td colspan="3">扣款</td><td style="color:var(--d)">-150.00</td></tr>
+                  <tr style="background:#F8FAFC;font-weight:700"><td colspan="3">实发合计</td><td style="font-size:18px;color:var(--p)">5,150.00</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC 其他功能 -->
+        <div class="pc-page" id="pc-other">
+          <div class="pc-section-title"><div class="bar red"></div><h2>其他功能</h2></div>
+          <div class="grid-3">
+            <div class="db-card" style="text-align:center;cursor:pointer" onclick="showToast('样鞋管理 — 制作/入库/领用/报废全流程')">
+              <div style="font-size:40px;margin-bottom:12px">👟</div>
+              <h3 style="margin-bottom:4px">样鞋管理</h3>
+              <p style="font-size:13px;color:var(--t2)">制作·入库·领用·报废</p>
+            </div>
+            <div class="db-card" style="text-align:center;cursor:pointer" onclick="showToast('件资异常上报 — 推送至直接上级')">
+              <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+              <h3 style="margin-bottom:4px">件资异常上报</h3>
+              <p style="font-size:13px;color:var(--t2)">物料·设备·工序异常</p>
+            </div>
+            <div class="db-card" style="text-align:center;cursor:pointer" onclick="showToast('员工意见箱 — 合理化建议·问题反馈')">
+              <div style="font-size:40px;margin-bottom:12px">💬</div>
+              <h3 style="margin-bottom:4px">员工意见箱</h3>
+              <p style="font-size:13px;color:var(--t2)">合理化建议·问题反馈</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /pcView -->
+
+<!-- ============================== PORTAL VIEW ============================== -->
+<div class="view" id="portalView">
+  <div class="portal-layout">
+    <div class="portal-sidebar" id="portalSidebar">
+      <div class="logo"><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;font-style:italic;font-size:22px;letter-spacing:-1px;color:#60A5FA;line-height:1">XTEP</span><span style="font-size:14px;color:rgba(255,255,255,.3);font-weight:300;line-height:1">|</span><span style="font-weight:600;font-size:15px;line-height:1">生产通 · 管理门户</span></span><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:1px">特步 · 一站式管理平台</div></div>
+      <div class="nav-group">
+        <div class="g-label"><i class="fas fa-cogs"></i> 业务模块</div>
+        <button class="nav-item active" data-portal="portal-dashboard"><i class="fas fa-tachometer-alt"></i> 生产总览</button>
+        <button class="nav-item" data-portal="portal-approval"><i class="fas fa-check-double"></i> 审批管理</button>
+        <button class="nav-item" data-portal="portal-report"><i class="fas fa-chart-bar"></i> 数据报表</button>
+      </div>
+    </div>
+    <div class="portal-resizer" id="portalResizer"></div>
+    <div class="portal-main">
+      <div class="portal-header">
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="搜索员工、班组、工序..."></div>
+        <div class="user"><i class="fas fa-bell" style="color:var(--t2);cursor:pointer;position:relative" onclick="showToast('3条新通知')"><span style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--d);border-radius:50%"></span></i><div class="avatar">陈</div><span>陈建国 · 生管经理</span></div>
+      </div>
+      <div class="portal-content" id="portalContent">
+
+        <div class="portal-page active" id="portal-dashboard">
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">3,856</div><div class="label">本月报工总笔数</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#D97706">47</div><div class="label">待审批</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--s)">652,800</div><div class="label">本月总产量(件)</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#7C3AED">12</div><div class="label">异常上报</div></div>
+          </div>
+          <div class="grid-3" style="margin-bottom:24px">
+            <div class="db-card">
+              <div class="db-header"><h3>班组产量排行</h3></div>
+              <table>
+                <thead><tr><th>#</th><th>班组</th><th>产量(件)</th><th>人数</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>冲裁段</td><td style="font-weight:600">38,000</td><td>12</td></tr>
+                  <tr><td>2</td><td>针车一班</td><td style="font-weight:600">21,600</td><td>18</td></tr>
+                  <tr><td>3</td><td>针车二班</td><td style="font-weight:600">18,500</td><td>15</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>待办事项</h3></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;cursor:pointer" onclick="portalNav('portal-approval')">
+                  <span class="badge badge-p1">12</span><span>报工确认待处理</span><i class="fas fa-chevron-right" style="margin-left:auto;color:var(--t2)"></i>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;cursor:pointer" onclick="portalNav('portal-approval')">
+                  <span class="badge" style="background:#F3F0FF;color:#7C3AED">3</span><span>报工审核待终审</span><i class="fas fa-chevron-right" style="margin-left:auto;color:var(--t2)"></i>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;cursor:pointer">
+                  <span class="badge badge-p0">5</span><span>异常上报待处理</span><i class="fas fa-chevron-right" style="margin-left:auto;color:var(--t2)"></i>
+                </div>
+              </div>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>工序产量分布</h3></div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>冲裁段</span><span>48%</span></div><div style="height:8px;background:#E5E7EB;border-radius:4px;overflow:hidden"><div style="height:100%;width:48%;background:var(--p);border-radius:4px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>针车支流</span><span>35%</span></div><div style="height:8px;background:#E5E7EB;border-radius:4px;overflow:hidden"><div style="height:100%;width:35%;background:var(--s);border-radius:4px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>成型段</span><span>17%</span></div><div style="height:8px;background:#E5E7EB;border-radius:4px;overflow:hidden"><div style="height:100%;width:17%;background:#7C3AED;border-radius:4px"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-page" id="portal-approval">
+          <div class="pc-section-title"><div class="bar"></div><h2>审批管理</h2></div>
+          <div class="db-card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>类型</th><th>提交人/班组</th><th>日期</th><th>摘要</th><th>当前节点</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td>报工确认</td><td>张三</td><td>05-22</td><td>针车支流 · 1,200件</td><td><span class="badge badge-p1">班组长确认</span></td><td class="actions"><button class="btn-act-s">通过</button><button class="btn-act-d">驳回</button></td></tr>
+                  <tr><td>报工确认</td><td>李四</td><td>05-22</td><td>冲裁段 · 2,000件</td><td><span class="badge badge-p1">课长审核</span></td><td class="actions"><button class="btn-act-s">通过</button><button class="btn-act-d">驳回</button></td></tr>
+                  <tr><td>报工审核</td><td>针车一班</td><td>05-22</td><td>18人 · 21,600件 · 3笔异常</td><td><span class="badge badge-p1">生管经理终审</span></td><td class="actions"><button class="btn-act-s">终审通过</button><button class="btn-act-d">驳回调整</button></td></tr>
+                  <tr><td>异常上报</td><td>赵六</td><td>05-22</td><td>物料短缺 · 冲裁段</td><td><span class="badge badge-p1">待处理</span></td><td class="actions"><button class="btn-act-p">查看</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-page" id="portal-report">
+          <div class="pc-section-title"><div class="bar green"></div><h2>数据报表</h2></div>
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="db-card">
+              <div class="db-header"><h3>日报（2026-05-22）</h3><a>导出 →</a></div>
+              <table>
+                <thead><tr><th>班组</th><th>人数</th><th>产量(件)</th><th>人均</th></tr></thead>
+                <tbody>
+                  <tr><td>冲裁段</td><td>12</td><td>38,000</td><td>3,167</td></tr>
+                  <tr><td>针车一班</td><td>18</td><td>21,600</td><td>1,200</td></tr>
+                  <tr><td>针车二班</td><td>15</td><td>18,500</td><td>1,233</td></tr>
+                  <tr style="background:#F8FAFC;font-weight:700"><td>合计</td><td>45</td><td>78,100</td><td>1,736</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>月报（2026年5月）</h3><a>导出 →</a></div>
+              <table>
+                <thead><tr><th>班组</th><th>人数</th><th>产量(件)</th><th>人均</th></tr></thead>
+                <tbody>
+                  <tr><td>冲裁段</td><td>12</td><td>298,000</td><td>24,833</td></tr>
+                  <tr><td>针车一班</td><td>18</td><td>192,400</td><td>10,689</td></tr>
+                  <tr><td>针车二班</td><td>15</td><td>162,400</td><td>10,827</td></tr>
+                  <tr style="background:#F8FAFC;font-weight:700"><td>合计</td><td>45</td><td>652,800</td><td>14,507</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+        <!-- Portal Detail: 报工确认详情 -->
+        <div class="portal-page" id="portal-bgqr-detail">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="cursor:pointer;font-size:14px;color:var(--p)" onclick="portalNav('portal-approval')"><i class="fas fa-arrow-left"></i> 返回审批管理</span></div>
+          <div class="card" style="max-width:640px">
+            <div class="card-title">报工确认详情</div>
+            <div class="detail-grid">
+              <div class="field"><label>员工</label><div class="value">张三</div></div>
+              <div class="field"><label>班组</label><div class="value">针车一班</div></div>
+              <div class="field"><label>报工日期</label><div class="value">2026-05-22</div></div>
+              <div class="field"><label>工序</label><div class="value">针车支流</div></div>
+              <div class="field"><label>产量</label><div class="value">1,200 件</div></div>
+              <div class="field"><label>工时</label><div class="value">8h</div></div>
+              <div class="field full"><label>审批链</label>
+                <div class="value"><div class="approve-chain" style="margin-top:4px">
+                  <div class="node done"><span class="label">提交</span><span class="name">员工</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                  <div class="node active"><span class="label">确认</span><span class="name">班组长</span></div><span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                  <div class="node"><span class="label">审核</span><span class="name">课长</span></div>
+                </div></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:20px">
+              <button class="btn btn-p" onclick="showToast('确认通过！已流转至下一节点');portalNav('portal-approval')">确认通过</button>
+              <button class="btn btn-sm btn-outline" onclick="portalNav('portal-approval')">返回</button>
+            </div>
+          </div>
+        </div>
+
+</div><!-- /portalView -->
+
+<!-- ============ MODALS ============ -->
+<!-- 报工审核详情 Modal -->
+<div class="modal-overlay" id="modalBgsh">
+  <div class="modal-content">
+    <div class="modal-header"><h3>报工审核详情（生管经理终审）</h3><button onclick="closeModal('modalBgsh')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="field"><label>班组</label><div class="value" id="bgshTeam">针车一班</div></div>
+        <div class="field"><label>日期</label><div class="value">2026-05-22</div></div>
+        <div class="field"><label>报工人数</label><div class="value" id="bgshCount">18 人</div></div>
+        <div class="field"><label>总产量</label><div class="value" id="bgshTotal">21,600 件</div></div>
+        <div class="field full"><label>异常标记</label><div class="value" id="bgshAnomaly" style="color:#D97706">3 笔异常数据（点击明细查看）</div></div>
+        <div class="field full">
+          <table class="data-table" style="margin-top:8px">
+            <thead><tr><th>员工</th><th>工序</th><th>产量</th><th>标记</th></tr></thead>
+            <tbody>
+              <tr><td>张三</td><td>针车支流</td><td>1,200</td><td>—</td></tr>
+              <tr class="highlight-row"><td>李明</td><td>针车支流</td><td>2,500</td><td>⚠ 产量异常偏高</td></tr>
+              <tr><td>王五</td><td>针车支流</td><td>980</td><td>—</td></tr>
+              <tr class="highlight-row"><td>赵四</td><td>针车支流</td><td>0</td><td>⚠ 零产量</td></tr>
+              <tr class="highlight-row"><td>钱六</td><td>针车支流</td><td>300</td><td>⚠ 产量异常偏低</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeModal('modalBgsh');showToast('已驳回调整，异常数据退回班组')">驳回调整</button>
+      <button class="btn btn-p" onclick="closeModal('modalBgsh');showToast('终审通过！数据已归档同步MES')">终审通过</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== View Switching =====
+document.querySelectorAll('.vs button[data-view]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.vs button[data-view]').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active');
+    var v=b.getAttribute('data-view');
+    document.getElementById('mobileView').style.display='none';
+    document.getElementById('pcView').style.display='none';
+    document.getElementById('portalView').style.display='none';
+    if(v==='mobile') document.getElementById('mobileView').style.display='flex';
+    if(v==='pc') document.getElementById('pcView').style.display='block';
+    if(v==='portal') document.getElementById('portalView').style.display='block';
+  });
+});
+document.getElementById('mobileView').style.display='flex';
+
+// ===== Mobile Navigation =====
+var mStack=['mp-sc-index'];
+function mNav(id){
+  var cur=document.querySelector('.m-page.active');
+  if(cur){
+    cur.classList.remove('active');
+    mStack.push(id);
+  }
+  var next=document.getElementById(id);
+  if(next){next.classList.add('active')}
+  updateMTitle(id);
+  updateMBack();
+  updateBottomNav(id);
+}
+
+function mGoBack(){
+  if(mStack.length<=1)return;
+  document.querySelector('.m-page.active').classList.remove('active');
+  mStack.pop();
+  var prev=mStack[mStack.length-1];
+  var el=document.getElementById(prev);
+  if(el){el.classList.add('active')}
+  updateMTitle(prev);
+  updateMBack();
+  updateBottomNav(prev);
+}
+
+function updateMTitle(id){
+  var map={
+    'mp-sc-index':'生产通','mp-bg-index':'报工板块','mp-bg-mesbg':'MES报工',
+    'mp-bg-bgqr':'报工确认','mp-bg-bgsh':'报工审核',
+    'mp-cx-index':'查询板块','mp-cx-cksm':'仓库扫描','mp-cx-bgmx':'报工明细查询','mp-cx-jzcx':'件资查询',
+    'mp-qt-index':'其他板块','mp-qt-yxgl':'样鞋管理','mp-qt-yxgl-add':'新增样鞋','mp-qt-jzyc':'件资异常上报','mp-qt-yjyx':'员工意见箱'
+  };
+  document.getElementById('mTitle').textContent=map[id]||'生产通';
+}
+
+function updateMBack(){
+  var back=document.getElementById('mBack');
+  if(mStack.length<=1){back.style.visibility='hidden'}else{back.style.visibility='visible'}
+}
+
+function updateBottomNav(id){
+  var tabs=document.querySelectorAll('.bottom-nav .tab');
+  tabs.forEach(function(t){t.classList.remove('active')});
+  var map={'mp-sc-index':0,'mp-bg-index':1,'mp-bg-mesbg':1,'mp-bg-bgqr':1,'mp-bg-bgsh':1,'mp-cx-index':2,'mp-cx-cksm':2,'mp-cx-bgmx':2,'mp-cx-jzcx':2,'mp-qt-index':3,'mp-qt-yxgl':3,'mp-qt-yxgl-add':3,'mp-qt-jzyc':3,'mp-qt-yjyx':3};
+  var idx=map[id];
+  if(idx!==undefined&&tabs[idx]){tabs[idx].classList.add('active')}
+}
+
+// ===== PC Navigation =====
+function pcNav(id,btn){
+  document.querySelectorAll('.pc-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(id);
+  if(el){el.classList.add('active')}
+  document.querySelectorAll('.pc-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  if(btn){btn.classList.add('active')}
+  var crumbs={'pc-dashboard':'工作台','pc-approval':'报工审批','pc-query':'数据查询','pc-other':'其他功能'};
+  document.getElementById('pcCrumb').textContent=crumbs[id]||'';
+}
+
+// ===== Portal Navigation =====
+function portalNav(pageId){
+  document.querySelectorAll('.portal-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(pageId);if(el){el.classList.add('active')}
+  document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  var nav=document.querySelector('.portal-sidebar .nav-item[data-portal="'+pageId+'"]');
+  if(nav) nav.classList.add('active');
+}
+document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(item){
+  item.addEventListener('click',function(){portalNav(this.dataset.portal)});
+});
+
+// ===== Mobile Tab Switching =====
+function switchMTab(tab,contentId){
+  var parent=tab.parentElement;
+  parent.querySelectorAll('.m-tab').forEach(function(t){t.classList.remove('active')});
+  tab.classList.add('active');
+  var container=tab.closest('.m-page')||tab.closest('.pc-page')||tab.closest('.pc-content');
+  if(!container)return;
+  container.querySelectorAll('.m-tab-content').forEach(function(c){c.classList.remove('active')});
+  var c=document.getElementById(contentId);
+  if(c){c.classList.add('active')}
+}
+
+// ===== Toast =====
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show')},2000);
+}
+
+// ===== Modals =====
+function showBgqrDetail(name,team,process,qty,hours,node){
+  document.getElementById('bgqrName').textContent=name;
+  document.getElementById('bgqrTeam').textContent=team;
+  document.getElementById('bgqrProcess').textContent=process;
+  document.getElementById('bgqrQty').textContent=qty+' 件';
+  document.getElementById('modalBgqr').classList.add('show');
+}
+function showBgshDetail(team,date,count,total,anomaly){
+  document.getElementById('bgshTeam').textContent=team;
+  document.getElementById('bgshCount').textContent=count+' 人';
+  document.getElementById('bgshTotal').textContent=total+' 件';
+  document.getElementById('bgshAnomaly').textContent=anomaly+' 笔异常数据（点击明细查看）';
+  document.getElementById('modalBgsh').classList.add('show');
+}
+
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(ov){
+  ov.addEventListener('click',function(e){if(e.target===ov){ov.classList.remove('show')}});
+});
+
+// ===== Share =====
+function shareProto(){
+  var url=window.location.href;
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){showToast('链接已复制到剪贴板！')})}
+  else{showToast('分享链接：'+url)}
+}
+
+// ===== PC Sidebar Resizer =====
+(function(){
+  var sb=document.getElementById('pcSidebar'),rz=document.getElementById('pcResizer'),dragging=false,startX,startW;
+  rz.addEventListener('mousedown',function(e){dragging=true;startX=e.clientX;startW=sb.offsetWidth;rz.classList.add('active');e.preventDefault()});
+  document.addEventListener('mousemove',function(e){if(!dragging)return;var w=Math.max(160,Math.min(400,startW+e.clientX-startX));sb.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging){dragging=false;rz.classList.remove('active')}});
+})();
+
+// ===== Portal Sidebar Resizer =====
+(function(){
+  var sb=document.getElementById('portalSidebar'),rz=document.getElementById('portalResizer'),dragging=false,startX,startW;
+  rz.addEventListener('mousedown',function(e){dragging=true;startX=e.clientX;startW=sb.offsetWidth;rz.classList.add('active');e.preventDefault()});
+  document.addEventListener('mousemove',function(e){if(!dragging)return;var w=Math.max(180,Math.min(400,startW+e.clientX-startX));sb.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging){dragging=false;rz.classList.remove('active')}});
+})();
+</script>
+<script>
+(function() {
+  if (window.self === window.top) return;
+  var style = document.createElement('style');
+  style.textContent = '.phone>.status-bar,.phone>.app-header{display:none!important}.phone{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;margin:0!important;padding:0!important}.phone>.page-content{padding:0!important;margin:0!important}.phone>.bottom-nav{flex-shrink:0}';
+  document.head.appendChild(style);
+  var vsBar = document.querySelector('.vs');
+  if (vsBar) vsBar.style.display = 'none';
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.style.height = '100vh';
+    v.style.marginTop = '0';
+  });
+  function applyView(view) {
+    var mv = document.getElementById('mobileView');
+    var pv = document.getElementById('pcView');
+    var pv2 = document.getElementById('portalView');
+    if (mv) mv.style.display = 'none';
+    if (pv) pv.style.display = 'none';
+    if (pv2) pv2.style.display = 'none';
+    if (view === 'mobile' && mv) mv.style.display = 'flex';
+    else if (view === 'pc' && pv) pv.style.display = 'block';
+    else if (view === 'portal' && pv2) pv2.style.display = 'block';
+  }
+  var hash = window.location.hash.replace('#', '');
+  if (hash && ['mobile','pc','portal'].indexOf(hash) >= 0) {
+    applyView(hash);
+  }
+  window.addEventListener('message', function(e) {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === 'switchView' && e.data.view) {
+      applyView(e.data.view);
+    }
+    if (e.data.type === 'goBack') {
+      if (typeof mStack !== 'undefined' && mStack.length > 1) {
+        if (typeof mGoBack === 'function') mGoBack();
+      } else {
+        window.parent.postMessage({ type: 'closeModule' }, '*');
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

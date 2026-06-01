@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人中心 — 原型方案</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--p:#DB2777;--pd:#BE185D;--pl:#FDF2F8;--xp:#E60012;--xpd:#CC0010;--xpl:#FFE8EA;--s:#34A853;--w:#FBBC04;--d:#EA4335;--di:#FEE8E8;--bg:#F5F7FA;--cd:#FFF;--t1:#1F2937;--t2:#6B7280;--bd:#E5E7EB;--sd:0 2px 12px rgba(0,0,0,.08);--r:12px;--r-sm:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;--trans:all .3s cubic-bezier(.4,0,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#E8ECF1;color:var(--t1);overflow:hidden;height:100vh}
+.vs{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;align-items:center;justify-content:center;gap:4px;background:#1F2937;padding:8px 16px;height:48px}
+.vs button{padding:6px 16px;border:none;background:transparent;color:#9CA3AF;font-size:13px;cursor:pointer;border-radius:6px;font-family:var(--font);transition:var(--trans)}
+.vs button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.vs button.active{color:#fff;background:var(--p)}
+.vs .vs-title{color:#fff;font-size:14px;font-weight:600;margin-right:auto}
+.vs .vs-share{background:var(--s);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;border:none;cursor:pointer;font-family:var(--font);margin-left:auto;transition:var(--trans)}
+.vs .vs-share:hover{opacity:.85}
+.view{display:none;width:100%;height:calc(100vh - 48px);margin-top:48px;position:relative}
+#mobileView{display:none;justify-content:center;align-items:center;background:#E8ECF1;padding:20px}
+#mobileView .phone{width:380px;height:780px;background:var(--bg);border-radius:32px;box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.phone .status-bar{height:44px;background:var(--p);display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#fff;font-size:12px;font-weight:600;flex-shrink:0}
+.phone .app-header{height:48px;background:var(--p);display:flex;align-items:center;padding:0 16px;color:#fff;flex-shrink:0;position:relative}
+.phone .app-header .back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;transition:var(--trans);font-size:18px;border:none;color:#fff;background:transparent}
+.phone .app-header .back:hover{background:rgba(255,255,255,.15)}
+.phone .app-header .title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.phone .app-header .right{width:36px}
+.phone .page-content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.phone .page-content::-webkit-scrollbar{width:0}
+.m-page{display:none;padding:16px;animation:mFadeIn .35s ease}
+.m-page.active{display:block}
+@keyframes mFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+#pcView{display:none}
+.pc-layout{display:flex;height:100%;background:var(--bg)}
+.pc-sidebar{width:240px;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;min-width:160px}
+.pc-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.pc-resizer:hover,.pc-resizer.active{background:var(--p)}
+.pc-resizer::after{content:"";position:absolute;inset:0 -4px}
+.pc-sidebar .logo{padding:20px 20px 16px;font-size:18px;font-weight:700;color:var(--p);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)}
+.pc-sidebar .logo i{font-size:24px}
+.pc-sidebar .nav-group{padding:12px 0}
+.pc-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.pc-sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--t1);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.pc-sidebar .nav-item i{width:20px;text-align:center;color:var(--t2);font-size:16px;transition:var(--trans)}
+.pc-sidebar .nav-item:hover{background:var(--pl);color:var(--p)}
+.pc-sidebar .nav-item:hover i{color:var(--p)}
+.pc-sidebar .nav-item.active{background:var(--pl);color:var(--p);font-weight:600}
+.pc-sidebar .nav-item.active i{color:var(--p)}
+.pc-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.pc-header{height:60px;background:#fff;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.pc-header .bc{font-size:14px;color:var(--t2)}
+.pc-header .bc span{color:var(--t1);font-weight:500}
+.pc-header .user{display:flex;align-items:center;gap:12px;font-size:14px}
+.pc-header .user .avatar{width:32px;height:32px;border-radius:50%;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.pc-content{flex:1;overflow-y:auto;padding:24px;position:relative}
+.pc-content::-webkit-scrollbar{width:6px}
+.pc-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.card{background:var(--cd);border-radius:var(--r);padding:20px;box-shadow:var(--sd);transition:var(--trans)}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.badge-s{background:#DCFCE7;color:#16A34A}
+.badge-p1{background:#FEF3C7;color:#D97706}
+.badge-info{background:var(--pl);color:var(--p)}
+.btn{padding:10px 24px;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:500;cursor:pointer;transition:var(--trans);font-family:var(--font)}
+.btn-p{background:var(--p);color:#fff}
+.btn-p:hover{background:var(--pd);transform:translateY(-1px);box-shadow:0 4px 12px rgba(219,39,119,.3)}
+.btn-outline{background:transparent;border:1px solid var(--bd);color:var(--t1)}
+.btn-outline:hover{border-color:var(--p);color:var(--p)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-block{width:100%}
+.btn-danger{background:var(--d);color:#fff}
+.btn-danger:hover{opacity:.9}
+/* Portal View */
+#portalView{display:none}
+.portal-layout{display:flex;height:100%}
+.portal-sidebar{width:260px;background:linear-gradient(180deg,#1F2937 0%,#111827 100%);display:flex;flex-direction:column;flex-shrink:0;min-width:180px}
+.portal-resizer{width:6px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;position:relative;z-index:10}
+.portal-resizer:hover,.portal-resizer.active{background:#F472B6}
+.portal-resizer::after{content:"";position:absolute;inset:0 -4px}
+.portal-sidebar .logo{padding:20px 20px 16px;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.portal-sidebar .logo i{font-size:22px;color:#F472B6}
+.portal-sidebar .nav-group{padding:16px 0}
+.portal-sidebar .nav-group .g-label{padding:4px 20px 8px;font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.portal-sidebar .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.7);font-size:14px;transition:var(--trans);border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.portal-sidebar .nav-item i{width:20px;text-align:center;font-size:16px}
+.portal-sidebar .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.portal-sidebar .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-right:3px solid #F472B6;font-weight:500}
+.portal-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F0F2F5;min-width:400px}
+.portal-header{height:60px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;z-index:10}
+.portal-header .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);padding:8px 16px;border-radius:8px;width:320px}
+.portal-header .search-box i{color:var(--t2)}
+.portal-header .search-box input{border:none;background:none;outline:none;font-size:14px;width:100%;font-family:var(--font)}
+.portal-header .user{display:flex;align-items:center;gap:16px}
+.portal-header .user .avatar{width:34px;height:34px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.portal-content{flex:1;overflow-y:auto;padding:24px}
+.portal-content::-webkit-scrollbar{width:6px}
+.portal-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.portal-page{display:none;animation:portalIn .4s ease}
+.portal-page.active{display:block}
+@keyframes portalIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:var(--t2);margin-bottom:6px;font-weight:500}
+.form-group .required::after{content:' *';color:var(--d)}
+.form-control{width:100%;padding:10px 14px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:14px;outline:none;transition:var(--trans);font-family:var(--font);background:#FFF}
+.form-control:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(219,39,119,.12)}
+select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.db-card{background:#fff;border-radius:var(--r);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:var(--trans)}
+.db-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.db-card .db-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.db-card .db-header h3{font-size:16px;font-weight:600}
+.pc-page{display:none;animation:pcIn .4s ease}
+.pc-page.active{display:block}
+@keyframes pcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:#1F2937;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;opacity:0;transition:all .5s ease;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.profile-header{text-align:center;padding:20px 0;position:relative}
+.profile-header .avatar-lg{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--p),#F472B6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;margin:0 auto 12px}
+.profile-header .name{font-size:20px;font-weight:700}
+.profile-header .meta{font-size:13px;color:var(--t2);margin-top:2px}
+.setting-item{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--bd);cursor:pointer;transition:var(--trans)}
+.setting-item:hover{color:var(--p)}
+.setting-item .s-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.setting-item .s-info{flex:1}
+.setting-item .s-info .s-title{font-size:15px;font-weight:500}
+.setting-item .s-info .s-desc{font-size:12px;color:var(--t2);margin-top:2px}
+.setting-item .s-arrow{color:#CBD5E1}
+.info-row{display:flex;padding:14px 0;border-bottom:1px solid var(--bd)}
+.info-row .info-label{width:90px;font-size:13px;color:var(--t2);flex-shrink:0}
+.info-row .info-value{font-size:14px;font-weight:500}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.theme-card{padding:24px 16px;border-radius:var(--r);text-align:center;cursor:pointer;border:2px solid transparent;transition:var(--trans);font-size:14px;font-weight:500}
+.theme-card:hover{transform:translateY(-2px)}
+.theme-card.active{border-color:var(--p);box-shadow:0 0 0 3px rgba(219,39,119,.15)}
+.theme-blue{background:linear-gradient(135deg,#E8F0FE,#BFDBFE);color:#1E6DF2}
+.theme-green{background:linear-gradient(135deg,#DCFCE7,#BBF7D0);color:#16A34A}
+.theme-purple{background:linear-gradient(135deg,#F3F0FF,#DDD6FE);color:#7C3AED}
+.theme-orange{background:linear-gradient(135deg,#FEF3E2,#FDE68A);color:#D97706}
+.theme-dark{background:linear-gradient(135deg,#1F2937,#374151);color:#F9FAFB}
+.theme-pink{background:linear-gradient(135deg,#FDF2F8,#FCE7F3);color:#DB2777}
+@media(max-width:768px){.vs .vs-title{display:none}#mobileView .phone{width:100%;height:100%;border-radius:0}}
+</style>
+</head>
+<body>
+
+<div class="vs" id="viewSwitcher">
+  <span class="vs-title"><i class="fas fa-user-circle"></i> 个人中心 · 原型</span>
+  <button class="active" data-view="mobile"><i class="fas fa-mobile-alt"></i> 手机端</button>
+  <button data-view="pc"><i class="fas fa-desktop"></i> 电脑端</button>
+  <button data-view="portal"><i class="fas fa-shield-alt"></i> 管理门户</button>
+  <button class="vs-share" onclick="shareProto()"><i class="fas fa-share-alt"></i> 分享</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================== MOBILE VIEW ============================== -->
+<div class="view" id="mobileView">
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span style="font-weight:800;letter-spacing:.5px;font-size:11px">XTEP 特步</span><span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i> <i class="fas fa-battery-full"></i></span></div>
+    <div class="app-header"><button class="back" id="mBack" onclick="mGoBack()" style="visibility:hidden"><i class="fas fa-chevron-left"></i></button><span class="title" id="mTitle">个人中心</span><span class="right"></span></div>
+    <div class="page-content" id="mContent">
+
+      <!-- ====== 个人中心首页 ====== -->
+      <div class="m-page active" id="mp-wd-index">
+        <div class="profile-header">
+          <div class="avatar-lg">张</div>
+          <div class="name">张三</div>
+          <div class="meta">工号：123456 · 制造一部 · 针车一班</div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="setting-item" onclick="mNav('mp-wd-info')">
+            <div class="s-icon" style="background:var(--pl);color:var(--p)"><i class="fas fa-id-card"></i></div>
+            <div class="s-info"><div class="s-title">个人信息</div><div class="s-desc">查看个人档案</div></div><i class="fas fa-chevron-right s-arrow"></i>
+          </div>
+          <div class="setting-item" onclick="mNav('mp-wd-settings')">
+            <div class="s-icon" style="background:#FEF3E2;color:#D97706"><i class="fas fa-cog"></i></div>
+            <div class="s-info"><div class="s-title">账户设置</div><div class="s-desc">密码 · 皮肤 · 隐私</div></div><i class="fas fa-chevron-right s-arrow"></i>
+          </div>
+          <div class="setting-item" onclick="mNav('mp-wd-feedback')" style="border-bottom:none">
+            <div class="s-icon" style="background:#DCFCE7;color:#16A34A"><i class="fas fa-comment-dots"></i></div>
+            <div class="s-info"><div class="s-title">意见反馈</div><div class="s-desc">功能建议 · 问题反馈</div></div><i class="fas fa-chevron-right s-arrow"></i>
+          </div>
+        </div>
+        <div class="card" style="text-align:center;font-size:14px">
+          <div style="color:var(--t2);margin-bottom:8px">一站式服务平台 v1.0.0</div>
+          <button class="btn btn-outline btn-sm" onclick="showToast('已退出登录')" style="color:var(--d);border-color:var(--di)">退出登录</button>
+        </div>
+      </div>
+
+      <!-- ====== 个人信息 ====== -->
+      <div class="m-page" id="mp-wd-info">
+        <div class="card">
+          <div class="info-row"><span class="info-label">姓名</span><span class="info-value">张三</span></div>
+          <div class="info-row"><span class="info-label">工号</span><span class="info-value">123456</span></div>
+          <div class="info-row"><span class="info-label">性别</span><span class="info-value">男</span></div>
+          <div class="info-row"><span class="info-label">部门</span><span class="info-value">制造一部</span></div>
+          <div class="info-row"><span class="info-label">岗位</span><span class="info-value">针车工</span></div>
+          <div class="info-row"><span class="info-label">班组</span><span class="info-value">针车一班</span></div>
+          <div class="info-row"><span class="info-label">入职时间</span><span class="info-value">2020-03-01</span></div>
+          <div class="info-row"><span class="info-label">联系电话</span><span class="info-value">138****5678</span></div>
+          <div class="info-row" style="border-bottom:none"><span class="info-label">身份证号</span><span class="info-value">3505**********1234</span></div>
+        </div>
+        <div style="background:var(--pl);border-radius:8px;padding:10px 14px;margin-top:12px;font-size:12px;color:var(--p);text-align:center">
+          <i class="fas fa-info-circle"></i> 数据来源：夏谷HR系统 · 如需修改请联系人事专员
+        </div>
+      </div>
+
+      <!-- ====== 账户设置 ====== -->
+      <div class="m-page" id="mp-wd-settings">
+        <div class="card">
+          <div class="setting-item" onclick="mNav('mp-wd-password')">
+            <div class="s-icon" style="background:var(--pl);color:var(--p)"><i class="fas fa-lock"></i></div>
+            <div class="s-info"><div class="s-title">修改密码</div><div class="s-desc">定期更新更安全</div></div><i class="fas fa-chevron-right s-arrow"></i>
+          </div>
+          <div class="setting-item" onclick="mNav('mp-wd-theme')">
+            <div class="s-icon" style="background:#F3F0FF;color:#7C3AED"><i class="fas fa-palette"></i></div>
+            <div class="s-info"><div class="s-title">我的皮肤</div><div class="s-desc">当前：默认蓝</div></div><i class="fas fa-chevron-right s-arrow"></i>
+          </div>
+          <div class="setting-item" onclick="showToast('隐私设置：暂未开放')" style="border-bottom:none">
+            <div class="s-icon" style="background:#F3F4F6;color:var(--t2)"><i class="fas fa-shield-alt"></i></div>
+            <div class="s-info"><div class="s-title">隐私设置</div><div class="s-desc">管理数据可见范围</div></div><i class="fas fa-chevron-right s-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 修改密码 ====== -->
+      <div class="m-page" id="mp-wd-password">
+        <div class="card">
+          <div class="form-group"><label class="required">原密码</label><input type="password" class="form-control" placeholder="请输入原密码"></div>
+          <div class="form-group"><label class="required">新密码</label><input type="password" class="form-control" placeholder="8-20位，包含字母+数字"></div>
+          <div class="form-group"><label class="required">确认新密码</label><input type="password" class="form-control" placeholder="再次输入新密码"></div>
+          <div style="background:#F3F4F6;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--t2);line-height:1.8">
+            <strong>密码规则：</strong><br>
+            · 8-20位字符<br>
+            · 必须包含字母和数字<br>
+            · 不能与旧密码相同
+          </div>
+          <button class="btn btn-p btn-block" onclick="showToast('密码修改成功！请使用新密码重新登录')">确认修改</button>
+        </div>
+      </div>
+
+      <!-- ====== 皮肤设置 ====== -->
+      <div class="m-page" id="mp-wd-theme">
+        <div style="margin-bottom:12px;font-size:13px;color:var(--t2)">点击即可切换主题，实时预览</div>
+        <div class="theme-grid">
+          <div class="theme-card theme-blue active" onclick="switchTheme(this,'默认蓝')"><i class="fas fa-check-circle" style="margin-bottom:8px;display:block;font-size:20px"></i>默认蓝</div>
+          <div class="theme-card theme-green" onclick="switchTheme(this,'护眼绿')">🌿<br>护眼绿</div>
+          <div class="theme-card theme-purple" onclick="switchTheme(this,'雅致紫')">💜<br>雅致紫</div>
+          <div class="theme-card theme-orange" onclick="switchTheme(this,'活力橙')">🍊<br>活力橙</div>
+          <div class="theme-card theme-pink" onclick="switchTheme(this,'玫瑰粉')">🌹<br>玫瑰粉</div>
+          <div class="theme-card theme-dark" onclick="switchTheme(this,'暗夜模式')">🌙<br>暗夜模式</div>
+        </div>
+      </div>
+
+      <!-- ====== 意见反馈 ====== -->
+      <div class="m-page" id="mp-wd-feedback">
+        <div class="card">
+          <div class="form-group"><label class="required">反馈类型</label><select class="form-control"><option>请选择类型</option><option>功能建议</option><option>问题反馈</option><option>使用体验</option><option>其他</option></select></div>
+          <div class="form-group"><label class="required">标题</label><input class="form-control" placeholder="简要描述您的反馈"></div>
+          <div class="form-group"><label class="required">详细描述</label><textarea class="form-control" rows="4" placeholder="请详细描述您的问题或建议..."></textarea></div>
+          <div class="form-group"><label>截图</label><div style="display:flex;gap:8px"><div style="width:80px;height:80px;background:#F3F4F6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#CBD5E1;cursor:pointer;border:2px dashed var(--bd)">+</div></div></div>
+          <button class="btn btn-p btn-block" onclick="showToast('反馈已提交！感谢您的宝贵意见')">提交反馈</button>
+        </div>
+        <div style="text-align:center;margin-top:12px">
+          <span style="font-size:13px;color:var(--p);cursor:pointer" onclick="mNav('mp-wd-feedback-list')">查看我的反馈记录 <i class="fas fa-arrow-right"></i></span>
+        </div>
+      </div>
+
+      <!-- ====== 反馈记录 ====== -->
+      <div class="m-page" id="mp-wd-feedback-list">
+        <div style="font-size:13px;color:var(--t2);margin-bottom:12px">共 2 条反馈</div>
+        <div class="card" style="margin-bottom:10px">
+          <div style="font-weight:500;margin-bottom:6px">增加指纹登录功能</div>
+          <div style="font-size:12px;color:var(--t2);margin-bottom:4px">建议增加指纹/人脸识别登录，方便一线员工快速登录</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px"><span style="color:var(--t2)">2026-05-20</span><span class="badge badge-p1">处理中</span></div>
+        </div>
+        <div class="card">
+          <div style="font-weight:500;margin-bottom:6px">界面字体太小</div>
+          <div style="font-size:12px;color:var(--t2);margin-bottom:4px">部分页面的文字偏小，年纪大的员工看不清</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px"><span style="color:var(--t2)">2026-05-10</span><span class="badge badge-s">已采纳</span></div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /phone -->
+</div><!-- /mobileView -->
+
+<!-- ============================== PC VIEW ============================== -->
+<div class="view" id="pcView">
+  <div class="pc-layout">
+    <div class="pc-sidebar" id="pcSidebar">
+      <div class="logo"><i class="fas fa-user-circle"></i> 个人中心</div>
+      <div class="nav-group">
+        <div class="g-label">我的</div>
+        <button class="nav-item active" data-pc="pc-dashboard" onclick="pcNav('pc-dashboard',this)"><i class="fas fa-id-card"></i> 个人信息</button>
+        <button class="nav-item" data-pc="pc-settings" onclick="pcNav('pc-settings',this)"><i class="fas fa-cog"></i> 账户设置</button>
+      </div>
+    </div>
+    <div class="pc-resizer" id="pcResizer"></div>
+    <div class="pc-main">
+      <div class="pc-header">
+        <div class="bc">个人中心 / <span id="pcCrumb">个人信息</span></div>
+        <div class="user"><div class="avatar">张</div><span>张三 · 制造一部</span></div>
+      </div>
+      <div class="pc-content" id="pcContent">
+
+        <div class="pc-page active" id="pc-dashboard">
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="db-card">
+              <div class="db-header"><h3>个人档案</h3></div>
+              <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
+                <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--p),#F472B6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;flex-shrink:0">张</div>
+                <div>
+                  <div style="font-size:18px;font-weight:700">张三</div>
+                  <div style="font-size:13px;color:var(--t2)">工号：123456 · 制造一部 · 针车一班</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+                <div><span style="color:var(--t2)">性别：</span>男</div>
+                <div><span style="color:var(--t2)">岗位：</span>针车工</div>
+                <div><span style="color:var(--t2)">入职时间：</span>2020-03-01</div>
+                <div><span style="color:var(--t2)">联系电话：</span>138****5678</div>
+              </div>
+            </div>
+            <div class="db-card">
+              <div class="db-header"><h3>快速入口</h3></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="padding:12px;background:var(--bg);border-radius:8px;cursor:pointer" onclick="pcNav('pc-settings',null)"><i class="fas fa-lock" style="margin-right:8px;color:var(--p)"></i>修改密码</div>
+                <div style="padding:12px;background:var(--bg);border-radius:8px;cursor:pointer" onclick="showToast('皮肤切换：当前为默认蓝')"><i class="fas fa-palette" style="margin-right:8px;color:#7C3AED"></i>我的皮肤</div>
+                <div style="padding:12px;background:var(--bg);border-radius:8px;cursor:pointer" onclick="showToast('打开意见反馈')"><i class="fas fa-comment-dots" style="margin-right:8px;color:#16A34A"></i>意见反馈</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pc-page" id="pc-settings">
+          <div class="db-card" style="max-width:500px">
+            <div class="db-header"><h3>修改密码</h3></div>
+            <div class="form-group"><label>原密码</label><input type="password" class="form-control" placeholder="请输入原密码"></div>
+            <div class="form-group"><label>新密码</label><input type="password" class="form-control" placeholder="8-20位，包含字母+数字"></div>
+            <div class="form-group"><label>确认新密码</label><input type="password" class="form-control" placeholder="再次输入新密码"></div>
+            <button class="btn btn-p" onclick="showToast('密码修改成功！')">确认修改</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /pcView -->
+
+<!-- ============================== PORTAL VIEW ============================== -->
+<div class="view" id="portalView">
+  <div class="portal-layout">
+    <div class="portal-sidebar" id="portalSidebar">
+      <div class="logo"><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:900;font-style:italic;font-size:22px;letter-spacing:-1px;color:#F472B6;line-height:1">XTEP</span><span style="font-size:14px;color:rgba(255,255,255,.3);font-weight:300;line-height:1">|</span><span style="font-weight:600;font-size:15px;line-height:1">个人中心 · 管理门户</span></span><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:1px">特步 · 一站式管理平台</div></div>
+      <div class="nav-group">
+        <div class="g-label"><i class="fas fa-users"></i> 用户管理</div>
+        <button class="nav-item active" data-portal="portal-dashboard"><i class="fas fa-chart-pie"></i> 用户概览</button>
+        <button class="nav-item" data-portal="portal-feedback"><i class="fas fa-comment-dots"></i> 反馈管理</button>
+      </div>
+    </div>
+    <div class="portal-resizer" id="portalResizer"></div>
+    <div class="portal-main">
+      <div class="portal-header">
+        <div class="search-box"><i class="fas fa-search"></i><input placeholder="搜索用户姓名、工号..."></div>
+        <div class="user"><div class="avatar">管</div><span>系统管理员</span></div>
+      </div>
+      <div class="portal-content" id="portalContent">
+
+        <!-- Portal: 用户概览 -->
+        <div class="portal-page active" id="portal-dashboard">
+          <h2 style="font-size:22px;margin-bottom:24px">用户概览</h2>
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="db-card stat-card"><div class="num" style="color:var(--p)">7,284</div><div class="label">注册用户</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--s)">6,891</div><div class="label">本月活跃</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:var(--w)">156</div><div class="label">待处理反馈</div></div>
+            <div class="db-card stat-card"><div class="num" style="color:#7C3AED">94.6%</div><div class="label">活跃率</div></div>
+          </div>
+          <div class="db-card">
+            <div class="db-header"><h3>最近注册用户</h3><a style="cursor:pointer" onclick="showToast('查看全部用户')">查看全部 →</a></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>工号</th><th>姓名</th><th>部门</th><th>岗位</th><th>注册时间</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr><td>20240501</td><td>陈小明</td><td>制造三部</td><td>针车工</td><td>2026-05-20</td><td><span class="badge badge-s">已激活</span></td></tr>
+                  <tr><td>20240502</td><td>林小红</td><td>品质部</td><td>质检员</td><td>2026-05-19</td><td><span class="badge badge-s">已激活</span></td></tr>
+                  <tr><td>20240503</td><td>黄建国</td><td>仓储部</td><td>仓管员</td><td>2026-05-18</td><td><span class="badge badge-p1">待激活</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Portal: 反馈管理 -->
+        <div class="portal-page" id="portal-feedback">
+          <h2 style="font-size:22px;margin-bottom:24px">反馈管理</h2>
+          <div style="display:flex;gap:12px;margin-bottom:16px">
+            <select class="form-control" style="width:160px"><option>全部类型</option><option>功能建议</option><option>问题反馈</option><option>使用体验</option></select>
+            <select class="form-control" style="width:120px"><option>全部状态</option><option>待处理</option><option>处理中</option><option>已采纳</option></select>
+            <button class="btn btn-p btn-sm" onclick="showToast('搜索中...')"><i class="fas fa-search"></i> 搜索</button>
+          </div>
+          <div class="db-card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>标题</th><th>用户</th><th>类型</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td>增加指纹登录功能</td><td>张三</td><td><span class="badge badge-info">功能建议</span></td><td>2026-05-20</td><td><span class="badge badge-p1">处理中</span></td><td class="actions"><button class="btn btn-p btn-sm" onclick="showToast('已标记为已采纳')">采纳</button><button class="btn btn-outline btn-sm" onclick="showToast('已回复用户')">回复</button></td></tr>
+                  <tr><td>界面字体太小</td><td>李四</td><td><span class="badge badge-info">问题反馈</span></td><td>2026-05-10</td><td><span class="badge badge-s">已采纳</span></td><td class="actions"><button class="btn btn-outline btn-sm" onclick="showToast('查看反馈详情')">详情</button></td></tr>
+                  <tr><td>希望增加打卡提醒</td><td>王五</td><td><span class="badge badge-info">功能建议</span></td><td>2026-05-22</td><td><span class="badge badge-p0">待处理</span></td><td class="actions"><button class="btn btn-p btn-sm" onclick="showToast('已标记为处理中')">受理</button><button class="btn btn-outline btn-sm" onclick="showToast('已回复用户')">回复</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.vs button[data-view]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.vs button[data-view]').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active');
+    var v=b.getAttribute('data-view');
+    document.getElementById('mobileView').style.display='none';
+    document.getElementById('pcView').style.display='none';
+    document.getElementById('portalView').style.display='none';
+    if(v==='mobile') document.getElementById('mobileView').style.display='flex';
+    if(v==='pc') document.getElementById('pcView').style.display='block';
+    if(v==='portal') document.getElementById('portalView').style.display='block';
+  });
+});
+document.getElementById('mobileView').style.display='flex';
+
+var mStack=['mp-wd-index'];
+function mNav(id){
+  var cur=document.querySelector('.m-page.active');
+  if(cur){cur.classList.remove('active');mStack.push(id);}
+  var next=document.getElementById(id);
+  if(next){next.classList.add('active')}
+  updateMTitle(id);updateMBack();
+}
+function mGoBack(){
+  if(mStack.length<=1)return;
+  document.querySelector('.m-page.active').classList.remove('active');
+  mStack.pop();
+  var prev=mStack[mStack.length-1];
+  var el=document.getElementById(prev);
+  if(el){el.classList.add('active')}
+  updateMTitle(prev);updateMBack();
+}
+function updateMTitle(id){
+  var map={'mp-wd-index':'个人中心','mp-wd-info':'个人信息','mp-wd-settings':'账户设置','mp-wd-password':'修改密码','mp-wd-theme':'我的皮肤','mp-wd-feedback':'意见反馈','mp-wd-feedback-list':'反馈记录'};
+  document.getElementById('mTitle').textContent=map[id]||'个人中心';
+}
+function updateMBack(){document.getElementById('mBack').style.visibility=mStack.length<=1?'hidden':'visible';}
+function pcNav(id,btn){
+  document.querySelectorAll('.pc-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(id);if(el){el.classList.add('active')}
+  document.querySelectorAll('.pc-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  if(btn){btn.classList.add('active')}
+  document.getElementById('pcCrumb').textContent={'pc-dashboard':'个人信息','pc-settings':'账户设置'}[id]||'';
+}
+function switchTheme(el,name){
+  document.querySelectorAll('.theme-card').forEach(function(t){t.classList.remove('active')});
+  el.classList.add('active');
+  showToast('已切换至：'+name);
+}
+var toastTimer;
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show')},2000);}
+function shareProto(){var url=window.location.href;if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){showToast('链接已复制！')})}else{showToast('分享链接：'+url)}}
+function portalNav(pageId){
+  document.querySelectorAll('.portal-page').forEach(function(p){p.classList.remove('active')});
+  var el=document.getElementById(pageId);if(el){el.classList.add('active')}
+  document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(n){n.classList.remove('active')});
+  var nav=document.querySelector('.portal-sidebar .nav-item[data-portal="'+pageId+'"]');
+  if(nav) nav.classList.add('active');
+}
+document.querySelectorAll('.portal-sidebar .nav-item').forEach(function(item){
+  item.addEventListener('click',function(){portalNav(this.dataset.portal)});
+});
+(function(){
+  var sb=document.getElementById('pcSidebar'),rz=document.getElementById('pcResizer'),dragging=false,startX,startW;
+  if(rz){rz.addEventListener('mousedown',function(e){dragging=true;startX=e.clientX;startW=sb.offsetWidth;rz.classList.add('active');e.preventDefault()})}
+  document.addEventListener('mousemove',function(e){if(!dragging)return;var w=Math.max(160,Math.min(400,startW+e.clientX-startX));sb.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging){dragging=false;rz.classList.remove('active')}});
+})();
+(function(){
+  var sb2=document.getElementById('portalSidebar'),rz2=document.getElementById('portalResizer'),dragging2=false,startX2,startW2;
+  if(rz2){rz2.addEventListener('mousedown',function(e){dragging2=true;startX2=e.clientX;startW2=sb2.offsetWidth;rz2.classList.add('active');e.preventDefault()})}
+  document.addEventListener('mousemove',function(e){if(!dragging2)return;var w=Math.max(180,Math.min(400,startW2+e.clientX-startX2));sb2.style.width=w+'px'});
+  document.addEventListener('mouseup',function(){if(dragging2){dragging2=false;rz2.classList.remove('active')}});
+})();
+</script>
+<script>
+(function() {
+  if (window.self === window.top) return;
+  var style = document.createElement('style');
+  style.textContent = '.phone>.status-bar,.phone>.app-header{display:none!important}.phone{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;margin:0!important;padding:0!important}.phone>.page-content{padding:0!important;margin:0!important}.phone>.bottom-nav{flex-shrink:0}';
+  document.head.appendChild(style);
+  var vsBar = document.querySelector('.vs');
+  if (vsBar) vsBar.style.display = 'none';
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.style.height = '100vh';
+    v.style.marginTop = '0';
+  });
+  function applyView(view) {
+    var mv = document.getElementById('mobileView');
+    var pv = document.getElementById('pcView');
+    var pv2 = document.getElementById('portalView');
+    if (mv) mv.style.display = 'none';
+    if (pv) pv.style.display = 'none';
+    if (pv2) pv2.style.display = 'none';
+    if (view === 'mobile' && mv) mv.style.display = 'flex';
+    else if (view === 'pc' && pv) pv.style.display = 'block';
+    else if (view === 'portal' && pv2) pv2.style.display = 'block';
+  }
+  var hash = window.location.hash.replace('#', '');
+  if (hash && ['mobile','pc','portal'].indexOf(hash) >= 0) {
+    applyView(hash);
+  }
+  window.addEventListener('message', function(e) {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === 'switchView' && e.data.view) {
+      applyView(e.data.view);
+    }
+    if (e.data.type === 'goBack') {
+      if (typeof mStack !== 'undefined' && mStack.length > 1) {
+        if (typeof mGoBack === 'function') mGoBack();
+      } else {
+        window.parent.postMessage({ type: 'closeModule' }, '*');
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
